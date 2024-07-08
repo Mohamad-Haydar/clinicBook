@@ -4,7 +4,9 @@ CREATE OR REPLACE PROCEDURE sp_insert_doctor(
 	IN speciality character varying,
 	IN email character varying,
 	IN phone_number character varying)
+LANGUAGE plpgsql
 AS $$
+BEGIN
 	INSERT INTO doctor(first_name, last_name, speciality, email, phone_number)
 	VALUES($1, $2, $3, $4, $5);
 END;

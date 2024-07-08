@@ -2,7 +2,7 @@
 INSERT INTO secretary(first_name, last_name, email, phone_number) VALUES('Zeinab','Salloum','zeinab@gmail.com','123456');
 
 -- To Fill the doctor table
-INSERT INTO doctor(first_name, last_name, email, phone_number) VALUES
+INSERT INTO doctor(first_name, last_name, email, phone_number, speciality) VALUES
 ('Jalal','Haydar','jalal@gmail.com','123456','Public health'),
 ('Ziad','Awad','Ziad@gmail.com','123456','Endocrine and diabetes'),
 ('Mohamad','Hayek','MohamadHayek@gmail.com','123456','Heart diseases'),
