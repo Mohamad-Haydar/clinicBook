@@ -1,6 +1,9 @@
 using api.Data;
+using api.library.DataAccess;
+using api.library.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace api.Controllers;
 
@@ -9,19 +12,22 @@ namespace api.Controllers;
 public class WeatherForecastController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
+    private readonly IConfiguration _configuration;
     private readonly UserManager<IdentityUser> _userManager;
-    public WeatherForecastController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
+    public WeatherForecastController(ApplicationDbContext context, UserManager<IdentityUser> userManager, IConfiguration configuration)
     {
         _context = context;
         _userManager = userManager;
+        _configuration = configuration;
     }
 
     [HttpGet]
     [Route("GetAllSecretaries")]
-    public async Task<IActionResult> GetSecretaries()
+    public List<SecretaryModel> GetSecretaries()
     {
-        // var users = await _context.Secretaries.ToListAsync();
-        var allUsers = await _userManager.FindByEmailAsync("email@gmail.com");
-        return Ok(allUsers);
+        SecretaryData secretaryData = new(_configuration);
+
+        return secretaryData.GetSecretaries();
+
     }
 }

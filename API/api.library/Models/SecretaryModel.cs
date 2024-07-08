@@ -1,11 +1,10 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace api.Models;
+namespace api.library.Models;
 
-[Table("client")]
-public class Client
+[Table("secretary")]
+public class SecretaryModel
 {
-
     [Column("id")]
     public int Id { get; set; }
     [Column("first_name")]

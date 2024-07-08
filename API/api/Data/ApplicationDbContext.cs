@@ -1,4 +1,4 @@
-using api.Models;
+using api.library.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Data
@@ -10,7 +10,7 @@ namespace api.Data
         {
         }
 
-        public DbSet<Client> Clients { get; set; }
-        public DbSet<Secretary> Secretaries { get; set; }
+        public DbSet<ClientModel> Clients { get; set; }
+        public DbSet<SecretaryModel> Secretaries { get; set; }
     }
 }
