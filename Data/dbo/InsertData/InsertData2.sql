@@ -1,30 +1,30 @@
 -- To fill the doctor services 
-INSERT INTO doctor_service(service_name, price, duration, doctor_id) VALUES
-('General Check',300000,10,1),
-('Preview',700000,10,2),
-('Review',200000,5,2),
-('Preview',600000,10,3),
-('Review',100000,7,3),
-('Preview',550000,10,4),
-('Review',100000,5,4),
-('Preview',400000,10,5),
-('Review',250000,5,5),
-('Preview',700000,10,6),
-('Review',200000,5,6),
-('Rip',400000,10,7),
-('Cockroach',700000,10,7),
-('Cleaning',300000,5,7),
-('Dress teath',800000,15,7),
-('Preview',700000,10,8),
-('Review',200000,5,8),
-('Preview',500000,10,9),
-('Review',250000,5,9),
-('Rip',400000,10,10),
-('Cockroach',700000,10,10),
-('Cleaning',300000,5,10),
-('Dress teath',800000,15,10),
-('Preview',550000,10,11),
-('Review',250000,5,11);
+INSERT INTO doctor_service(duration, doctor_id, service_id) VALUES
+(10,1, 1),
+(10,2, 1),
+(5,2, 3),
+(10,3, 1),
+(7,3, 3),
+(10,4, 1),
+(5,4, 3),
+(10,5, 1),
+(5,5, 3),
+(10,6, 1),
+(5,6, 3),
+(10,7, 2),
+(10,7, 2),
+(5,7, 4),
+(15,7, 2),
+(10,8, 1),
+(5,8, 3),
+(10,9, 1),
+(5,9, 3),
+(10,10, 2),
+(10,10, 2),
+(5,10, 4),
+(15,10, 2),
+(10,11, 1),
+(5,11, 3);
 
 -- Insert into doctor_availability
 INSERT INTO doctor_availability(available_date, day_name, start_hour, end_hour, max_client, doctor_id) VALUES
@@ -69,8 +69,6 @@ INSERT INTO client_reservation(start_time, duration, client_id, doctor_availabil
 ('8:00:00', 10, 4, 4),
 ('8:00:00', 7, 9, 5),
 ('10:00:00', 20, 10, 11);
-
-commit;
 
 -- Insert into client_reservation
 INSERT INTO reservation_detail(doctor_service_id, client_reservation_id) VALUES

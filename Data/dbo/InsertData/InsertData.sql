@@ -1,19 +1,38 @@
 -- TO fill the secretary table
 INSERT INTO secretary(first_name, last_name, email, phone_number) VALUES('Zeinab','Salloum','zeinab@gmail.com','123456');
 
+-- To fill category
+INSERT INTO category(category_name) VALUES
+('Public health'),
+('Endocrine and diabetes'),
+('Heart diseases'),
+('Gynecology'),
+('Nutrition specialist'),
+('Pediatrics'),
+('Dentistry'),
+('Family deaseses'),
+('Skin desises');
+
+-- To fill the services table
+insert into service(service_name) VALUES
+('Preview'),
+('Session'),
+('Review'),
+('Cleaning');
+
 -- To Fill the doctor table
-INSERT INTO doctor(first_name, last_name, email, phone_number, speciality) VALUES
-('Jalal','Haydar','jalal@gmail.com','123456','Public health'),
-('Ziad','Awad','Ziad@gmail.com','123456','Endocrine and diabetes'),
-('Mohamad','Hayek','MohamadHayek@gmail.com','123456','Heart diseases'),
-('Hayat','Shoaib','Hayat@gmail.com','123456','Gynecology'),
-('Hiba','Ismail','Hiba@gmail.com','123456','Nutrition specialist'),
-('Bashar','Shmeisany','Bashar@gmail.com','123456','Pediatrics'),
-('Mohamad','Abdallah','MohamadAbdallah@gmail.com','123456','Dentistry'),
-('Zeina','Kanso','Zeina@gmail.com','123456','Family deaseses'),
-('Yosra','Nasser','Yosra@gmail.com','123456','Gynecology'),
-('Kawthar','Halawi','Kawthar@gmail.com','123456','Dentistry'),
-('Reda','Reda','Reda@gmail.com','123456', 'Skin desises');
+INSERT INTO doctor(first_name, last_name, email, phone_number, description, category_id) VALUES
+('Jalal','Haydar','jalal@gmail.com','123456','general treatment for 400000',1),
+('Ziad','Awad','Ziad@gmail.com','123456','Endocrine and diabetes for 600000',2),
+('Mohamad','Hayek','MohamadHayek@gmail.com','123456','Heart diseases for 600000',3),
+('Hayat','Shoaib','Hayat@gmail.com','123456','Gynecology for 600000',4),
+('Hiba','Ismail','Hiba@gmail.com','123456','Nutrition specialist for 500000',5),
+('Bashar','Shmeisany','Bashar@gmail.com','123456','Pediatrics for 700000',6),
+('Mohamad','Abdallah','MohamadAbdallah@gmail.com','123456','Dentistry \n removal for 400000 \n cleaning for 200000 \n fix cockroach for 700000',7),
+('Zeina','Kanso','Zeina@gmail.com','123456','Famiiy desease for 500000',8),
+('Yosra','Nasser','Yosra@gmail.com','123456','Gynecology for 600000',4),
+('Kawthar','Halawi','Kawthar@gmail.com','123456','Dentistry \n removal for 400000 \n cleaning for 200000 \n fix cockroach for 700000',7),
+('Reda','Reda','Reda@gmail.com','123456','Skin treatment for 500000', 9);
 
 -- To fill the client
 INSERT INTO client(first_name, last_name, email, phone_number) VALUES
