@@ -6,13 +6,13 @@ namespace api.library.Models;
 public class SecretaryModel
 {
     [Column("id")]
-    public int Id { get; set; }
-    [Column("first_name")]
+    public string Id { get; set; }
+    [Column("firstname")]
     public string FirstName { get; set; }
-    [Column("last_name")]
+    [Column("lastname")]
     public string LastName { get; set; }
     [Column("email")]
     public string Email { get; set; }
-    [Column("phone_number")]
+    [Column("phonenumber")]
     public string PhoneNumber { get; set; }
 }

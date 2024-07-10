@@ -13,10 +13,10 @@ public class SecretaryData
         _configuration = configuration;
     }
 
-    public List<SecretaryModel> GetSecretaries()
+    public async Task<IEnumerable<SecretaryModel>> GetSecretaries()
     {
         SqlDataAccess sql = new(_configuration);
-        var output = sql.LoadData<SecretaryModel, dynamic>("f_load_secretaries", new { }, "appData");
+        var output = await sql.LoadDataAsync<SecretaryModel, dynamic>("f_load_secretaries", new { }, "appData");
         return output;
     }
 }

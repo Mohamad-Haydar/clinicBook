@@ -19,22 +19,22 @@ public class SqlDataAccess : IDisposable
         return _configuration.GetConnectionString(name);
     }
 
-    public List<T> LoadData<T, U>(string storedProcedure, U parameters, string connectionStringName)
+    public async Task<IEnumerable<T>> LoadDataAsync<T, U>(string storedProcedure, U parameters, string connectionStringName)
     {
         string? connectionString = GetConnectionString(connectionStringName);
         using (IDbConnection connection = new NpgsqlConnection(connectionString))
         {
-            List<T> rows = connection.Query<T>("SELECT * FROM " + storedProcedure + "()", parameters).ToList();
+            IEnumerable<T> rows = await connection.QueryAsync<T>("SELECT * FROM " + storedProcedure + "()", parameters);
             return rows;
         }
     }
 
-    public void SaveData<T>(string storedProcedure, T parameters, string connectionStringName)
+    public async Task SaveDataAsync<T>(string storedProcedure, T parameters, string connectionStringName)
     {
         string? connectionString = GetConnectionString(connectionStringName);
         using (IDbConnection connection = new NpgsqlConnection(connectionString))
         {
-            connection.Execute(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
+            await connection.ExecuteAsync(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
         }
     }
 
@@ -49,14 +49,14 @@ public class SqlDataAccess : IDisposable
         _connection.Open();
         _transaction = _connection.BeginTransaction();
     }
-    public List<T> LoadDataInTransaction<T, U>(string storedProcedure, U parameters)
+    public async Task<IEnumerable<T>> LoadDataInTransactionAsync<T, U>(string storedProcedure, U parameters)
     {
-        List<T> rows = _connection.Query<T>(storedProcedure, parameters, commandType: CommandType.StoredProcedure, transaction: _transaction).ToList();
+        IEnumerable<T> rows = await _connection.QueryAsync<T>(storedProcedure, parameters, commandType: CommandType.StoredProcedure, transaction: _transaction);
         return rows;
     }
-    public void SaveDataInTransaction<T>(string storedProcedure, T parameters)
+    public async Task SaveDataInTransactionAsync<T>(string storedProcedure, T parameters)
     {
-        _connection.Execute(storedProcedure, parameters, commandType: CommandType.StoredProcedure, transaction: _transaction);
+        await _connection.ExecuteAsync(storedProcedure, parameters, commandType: CommandType.StoredProcedure, transaction: _transaction);
     }
     private bool isCloded = false;
 

@@ -1,5 +1,5 @@
 -- To fill category
-INSERT INTO category(category_name) VALUES
+INSERT INTO Category(CategoryName) VALUES
 ('Public health'),
 ('Endocrine and diabetes'),
 ('Heart diseases'),
@@ -11,7 +11,7 @@ INSERT INTO category(category_name) VALUES
 ('Skin desises');
 
 -- To fill the services table
-insert into service(service_name) VALUES
+insert into Service(ServiceName) VALUES
 ('Preview'),
 ('Session'),
 ('Review'),

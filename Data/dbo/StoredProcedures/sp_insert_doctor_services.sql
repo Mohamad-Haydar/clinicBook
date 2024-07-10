@@ -1,12 +1,12 @@
 CREATE OR REPLACE PROCEDURE sp_insert_doctor_services(
 	IN duration int,
-	IN doctor_id character varying,
-	IN service_id int
+	IN doctorid character varying,
+	IN serviceid int
 	)
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	INSERT INTO doctor_service(duration, doctor_id, service_id)
+	INSERT INTO doctorservice(duration, doctorid, serviceid)
 	VALUES($1, $2, $3);
 END;
 $$;

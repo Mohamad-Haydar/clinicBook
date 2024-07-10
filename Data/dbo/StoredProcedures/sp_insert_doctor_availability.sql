@@ -1,15 +1,15 @@
 CREATE OR REPLACE PROCEDURE sp_insert_doctor_availability(
-	IN available_date date,
-	IN day_name character varying,
-	IN start_hour timetz,
-	IN end_hour timetz,
-	IN max_client int,
-	IN doctor_id character varying
+	IN availabledate date,
+	IN dayname character varying,
+	IN starthour timetz,
+	IN endhour timetz,
+	IN maxclient int,
+	IN doctorid character varying
 	)
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	INSERT INTO doctor_availability(available_date, day_name, start_hour, end_hour, max_client, doctor_id)
+	INSERT INTO doctoravailability(availabledate, dayname, starthour, endhour, maxclient, doctorid)
 	VALUES($1, $2, $3, $4, $5, $6);
 END;
 $$;

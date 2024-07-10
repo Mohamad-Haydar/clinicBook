@@ -23,11 +23,11 @@ public class WeatherForecastController : ControllerBase
 
     [HttpGet]
     [Route("GetAllSecretaries")]
-    public List<SecretaryModel> GetSecretaries()
+    public async Task<IEnumerable<SecretaryModel>> GetSecretaries()
     {
         SecretaryData secretaryData = new(_configuration);
 
-        return secretaryData.GetSecretaries();
+        return await secretaryData.GetSecretaries();
 
     }
 }

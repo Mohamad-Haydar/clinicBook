@@ -1,16 +1,16 @@
 -- ≈, category_id
 CREATE OR REPLACE PROCEDURE sp_insert_doctor(
 	IN id character varying,
-	IN first_name character varying,
-	IN last_name character varying,
+	IN firstname character varying,
+	IN lastname character varying,
 	IN email character varying,
-	IN phone_number character varying,
+	IN phonenumber character varying,
 	IN description text,
-	IN category_id int)
+	IN categoryid int)
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	INSERT INTO doctor(first_name, last_name, email, phone_number, description, category_id)
+	INSERT INTO doctor(firstname, lastname, email, phonenumber, description, categoryid)
 	VALUES($1, $2, $3, $4, $5, $6);
 END;
 $$;
