@@ -1,6 +1,3 @@
--- TO fill the secretary table
-INSERT INTO secretary(first_name, last_name, email, phone_number) VALUES('Zeinab','Salloum','zeinab@gmail.com','123456');
-
 -- To fill category
 INSERT INTO category(category_name) VALUES
 ('Public health'),

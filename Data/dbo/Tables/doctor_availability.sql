@@ -5,6 +5,6 @@ Create Table doctor_availability(
   start_hour timetz NOT NULL,
   end_hour timetz NOT NULL,
   max_client int NOT NULL,
-  doctor_id int NOT NULL,
+  doctor_id varchar(128) NOT NULL,
   CONSTRAINT fk_doctor FOREIGN KEY(doctor_id) REFERENCES doctor(id) ON DELETE CASCADE
 )

@@ -9,7 +9,7 @@ CREATE Table category(
 );
 
 Create Table client(
-  id int primary key GENERATED ALWAYS AS IDENTITY,
+  id varchar(128) primary key,
   first_name varchar(20) NOT NULL,
   last_name varchar(20) NOT NULL,
   email varchar(50) NOT NULL,
@@ -18,7 +18,7 @@ Create Table client(
 
 
 Create Table doctor(
-  id int primary key GENERATED ALWAYS AS IDENTITY,
+  id varchar(128) primary key,
   first_name varchar(20)  NOT NULL,
   last_name varchar(20) NOT NULL,
   email varchar(50) NOT NULL,
@@ -32,7 +32,7 @@ Create Table doctor_service(
   id int primary key GENERATED ALWAYS AS IDENTITY,
   service_name varchar(50) NOT NULL,
   duration int NOT NULL, -- duration in minutes and represent the duration of this service for the specified doctor
-  doctor_id int NOT NULL,
+  doctor_id varchar(128) NOT NULL,
   service_id int NOT NULL,
   CONSTRAINT fk_doctor FOREIGN KEY(doctor_id) REFERENCES doctor(id) ON DELETE CASCADE,
   CONSTRAINT fk_service FOREIGN KEY(service_id) REFERENCES service(id) ON DELETE CASCADE
@@ -45,7 +45,7 @@ Create Table doctor_availability(
   start_hour timetz NOT NULL,
   end_hour timetz NOT NULL,
   max_client int NOT NULL,
-  doctor_id int NOT NULL,
+  doctor_id varchar(128) NOT NULL,
   CONSTRAINT fk_doctor FOREIGN KEY(doctor_id) REFERENCES doctor(id) ON DELETE CASCADE
 );
 
@@ -53,7 +53,7 @@ Create Table client_reservation(
   id int primary key GENERATED ALWAYS AS IDENTITY,
   start_time timetz NOT NULL,
   duration int NOT NULL, -- duration in minutes and calculated based on the services reserved
-  client_id int NOT NULL,
+  client_id varchar(128) NOT NULL,
   doctor_availabilty_id int NOT NULL,
   CONSTRAINT fk_client FOREIGN KEY(client_id) REFERENCES client(id) ON DELETE CASCADE,
   CONSTRAINT fk_doctor_availability FOREIGN KEY(doctor_availabilty_id) REFERENCES doctor_availability(id) ON DELETE CASCADE
@@ -68,7 +68,7 @@ Create Table reservation_detail(
 );
 
 Create Table secretary(
-  id int primary key GENERATED ALWAYS AS IDENTITY,
+  id varchar(128) primary key,
   first_name varchar(20) NOT NULL,
   last_name varchar(20) NOT NULL,
   email varchar(50) NOT NULL,

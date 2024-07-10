@@ -1,6 +1,6 @@
 CREATE OR REPLACE PROCEDURE sp_insert_doctor_services(
 	IN duration int,
-	IN doctor_id int,
+	IN doctor_id character varying,
 	IN service_id int
 	)
 LANGUAGE plpgsql

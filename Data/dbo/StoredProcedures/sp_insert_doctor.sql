@@ -1,5 +1,6 @@
 -- ≈, category_id
 CREATE OR REPLACE PROCEDURE sp_insert_doctor(
+	IN id character varying,
 	IN first_name character varying,
 	IN last_name character varying,
 	IN email character varying,

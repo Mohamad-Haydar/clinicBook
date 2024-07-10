@@ -4,7 +4,7 @@ CREATE OR REPLACE PROCEDURE sp_insert_doctor_availability(
 	IN start_hour timetz,
 	IN end_hour timetz,
 	IN max_client int,
-	IN doctor_id int
+	IN doctor_id character varying
 	)
 LANGUAGE plpgsql
 AS $$
