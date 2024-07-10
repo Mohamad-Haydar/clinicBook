@@ -1,3 +1,4 @@
+using api.Attributes;
 using api.library.DataAccess;
 using api.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,7 @@ public class SecretaryController : Controller
         _secretaryData = secretaryData;
     }
 
-    [AuthorizeRoles(Roles.Secretary)]
+    [AuthorizeRoles(Roles.Admin)]
     [Route("GetSecretaries")]
     [HttpGet]
     public async Task<IActionResult> GetSecretaries()

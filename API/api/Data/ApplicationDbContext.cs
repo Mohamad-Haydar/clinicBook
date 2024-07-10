@@ -10,8 +10,8 @@ namespace api.Data
         {
         }
 
-        public DbSet<ClientModel> Client { get; set; }
-        public DbSet<SecretaryModel> Secretary { get; set; }
-        public DbSet<DoctorModel> DoctorModel {get; set;}
+        public DbSet<ClientModel> Clients { get; set; }
+        public DbSet<SecretaryModel> Secretaries { get; set; }
+        public DbSet<DoctorModel> Doctors {get; set;}
     }
 }

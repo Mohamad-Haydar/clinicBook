@@ -2,5 +2,5 @@ namespace api.Models;
 
 public enum Roles
 {
-    Secretary,Client,Doctor
+    Secretary,Client,Doctor,Admin
 }

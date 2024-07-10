@@ -1,8 +1,11 @@
 using System.Text;
 using api.Data;
+using api.Models;
+using api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,9 +18,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDbContext<IdentityAppDbContext>(options =>
         options.UseNpgsql(identityConnectionString));
 
-
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddRoles<IdentityRole>()
+builder.Services.AddIdentity<UserModel, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<IdentityAppDbContext>();
 
 builder.Services.Configure<IdentityOptions>(options =>
@@ -48,7 +49,44 @@ builder.Services.AddAuthentication(options =>
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.FromMinutes(5)
         };
+});
 
+builder.Services.AddTransient<ITokenService, TokenService>();
+
+
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "jwtToken_Auth_API",
+        Version = "v1"
+    });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Here Enter the JWT Token like the following: beater[space] <your token>"
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement{
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference=new OpenApiReference
+                {
+                    Type=ReferenceType.SecurityScheme,
+                    Id="Bearer",
+                }
+            },
+            new string[]
+            {
+
+            }
+        }
+    });
 });
 
 var app = builder.Build();

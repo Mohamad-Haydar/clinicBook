@@ -1,6 +1,7 @@
+using api.Models;
 using Microsoft.AspNetCore.Authorization;
 
-namespace api.Models;
+namespace api.Attributes;
 
 public class AuthorizeRolesAttribute : AuthorizeAttribute
 {

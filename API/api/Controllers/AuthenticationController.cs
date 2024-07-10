@@ -1,45 +1,44 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+using api.Attributes;
 using api.Data;
 using api.library.Models;
 using api.Models;
-using Microsoft.AspNetCore.Authorization;
+using api.Models.Responce;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 
 namespace api.Controllers;
 
 public class AuthenticationController : Controller
 {
     private readonly IdentityAppDbContext _identityContext;
-    private readonly UserManager<IdentityUser> _userManager;
+    private readonly UserManager<UserModel> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly ApplicationDbContext _appContext;
+    private readonly ITokenService _tokenService;
 
-    public AuthenticationController(IdentityAppDbContext identityContext, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext appContext)
+    public AuthenticationController(IdentityAppDbContext identityContext, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext appContext, ITokenService tokenService)
     {
         _identityContext = identityContext;
         _userManager = userManager;
         _roleManager = roleManager;
         _appContext = appContext;
+        _tokenService = tokenService;
     }
 
     [Route("GenerateInitialData")]
     [HttpPost]
     public async Task GenerateInitialData()
     {
-        // var values = Enum.GetValues(typeof(Roles));
-        // foreach (var val in values)
-        // {
-        //     var role = val.ToString();
-        //     bool roleExists = await _roleManager.RoleExistsAsync(role);
-        //     if (roleExists == false)
-        //     {
-        //         await _roleManager.CreateAsync(new IdentityRole(role));
-        //     }
-        // }
+        var values = Enum.GetValues(typeof(Roles));
+        foreach (var val in values)
+        {
+            var role = val.ToString();
+            bool roleExists = await _roleManager.RoleExistsAsync(role);
+            if (roleExists == false)
+            {
+                await _roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
 
         // string[] emails = ["zeinab@gmail.com", "mohamad@gmail.com"];
         // foreach (var email in emails)
@@ -71,7 +70,7 @@ public class AuthenticationController : Controller
         {
             try
             {
-                var user = new IdentityUser { UserName = clientModel.Email, Email = clientModel.Email, PhoneNumber = clientModel.PhoneNumber };
+                var user = new UserModel { UserName = clientModel.Email, Email = clientModel.Email, PhoneNumber = clientModel.PhoneNumber };
                 var result = await _userManager.CreateAsync(user,password);
                 await _userManager.AddToRoleAsync(user, Roles.Client.ToString());
                 ClientModel client = new(){
@@ -81,7 +80,7 @@ public class AuthenticationController : Controller
                     Email = clientModel.Email,
                     PhoneNumber = clientModel.PhoneNumber,
                 };
-                await _appContext.Client.AddAsync(client);
+                await _appContext.Clients.AddAsync(client);
                 await _appContext.SaveChangesAsync();
                 transaction.Commit();
                 return Ok(new { message = "Client created successfully. You can login to your account." });
@@ -108,7 +107,7 @@ public class AuthenticationController : Controller
         {
             try
             {
-                var user = new IdentityUser { UserName = secretaryModel.Email, Email = secretaryModel.Email, PhoneNumber = secretaryModel.PhoneNumber };
+                var user = new UserModel { UserName = secretaryModel.Email, Email = secretaryModel.Email, PhoneNumber = secretaryModel.PhoneNumber };
                 var result = await _userManager.CreateAsync(user, password);
                 await _userManager.AddToRoleAsync(user, Roles.Secretary.ToString());
                 SecretaryModel secretary = new(){
@@ -118,7 +117,7 @@ public class AuthenticationController : Controller
                     Email = secretaryModel.Email,
                     PhoneNumber = secretaryModel.PhoneNumber,
                 };
-                await _appContext.Secretary.AddAsync(secretary);
+                await _appContext.Secretaries.AddAsync(secretary);
                 await _appContext.SaveChangesAsync();
                 transaction.Commit();
                 return Ok(new { message = "Secretary created successfully. You can login to your account." });
@@ -131,7 +130,7 @@ public class AuthenticationController : Controller
         }
     }
 
-    [AuthorizeRoles(Roles.Secretary)]
+    [AuthorizeRoles(Roles.Secretary, Roles.Admin)]
     [Route("RegisterDoctor")]
     [HttpPost]
     public async Task<IActionResult> RegisterDoctor([FromBody] DoctorModel doctorModel, string password)
@@ -146,7 +145,7 @@ public class AuthenticationController : Controller
         {
             try
             {
-                var user = new IdentityUser { UserName = doctorModel.Email, Email = doctorModel.Email, PhoneNumber = doctorModel.PhoneNumber };
+                var user = new UserModel { UserName = doctorModel.Email, Email = doctorModel.Email, PhoneNumber = doctorModel.PhoneNumber };
                 var result = await _userManager.CreateAsync(user, password);
                 await _userManager.AddToRoleAsync(user, Roles.Doctor.ToString());
                 DoctorModel doctor = new(){
@@ -158,7 +157,7 @@ public class AuthenticationController : Controller
                     Description = doctorModel.Description,
                     CategoryId = doctorModel.CategoryId
                 };
-                await _appContext.DoctorModel.AddAsync(doctor);
+                await _appContext.Doctors.AddAsync(doctor);
                 await _appContext.SaveChangesAsync();
                 transaction.Commit();
                 return Ok(new { message = "Doctor created successfully. You can login to your account." });
@@ -171,17 +170,53 @@ public class AuthenticationController : Controller
         }
     }
 
+    [Route("RegisterAdmin")]
+    [HttpPost]
+    public async Task<IActionResult> RegisterAdmin(string email, string password)
+    {
+        var userExists = await _userManager.FindByEmailAsync(email);
+        if(userExists != null)
+        {
+            return BadRequest(new {message="email already exists"});
+        }
+        try
+        {
+            var user = new UserModel { UserName = "admin", Email = email, PhoneNumber = "76612235" };
+            var result = await _userManager.CreateAsync(user,password);
+            await _userManager.AddToRoleAsync(user, Roles.Admin.ToString());
+            return Ok(new { message = "Admin created successfully. You can login to your account." });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = "Something went wrong. Please try again." });
+        }
+    }
+
+
     [Route("login")]
     [HttpPost]
     public async Task<IActionResult> LoginUser(string email, string password)
     {
-        if(await IsValidEmailAndPassword(email, password))
+        var user = await _userManager.FindByEmailAsync(email);
+        if(await _userManager.CheckPasswordAsync(user, password))
         {
-            return new ObjectResult(await GenerateToken(email));
+            var accessToken = await _tokenService.GenerateAccessTokenAsync(email);
+            var refreshToken = _tokenService.GenerateRefreshToken();
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+            _identityContext.SaveChanges();
+
+            return new ObjectResult(
+                new AuthenticationResponse
+                    {
+                        AccessToken = accessToken, 
+                        RefreshToken = refreshToken
+                    }
+                );
         }
         else
         {
-            return BadRequest();
+            return BadRequest(new {message = "Wrong password"});
         }    
     }
 
@@ -195,52 +230,6 @@ public class AuthenticationController : Controller
         return await _userManager.CheckPasswordAsync(user, password);
     }
 
-     private async Task<dynamic> GenerateToken(string email)
-        {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                return new
-                {
-                    Access_Token = "no token",
-                    email = ""
-                };
-            }
-            var roles = from ur in _identityContext.UserRoles
-                        join r in _identityContext.Roles on ur.RoleId equals r.Id
-                        where ur.UserId == user.Id
-                        select new { ur.UserId, ur.RoleId, r.Name };
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name,email),
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(JwtRegisteredClaimNames.Nbf, new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds().ToString()),
-                new Claim(JwtRegisteredClaimNames.Exp, new DateTimeOffset(DateTime.Now.AddDays(1)).ToUnixTimeSeconds().ToString()),
-            };
-
-            foreach (var role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role.Name));
-            }
-
-            var token = new JwtSecurityToken(
-                new JwtHeader(
-                    new SigningCredentials(
-                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes("loreamipsumissomesecreatekeytobeused")),
-                        SecurityAlgorithms.HmacSha256
-                        )
-                    ),
-                new JwtPayload(claims)
-                );
-
-            var output = new
-            {
-                Access_Token = new JwtSecurityTokenHandler().WriteToken(token),
-                Email = email
-            };
-
-            return output;
-                    
-        }
+    
 
 }
