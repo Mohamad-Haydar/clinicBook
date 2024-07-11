@@ -32,11 +32,26 @@ public class TokenController : Controller
         try
         {
             var principal = _tokenService.GetPrincipalFromExpiredToken(accessToken);
-            var email = principal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email)?.Value; //this is mapped to the Name claim by default
-
-            var user = await _userManager.FindByEmailAsync(email);
+            var email = principal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email)?.Value;
+            var userId = principal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier)?.Value;
+            var user = await _userManager.FindByIdAsync(userId);
             if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            {
+                 Response.Cookies.Delete("accessToken", new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = false,
+                        SameSite = SameSiteMode.Lax
+                    });
+                Response.Cookies.Delete("refreshToken", new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = false,
+                        SameSite = SameSiteMode.Lax
+                    });
+        
                 return BadRequest("Invalid client request");
+            }
             var newAccessToken = await _tokenService.GenerateAccessTokenAsync(email);
             var newRefreshToken = _tokenService.GenerateRefreshToken();
             user.RefreshToken = newRefreshToken;

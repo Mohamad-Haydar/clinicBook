@@ -247,6 +247,23 @@ public class AuthenticationController : Controller
         var userId = principal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier)?.Value;
 
         var user = await _userManager.FindByIdAsync(userId);
+        if(user.RefreshToken != refreshPair.Value)
+        {
+            Response.Cookies.Delete("accessToken", new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = false,
+                    SameSite = SameSiteMode.Lax
+                });
+            Response.Cookies.Delete("refreshToken", new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = false,
+                    SameSite = SameSiteMode.Lax
+                });
+
+           return BadRequest("Invalid client request");
+        }
         user.RefreshToken = null;
         user.RefreshTokenExpiryTime = DateTime.MinValue;
         _identityContext.SaveChanges();
