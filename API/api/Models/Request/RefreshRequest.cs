@@ -1,6 +1,6 @@
-namespace api.Models;
+namespace api.Models.Request;
 
-public class RefreshRequestModel
+public class RefreshRequest
 {
     public string? AccessToken { get; set; }
     public string? RefreshToken { get; set; }

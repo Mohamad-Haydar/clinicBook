@@ -13,5 +13,6 @@ namespace api.Data
         public DbSet<ClientModel> Clients { get; set; }
         public DbSet<SecretaryModel> Secretaries { get; set; }
         public DbSet<DoctorModel> Doctors {get; set;}
+        public DbSet<DoctorServiceModel> DoctorServiceModels {get; set;}
     }
 }

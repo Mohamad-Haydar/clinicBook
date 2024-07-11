@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using api.Data;
 using api.Models;
+using api.Models.Request;
 using api.Models.Responce;
 using api.Services;
 using Microsoft.AspNetCore.Identity;
@@ -22,7 +23,7 @@ public class TokenController : Controller
 
     [HttpPost]
     [Route("refresh")]
-    public async Task<IActionResult> Refresh([FromBody] RefreshRequestModel tokenApiModel)
+    public async Task<IActionResult> Refresh([FromBody] RefreshRequest tokenApiModel)
     {
         if (!ModelState.IsValid || tokenApiModel.AccessToken == null || tokenApiModel.RefreshToken == null)
             return BadRequest("Invalid client request");

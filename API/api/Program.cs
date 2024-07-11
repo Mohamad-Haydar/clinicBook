@@ -1,5 +1,8 @@
 using System.Text;
 using api.Data;
+using api.library.DataAccess;
+using api.library.Helper;
+using api.library.Internal.DataAccess;
 using api.Models;
 using api.Services;
 using Microsoft.AspNetCore.Identity;
@@ -11,8 +14,8 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var appConnectionString = builder.Configuration.GetConnectionString("appData") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-var identityConnectionString = builder.Configuration.GetConnectionString("identityData") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var appConnectionString = builder.Configuration.GetConnectionString("AppDbConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var identityConnectionString = builder.Configuration.GetConnectionString("IdentityDbConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseNpgsql(appConnectionString));
 builder.Services.AddDbContext<IdentityAppDbContext>(options =>
@@ -52,6 +55,8 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddTransient<ITokenService, TokenService>();
+builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("ConnectionStrings"));
+builder.Services.AddSingleton<ISqlDataAccess, SqlDataAccess>();
 
 
 

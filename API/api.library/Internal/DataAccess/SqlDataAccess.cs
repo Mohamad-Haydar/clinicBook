@@ -1,27 +1,15 @@
 using System.Data;
-using System.Data.SqlClient;
+using api.library.DataAccess;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 
 namespace api.library.Internal.DataAccess;
 
-public class SqlDataAccess : IDisposable
+public class SqlDataAccess :ISqlDataAccess,  IDisposable
 {
-    private readonly IConfiguration _configuration;
-
-    public SqlDataAccess(IConfiguration configuration)
+    public async Task<IEnumerable<T>> LoadDataAsync<T, U>(string storedProcedure, U parameters, string connectionString)
     {
-        _configuration = configuration;
-    }
-    public string? GetConnectionString(string name)
-    {
-        return _configuration.GetConnectionString(name);
-    }
-
-    public async Task<IEnumerable<T>> LoadDataAsync<T, U>(string storedProcedure, U parameters, string connectionStringName)
-    {
-        string? connectionString = GetConnectionString(connectionStringName);
         using (IDbConnection connection = new NpgsqlConnection(connectionString))
         {
             IEnumerable<T> rows = await connection.QueryAsync<T>("SELECT * FROM " + storedProcedure + "()", parameters);
@@ -29,12 +17,18 @@ public class SqlDataAccess : IDisposable
         }
     }
 
-    public async Task SaveDataAsync<T>(string storedProcedure, T parameters, string connectionStringName)
+    public async Task SaveDataAsync<T>(string storedProcedure, T parameters, string connectionString)
     {
-        string? connectionString = GetConnectionString(connectionStringName);
-        using (IDbConnection connection = new NpgsqlConnection(connectionString))
+        try
         {
-            await connection.ExecuteAsync(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
+            using (IDbConnection connection = new NpgsqlConnection(connectionString))
+            {
+                await connection.ExecuteAsync(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
         }
     }
 
@@ -42,9 +36,8 @@ public class SqlDataAccess : IDisposable
 
     private IDbConnection _connection;
     private IDbTransaction _transaction;
-    public void StartTransaction(string connectionStringName)
+    public void StartTransaction(string connectionString)
     {
-        string? connectionString = GetConnectionString(connectionStringName);
         _connection = new NpgsqlConnection(connectionString);
         _connection.Open();
         _transaction = _connection.BeginTransaction();
