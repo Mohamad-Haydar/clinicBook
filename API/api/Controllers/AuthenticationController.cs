@@ -1,8 +1,10 @@
+using System.Security.Claims;
 using api.Attributes;
 using api.Data;
 using api.library.Models;
 using api.Models;
 using api.Models.Responce;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -206,6 +208,20 @@ public class AuthenticationController : Controller
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
             _identityContext.SaveChanges();
 
+            Response.Cookies.Append("accessToken", accessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
+
+            Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
+
             return new ObjectResult(
                 new AuthenticationResponse
                     {
@@ -220,6 +236,37 @@ public class AuthenticationController : Controller
         }    
     }
 
+    [Route("logout")]
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> Logout()
+    {
+        KeyValuePair<string, string> refreshPair = Request.Cookies.FirstOrDefault(x => x.Key=="refreshToken");
+        KeyValuePair<string, string> accessPair = Request.Cookies.FirstOrDefault(x => x.Key=="accessToken");
+        var principal = _tokenService.GetPrincipalFromExpiredToken(accessPair.Value);
+        var userId = principal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier)?.Value;
+
+        var user = await _userManager.FindByIdAsync(userId);
+        user.RefreshToken = null;
+        user.RefreshTokenExpiryTime = DateTime.MinValue;
+        _identityContext.SaveChanges();
+
+        Response.Cookies.Delete("accessToken", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
+        Response.Cookies.Delete("refreshToken", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
+        
+        
+        return Ok(new {message="Log out Successfully"});
+    }
     private async Task<bool> IsValidEmailAndPassword(string email, string password)
     {
         var user = await _userManager.FindByEmailAsync(email);

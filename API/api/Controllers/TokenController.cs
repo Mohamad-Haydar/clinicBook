@@ -43,6 +43,20 @@ public class TokenController : Controller
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
             _identityContext.SaveChanges();
 
+            Response.Cookies.Append("jwtToken", accessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
+
+            Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
+
             return Ok(new AuthenticationResponse()
             {
                 AccessToken = newAccessToken,
@@ -56,4 +70,5 @@ public class TokenController : Controller
         }
         
     }
+
 }
