@@ -1,6 +1,6 @@
 using api.library.Helper;
 using api.library.Internal.DataAccess;
-using api.library.Models;
+using api.library.Models.Responce;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -18,9 +18,9 @@ public class SecretaryData
         _connectionStrings = connectionStrings;
     }
 
-    public async Task<IEnumerable<SecretaryModel>> GetSecretaries()
+    public async Task<IEnumerable<SecretaryResponce>> GetSecretaries()
     {
-        var output = await _sql.LoadDataAsync<SecretaryModel, dynamic>("f_load_secretaries", new { }, _connectionStrings.Value.AppDbConnection);
+        var output = await _sql.LoadDataAsync<SecretaryResponce, dynamic>("f_load_secretaries", new { }, _connectionStrings.Value.AppDbConnection);
         return output;
     }
 }

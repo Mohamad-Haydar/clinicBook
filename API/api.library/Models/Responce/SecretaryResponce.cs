@@ -1,9 +1,8 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace api.library.Models;
+namespace api.library.Models.Responce;
 
-[Table("secretary")]
-public class SecretaryModel
+public class SecretaryResponce
 {
     [Column("id")]
     public string Id { get; set; }

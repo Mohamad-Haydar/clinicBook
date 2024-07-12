@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace api.library.Models;
+namespace api.Models;
 
-[Table("client")]
-public class ClientModel
+[Table("doctor")]
+public class DoctorModel
 {
     [Column("id")]
     public string Id { get; set; }
@@ -15,4 +15,9 @@ public class ClientModel
     public string Email { get; set; }
     [Column("phonenumber")]
     public string PhoneNumber { get; set; }
+    [Column("description")]
+    public string Description { get; set; }
+    [Column("categoryid")]
+    public int CategoryId { get; set; }
+
 }

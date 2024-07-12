@@ -1,7 +1,6 @@
 using api.library.DataAccess;
 using api.library.Helper;
-using api.library.Internal.DataAccess;
-using api.library.Models;
+using api.library.Models.Responce;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -21,7 +20,7 @@ public class WeatherForecastController : ControllerBase
 
     [HttpGet]
     [Route("GetAllSecretaries")]
-    public async Task<IEnumerable<SecretaryModel>> GetSecretaries()
+    public async Task<IEnumerable<SecretaryResponce>> GetSecretaries()
     {
         SecretaryData secretaryData = new(_sql, _connectionStrings);
 

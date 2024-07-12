@@ -3,6 +3,7 @@ using api.Attributes;
 using api.Data;
 using api.library.Models;
 using api.Models;
+using api.Models.Request;
 using api.Models.Responce;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -132,12 +133,13 @@ public class AuthenticationController : Controller
         }
     }
 
-    [AuthorizeRoles(Roles.Secretary, Roles.Admin)]
+    // [AuthorizeRoles(Roles.Secretary, Roles.Admin)]
+    [AllowAnonymous]
     [Route("RegisterDoctor")]
     [HttpPost]
-    public async Task<IActionResult> RegisterDoctor([FromBody] DoctorModel doctorModel, string password)
+    public async Task<IActionResult> RegisterDoctor([FromBody] CreateDoctorRequest createDoctorRequest)
     {
-        var userExists = await _userManager.FindByEmailAsync(doctorModel.Email);
+        var userExists = await _userManager.FindByEmailAsync(createDoctorRequest.Email);
         if(userExists != null)
         {
             return BadRequest(new {message="email already exists"});
@@ -147,17 +149,18 @@ public class AuthenticationController : Controller
         {
             try
             {
-                var user = new UserModel { UserName = doctorModel.Email, Email = doctorModel.Email, PhoneNumber = doctorModel.PhoneNumber };
-                var result = await _userManager.CreateAsync(user, password);
+                string userName =  createDoctorRequest.FirstName +  createDoctorRequest.LastName;
+                var user = new UserModel { UserName = userName , Email = createDoctorRequest.Email, PhoneNumber = createDoctorRequest.PhoneNumber };
+                var result = await _userManager.CreateAsync(user, createDoctorRequest.password);
                 await _userManager.AddToRoleAsync(user, Roles.Doctor.ToString());
                 DoctorModel doctor = new(){
                     Id = user.Id,
-                    FirstName = doctorModel.FirstName,
-                    LastName = doctorModel.LastName,
-                    Email = doctorModel.Email,
-                    PhoneNumber = doctorModel.PhoneNumber,
-                    Description = doctorModel.Description,
-                    CategoryId = doctorModel.CategoryId
+                    FirstName = createDoctorRequest.FirstName,
+                    LastName = createDoctorRequest.LastName,
+                    Email = createDoctorRequest.Email,
+                    PhoneNumber = createDoctorRequest.PhoneNumber,
+                    Description = createDoctorRequest.Description,
+                    CategoryId = createDoctorRequest.CategoryId
                 };
                 await _appContext.Doctors.AddAsync(doctor);
                 await _appContext.SaveChangesAsync();
@@ -284,16 +287,5 @@ public class AuthenticationController : Controller
         
         return Ok(new {message="Log out Successfully"});
     }
-    private async Task<bool> IsValidEmailAndPassword(string email, string password)
-    {
-        var user = await _userManager.FindByEmailAsync(email);
-        if(user == null)
-        {
-            return false;
-        }
-        return await _userManager.CheckPasswordAsync(user, password);
-    }
-
-    
 
 }

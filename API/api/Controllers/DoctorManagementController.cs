@@ -1,29 +1,39 @@
+using api.Attributes;
 using api.Data;
 using api.library.DataAccess;
 using api.library.Helper;
-using api.library.Internal.DataAccess;
-using api.library.Models;
+using api.library.Models.Request;
+using api.library.Models.Responce;
+using api.Models;
+using api.Models.Request;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace api.Controllers;
 
-// [Authorize]
+[AuthorizeRoles(Roles.Admin, Roles.Secretary)]
+[Route("api/[controller]")]
 public class DoctorManagementController : ControllerBase
 {
+    private readonly IdentityAppDbContext _identityContext;
+    private readonly UserManager<UserModel> _userManager;
     private readonly ApplicationDbContext _appDbContext;
     private readonly ISqlDataAccess _sql;
     private readonly IOptions<ConnectionStrings> _connectionStrings;
-    public DoctorManagementController(ApplicationDbContext appDbContext, ISqlDataAccess sql, IOptions<ConnectionStrings> connectionStrings)
+    public DoctorManagementController(ApplicationDbContext appDbContext, ISqlDataAccess sql, IOptions<ConnectionStrings> connectionStrings, IdentityAppDbContext identityContext, UserManager<UserModel> userManager)
     {
         _appDbContext = appDbContext;
         _sql = sql;
         _connectionStrings = connectionStrings;
+        _identityContext = identityContext;
+        _userManager = userManager;
     }
-    
+
     [HttpPost]
-    [Route("add_doctor_service")]
+    [Route("addDoctorService")]
     public async Task<IActionResult> AddDoctorService([FromBody] DoctorServiceRequest doctorService)
     {
         DoctorServiceData doctorServiceData = new(_sql,_connectionStrings);
@@ -36,7 +46,7 @@ public class DoctorManagementController : ControllerBase
     }
 
     [HttpPost]
-    [Route("add_multiple_service")]
+    [Route("addMultipleService")]
     public async Task<IActionResult> AddMultipleService([FromBody] List<DoctorServiceRequest> doctorServices)
     {
         DoctorServiceData doctorServiceData = new DoctorServiceData(_sql,_connectionStrings);
@@ -56,7 +66,7 @@ public class DoctorManagementController : ControllerBase
     }
 
     [HttpPatch]
-    [Route("update_doctor_service_duration")]
+    [Route("updateDoctorServiceDuration")]
     public async Task<IActionResult> UpdateDoctorServiceDuration(int id, int duration)
     {
         var service = await _appDbContext.DoctorServiceModels.FirstOrDefaultAsync(x => x.Id == id);
@@ -70,7 +80,7 @@ public class DoctorManagementController : ControllerBase
     }
 
     [HttpDelete]
-    [Route("delete_doctor_service")]
+    [Route("deleteDoctorService")]
     public async Task<IActionResult> DeleteDoctorService(int id)
     {
         var service = await _appDbContext.DoctorServiceModels.FirstOrDefaultAsync(x => x.Id == id);
@@ -83,4 +93,88 @@ public class DoctorManagementController : ControllerBase
         return Ok(new {message="Service Deleted successfully"});
     }
 
+    [HttpDelete]
+    [Route("removeDoctor")]
+    public async Task<IActionResult> RemoveDoctor(string id)
+    {
+        var doctor = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.Id == id);
+        var user = await _userManager.FindByIdAsync(id);
+        if(doctor == null || user == null)
+        {
+            return BadRequest(new {message="Doctor not foud, enter a correct email"});
+        }
+        using (var transaction = _identityContext.Database.BeginTransaction())
+        {
+            try
+            {
+                _appDbContext.Remove(doctor);
+                await _userManager.DeleteAsync(user);
+                await _identityContext.SaveChangesAsync();
+                await _appDbContext.SaveChangesAsync();
+                transaction.Commit();
+                return Ok(new { message = "Doctor Deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return BadRequest(new { message = "Something went wrong. Please try again." });
+            }
+        }
+    }
+
+    [HttpPatch]
+    [Route("updateDoctorInfo")]
+    [AuthorizeRoles(Roles.Doctor,Roles.Admin, Roles.Secretary)]
+    public async Task<IActionResult> UpdateDoctorInfo([FromBody] CreateDoctorRequest model)
+    {
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        var doctor = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.Email == model.Email);
+        if(user == null || doctor == null)
+        {
+            return BadRequest(new {message="Doctor Does not exists"});
+        }
+
+        using (var transaction = _identityContext.Database.BeginTransaction())
+        {
+            try
+            {
+                string userName = model.FirstName ?? doctor.FirstName +  model.LastName ?? doctor.LastName;
+                user.UserName = userName;
+                user.PhoneNumber = model.PhoneNumber ?? user.PhoneNumber;
+
+                doctor.FirstName  =  model.FirstName ?? doctor.FirstName;
+                doctor.LastName  =  model.LastName ?? doctor.LastName;
+                doctor.PhoneNumber  =  model.PhoneNumber ?? doctor.PhoneNumber;
+                doctor.Description  =  model.Description ?? doctor.Description;
+                doctor.CategoryId = model.CategoryId > 0 ? model.CategoryId : doctor.CategoryId;
+
+                await _appDbContext.SaveChangesAsync();
+                await _identityContext.SaveChangesAsync();
+                transaction.Commit();
+                return Ok(new { message = "Doctor Data updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return BadRequest(new { message = "Something went wrong. Please try again." });
+            }
+        }
+    }
+
+    [HttpGet]
+    [Route("getDoctorInfo")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetDoctorInfo(string email)
+    {
+        if(!ModelState.IsValid)
+        {
+            return BadRequest(new {message="please enter the email"});
+        }
+
+        IQueryable<DoctorInfoResponce> doctor = from d in _appDbContext.Doctors 
+                    where d.Email == email
+                    join c in _appDbContext.CategoryModels on d.CategoryId equals c.Id
+                    select new DoctorInfoResponce {Id = d.Id,FirstName = d.FirstName,LastName = d.LastName, Email = d.Email,PhoneNumber = d.PhoneNumber,Description = d.Description, CategoryName = c.CategoryName};
+        return Ok(doctor);
+    }
 }

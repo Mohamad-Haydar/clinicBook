@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace api.library.Models;
+namespace api.Models;
 
 [Table("doctorservice")]
 public class DoctorServiceModel

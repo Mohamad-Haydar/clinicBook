@@ -1,9 +1,10 @@
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
+using Microsoft.Extensions.Configuration;
 using NpgsqlTypes;
 
-namespace api.library.Models;
+namespace api.library.Models.Request;
 
 public class DoctorServiceRequest 
 {
