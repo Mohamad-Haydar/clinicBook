@@ -8,13 +8,40 @@ namespace api.library.Internal.DataAccess;
 
 public class SqlDataAccess :ISqlDataAccess,  IDisposable
 {
-    public async Task<IEnumerable<T>> LoadDataAsync<T, U>(string storedProcedure, U parameters, string connectionString)
+    public async Task<List<Dictionary<string, object>>> LoadDataAsync(string functionName, string[] paramNames, object[] paramValues, string connectionString)
     {
-        using (IDbConnection connection = new NpgsqlConnection(connectionString))
+        var results = new List<Dictionary<string, object>>();
+        using (var connection = new NpgsqlConnection(connectionString))
         {
-            IEnumerable<T> rows = await connection.QueryAsync<T>("SELECT * FROM " + storedProcedure + "()", parameters);
-            return rows;
+            await connection.OpenAsync();
+
+            using (var cmd = new NpgsqlCommand())
+            {     
+                cmd.Connection = connection;
+                string sql = $"SELECT * FROM {functionName}({string.Join(", ", Array.ConvertAll(paramNames, name => $"@{name}"))})";
+                cmd.CommandText = sql;
+                
+                for (int i = 0; i < paramNames.Length; i++)
+                {
+                    cmd.Parameters.AddWithValue(paramNames[i], paramValues[i]);
+                }
+
+                var reader = cmd.ExecuteReaderAsync().Result;
+                while (reader.Read())
+                {
+                    var row = new Dictionary<string, object>();
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        string columnName = reader.GetName(i);
+                        object value = reader[i];
+                        row[columnName] = value;
+                    }
+                    results.Add(row);
+                }
+            }
+            await connection.CloseAsync();
         }
+        return results;
     }
 
     public async Task SaveDataAsync<T>(string storedProcedure, T parameters, string connectionString)

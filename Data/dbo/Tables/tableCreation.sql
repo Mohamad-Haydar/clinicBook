@@ -45,6 +45,7 @@ Create Table DoctorAvailability(
   StartHour timetz NOT NULL,
   EndHour timetz NOT NULL,
   MaxClient int NOT NULL,
+  CurrentReservations int NOT NULL DEFAULT 0,
   DoctorId varchar(128) NOT NULL,
   CONSTRAINT fk_doctor FOREIGN KEY(DoctorId) REFERENCES Doctor(Id) ON DELETE CASCADE
   CONSTRAINT check_start_end_hours CHECK (starthour < endhour);
@@ -54,7 +55,7 @@ Create Table DoctorAvailability(
 Create Table ClientReservation(
   Id int primary key GENERATED ALWAYS AS IDENTITY,
   StartTime timetz NOT NULL,
-  Duration int NOT NULL, -- Duration in minutes and calculated based on the services reserved
+  endtime timetz NOT NULL, -- Duration in minutes and calculated based on the services reserved
   ClientId varchar(128) NOT NULL,
   DoctorAvailabiltyId int NOT NULL,
   CONSTRAINT fk_client FOREIGN KEY(ClientId) REFERENCES Client(Id) ON DELETE CASCADE,

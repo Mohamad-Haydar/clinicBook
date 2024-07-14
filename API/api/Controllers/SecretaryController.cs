@@ -1,7 +1,9 @@
 using api.Attributes;
+using api.Data;
 using api.library.DataAccess;
 using api.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace api.Controllers;
 
@@ -9,21 +11,23 @@ public class SecretaryController : Controller
 {
 
     private readonly SecretaryData _secretaryData;
+    private readonly ApplicationDbContext _appDbContext;
 
-    public SecretaryController(SecretaryData secretaryData)
+    public SecretaryController(SecretaryData secretaryData, ApplicationDbContext appDbContext)
     {
         _secretaryData = secretaryData;
+        _appDbContext = appDbContext;
     }
 
-    [AuthorizeRoles(Roles.Admin)]
+    // [AuthorizeRoles(Roles.Admin)]
     [Route("GetSecretaries")]
     [HttpGet]
-    public async Task<IActionResult> GetSecretaries()
+    public async Task<IActionResult> GetSecretaries(string email)
     {
         try
         {
-            var secretaries = await _secretaryData.GetSecretaries();
-            return Ok(secretaries);
+            var secretarie = await _appDbContext.Secretaries.FirstOrDefaultAsync(x => x.Email == email);
+            return Ok(secretarie);
         }
         catch (System.Exception)
         {

@@ -57,6 +57,9 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddTransient<ITokenService, TokenService>();
 builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("ConnectionStrings"));
 builder.Services.AddSingleton<ISqlDataAccess, SqlDataAccess>();
+builder.Services.AddSingleton<SecretaryData, SecretaryData>();
+builder.Services.AddSingleton<DoctorServiceData, DoctorServiceData>();
+builder.Services.AddSingleton<ReservationData, ReservationData>();
 
 
 

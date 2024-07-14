@@ -15,6 +15,7 @@ namespace api.Data
         public DbSet<DoctorModel> Doctors {get; set;}
         public DbSet<DoctorServiceModel> DoctorServiceModels {get; set;}
         public DbSet<CategoryModel> CategoryModels {get; set;}
-        public DbSet<DoctorAvailabilityModel> DoctorAvailabilities {get;set;}
+        public DbSet<DoctorAvailabilityModel> DoctorAvailabilities {get; set;}
+        public DbSet<ClientReservation> ClientReservations {get; set;}
     }
 }

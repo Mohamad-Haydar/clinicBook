@@ -1,7 +1,6 @@
 using api.Attributes;
 using api.Data;
 using api.library.DataAccess;
-using api.library.Helper;
 using api.library.Models.Request;
 using api.library.Models.Responce;
 using api.Models;
@@ -10,7 +9,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace api.Controllers;
 
@@ -21,23 +19,20 @@ public class DoctorManagementController : ControllerBase
     private readonly IdentityAppDbContext _identityContext;
     private readonly UserManager<UserModel> _userManager;
     private readonly ApplicationDbContext _appDbContext;
-    private readonly ISqlDataAccess _sql;
-    private readonly IOptions<ConnectionStrings> _connectionStrings;
-    public DoctorManagementController(ApplicationDbContext appDbContext, ISqlDataAccess sql, IOptions<ConnectionStrings> connectionStrings, IdentityAppDbContext identityContext, UserManager<UserModel> userManager)
+    private readonly DoctorServiceData _doctorServiceData;
+    public DoctorManagementController(ApplicationDbContext appDbContext, IdentityAppDbContext identityContext, UserManager<UserModel> userManager, DoctorServiceData doctorServiceData)
     {
         _appDbContext = appDbContext;
-        _sql = sql;
-        _connectionStrings = connectionStrings;
         _identityContext = identityContext;
         _userManager = userManager;
+        _doctorServiceData = doctorServiceData;
     }
 
     [HttpPost]
     [Route("addDoctorService")]
     public async Task<IActionResult> AddDoctorService([FromBody] DoctorServiceRequest doctorService)
     {
-        DoctorServiceData doctorServiceData = new(_sql,_connectionStrings);
-        var res = await doctorServiceData.AddDoctorServiceAsync(doctorService);
+        var res = await _doctorServiceData.AddDoctorServiceAsync(doctorService);
         if(res)
         {
             return Ok(new {message="Service added successfully"});
@@ -49,12 +44,11 @@ public class DoctorManagementController : ControllerBase
     [Route("addMultipleService")]
     public async Task<IActionResult> AddMultipleService([FromBody] List<DoctorServiceRequest> doctorServices)
     {
-        DoctorServiceData doctorServiceData = new DoctorServiceData(_sql,_connectionStrings);
         using (var transaction = _appDbContext.Database.BeginTransaction())
         {
             foreach (var doctorService in doctorServices)
             {
-                var res = await doctorServiceData.AddDoctorServiceAsync(doctorService);    
+                var res = await _doctorServiceData.AddDoctorServiceAsync(doctorService);    
                 if(!res)
                 {
                     transaction.Rollback();
@@ -81,6 +75,8 @@ public class DoctorManagementController : ControllerBase
 
     [HttpDelete]
     [Route("deleteDoctorService")]
+    //TODO: when deleting i should delete the reservation detail 
+    // and check if i want to delete the client reservation
     public async Task<IActionResult> DeleteDoctorService(int id)
     {
         var service = await _appDbContext.DoctorServiceModels.FirstOrDefaultAsync(x => x.Id == id);

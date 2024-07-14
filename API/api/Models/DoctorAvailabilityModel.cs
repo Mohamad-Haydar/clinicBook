@@ -18,6 +18,8 @@ public class DoctorAvailabilityModel
     public DateTimeOffset EndHour { get; set; }
     [Column("maxclient")]
     public int MaxClient { get; set; }
+    [Column("currentreservations")]
+    public int CurrentReservations { get; set; }
     [Column("doctorid")]
     public string DoctorId { get; set; }
 }

@@ -8,19 +8,10 @@ namespace api.library.DataAccess;
 
 public class SecretaryData
 {
-    // private readonly IConfiguration _configuration;
-    private IOptions<ConnectionStrings> _connectionStrings;
-    private readonly ISqlDataAccess _sql;
+    private readonly IOptions<ConnectionStrings> _connectionStrings;
 
-    public SecretaryData(ISqlDataAccess sql, IOptions<ConnectionStrings> connectionStrings)
+    public SecretaryData(IOptions<ConnectionStrings> connectionStrings)
     {
-        _sql = sql;
         _connectionStrings = connectionStrings;
-    }
-
-    public async Task<IEnumerable<SecretaryResponce>> GetSecretaries()
-    {
-        var output = await _sql.LoadDataAsync<SecretaryResponce, dynamic>("f_load_secretaries", new { }, _connectionStrings.Value.AppDbConnection);
-        return output;
     }
 }

@@ -44,6 +44,7 @@ public class DoctorAvailabilityController : Controller
 
     [HttpPost]
     [Route("openavailabledate")]
+    [AllowAnonymous]
     public async Task<IActionResult> OpenAvailableDate([FromBody] OpenAvailableDateRequest model)
     {
         if(!ModelState.IsValid || model == null)
