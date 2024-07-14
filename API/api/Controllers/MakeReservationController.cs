@@ -74,20 +74,47 @@ public class MakeReservationController : Controller
         return BadRequest("something when wrong please check you input and try again");
     }
 
+    [HttpGet]
+    [Route("GetConcurrentBookings")]
+    public async Task<IActionResult> GetConcurrentBookings([Required] int ClientReservationId)
+    {
+        if(!ModelState.IsValid)
+        {
+            return BadRequest(new {message="please enter valid input"});
+        }
+
+        var result = await _reservationData.GetConcurrentBookingsAsync(ClientReservationId);
+        if(result != null)
+        {
+            return Ok(result);
+        }
+        return BadRequest("something when wrong please check you input and try again");
+    }
+
+    [HttpGet]
+    [Route("GetPreviousBookings")]
+    public async Task<IActionResult> GetPreviousBookings([Required] int ClientReservationId)
+    {
+        if(!ModelState.IsValid)
+        {
+            return BadRequest(new {message="please enter valid input"});
+        }
+
+        var result = await _reservationData.GetPreviousBookingsAsync(ClientReservationId);
+        if(result != null)
+        {
+            return Ok(result);
+        }
+        return BadRequest("something when wrong please check you input and try again");
+    }
+
     [HttpDelete]
     [Route("DeleteSpecificReservation")]
     public async Task<IActionResult> DeleteSpecificReservation([Required] int clientReservationId)
     {
         if(!ModelState.IsValid)
             return BadRequest(new {message = "Please enter a valid input"});
-        
-        // var exists = await _appDbContext.ClientReservations.FirstOrDefaultAsync(x => x.Id == clientReservationId);
-        // if(exists != null)
-        // {
-        //     var result = _appDbContext.ClientReservations.Remove(exists);
-        //     await _appDbContext.SaveChangesAsync();
-        //     return Ok(new {message="your reservation is removed successfully"});
-        // }
+
         var result = await _reservationData.DeleteSpecificReservationAsync(clientReservationId);
         if(result)
         {
@@ -95,6 +122,5 @@ public class MakeReservationController : Controller
         }
         return BadRequest(new {message = "Please check your input and try again"});
     }
-
 
 }

@@ -8,7 +8,7 @@ namespace api.library.Internal.DataAccess;
 
 public class SqlDataAccess :ISqlDataAccess,  IDisposable
 {
-    public async Task<List<Dictionary<string, object>>> LoadDataAsync(string functionName, string[] paramNames, object[] paramValues, string connectionString)
+    public async Task<IQueryable<Dictionary<string, object>>> LoadDataAsync(string functionName, string[] paramNames, object[] paramValues, string connectionString)
     {
         var results = new List<Dictionary<string, object>>();
         using (var connection = new NpgsqlConnection(connectionString))
@@ -41,7 +41,7 @@ public class SqlDataAccess :ISqlDataAccess,  IDisposable
             }
             await connection.CloseAsync();
         }
-        return results;
+        return results.AsQueryable();
     }
 
     public async Task SaveDataAsync<T>(string storedProcedure, T parameters, string connectionString)

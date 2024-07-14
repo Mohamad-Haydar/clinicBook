@@ -39,7 +39,7 @@ public class ReservationData
 
             var result = await _sql.LoadDataAsync("f_get_reservation_detail",paramsName,paramsValue,_connectionStrings.Value.AppDbConnection);
 
-            return result[0];
+            return result.First();
         }
         catch (Exception ex)
         {
@@ -47,7 +47,7 @@ public class ReservationData
         }
     }
 
-    public async Task<IList<Dictionary<string, object>>> GetAllPersonalReservationsAsync(string ClientId)
+    public async Task<IQueryable<Dictionary<string, object>>> GetAllPersonalReservationsAsync(string ClientId)
     {
          try
         {
@@ -74,6 +74,39 @@ public class ReservationData
         catch (System.Exception)
         {
             return false;
+        }
+    }
+
+    public async Task<IQueryable<Dictionary<string, object>>> GetConcurrentBookingsAsync(int id)
+    {
+         try
+        {
+            string[] paramsName = ["client_reservation_id"];
+            object[] paramsValue = [id];
+
+            var result = await _sql.LoadDataAsync("f_get_concurrent_reservations",paramsName,paramsValue,_connectionStrings.Value.AppDbConnection);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
+    }
+    public async Task<IQueryable<Dictionary<string, object>>> GetPreviousBookingsAsync(int id)
+    {
+         try
+        {
+            string[] paramsName = ["client_reservation_id"];
+            object[] paramsValue = [id];
+
+            var result = await _sql.LoadDataAsync("f_get_previous_reservations",paramsName,paramsValue,_connectionStrings.Value.AppDbConnection);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            return null;
         }
     }
 
