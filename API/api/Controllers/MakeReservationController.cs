@@ -34,14 +34,15 @@ public class MakeReservationController : Controller
             return BadRequest(new {message="please enter a valid input"});
         }
 
-        var res = await _reservationData.CreateQueueReservationAsync(model);
-
-        if(res)
+        try
         {
-            // TODO: return the date and time of his reservation
+            await _reservationData.CreateQueueReservationAsync(model);
             return Ok(new {message="Reservation added successfully"});
         }
-        return BadRequest(new {message="something whent wrong please check your input data"});
+        catch (Exception ex)
+        {
+            return BadRequest(new {message=ex.Message});
+        }
     }
 
     [HttpGet]
@@ -52,26 +53,34 @@ public class MakeReservationController : Controller
         {
             return BadRequest(new {message="please enter a valid input"});
         }
-
-        var res = await _reservationData.GetReservationDetailsAsync(id);
-
-        if(res != null)
+        try
         {
+            var res = await _reservationData.GetReservationDetailsAsync(id);
             return Ok(res);
         }
-        return BadRequest(new {message="something whent wrong please check your input data"});
+        catch (Exception ex)
+        {
+            return BadRequest(new {message="Something whent wrong please try again."});
+        }
     }
 
     [HttpGet]
     [Route("GetAllPersonalReservations")]
     public async Task<IActionResult> GetAllPersonalReservations([Required] string ClientId)
     {
-        var res = await _reservationData.GetAllPersonalReservationsAsync(ClientId);
-        if(res != null)
+         if(!ModelState.IsValid)
         {
+            return BadRequest(new {message="please enter a valid input"});
+        }
+        try
+        {
+            var res = await _reservationData.GetAllPersonalReservationsAsync(ClientId);
             return Ok(res);
         }
-        return BadRequest("something when wrong please check you input and try again");
+        catch (Exception)
+        {
+            return BadRequest(new { message="something when wrong please check you input and try again"});
+        }
     }
 
     [HttpGet]
@@ -82,13 +91,15 @@ public class MakeReservationController : Controller
         {
             return BadRequest(new {message="please enter valid input"});
         }
-
-        var result = await _reservationData.GetConcurrentBookingsAsync(ClientReservationId);
-        if(result != null)
+        try
         {
+            var result = await _reservationData.GetConcurrentBookingsAsync(ClientReservationId);
             return Ok(result);
         }
-        return BadRequest("something when wrong please check you input and try again");
+        catch (Exception)
+        {
+            return BadRequest(new {message="something when wrong please check you input and try again"});
+        }
     }
 
     [HttpGet]
@@ -99,13 +110,16 @@ public class MakeReservationController : Controller
         {
             return BadRequest(new {message="please enter valid input"});
         }
-
-        var result = await _reservationData.GetPreviousBookingsAsync(ClientReservationId);
-        if(result != null)
+        try
         {
+            var result = await _reservationData.GetPreviousBookingsAsync(ClientReservationId);
             return Ok(result);
         }
-        return BadRequest("something when wrong please check you input and try again");
+        catch (Exception)
+        {
+            return BadRequest(new {message="something when wrong please check you input and try again"});
+        }
+
     }
 
     [HttpDelete]

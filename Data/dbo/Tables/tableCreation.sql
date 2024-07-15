@@ -60,6 +60,8 @@ Create Table ClientReservation(
   DoctorAvailabiltyId int NOT NULL,
   CONSTRAINT fk_client FOREIGN KEY(ClientId) REFERENCES Client(Id) ON DELETE CASCADE,
   CONSTRAINT fk_doctor_availability FOREIGN KEY(DoctorAvailabiltyId) REFERENCES DoctorAvailability(Id) ON DELETE CASCADE
+  CONSTRAINT unique_client_doctor_availability UNIQUE (clientid, doctoravailabilityid)
+
 );
 
 Create Table ReservationDetail(

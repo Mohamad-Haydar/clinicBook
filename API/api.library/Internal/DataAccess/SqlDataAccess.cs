@@ -10,38 +10,45 @@ public class SqlDataAccess :ISqlDataAccess,  IDisposable
 {
     public async Task<IQueryable<Dictionary<string, object>>> LoadDataAsync(string functionName, string[] paramNames, object[] paramValues, string connectionString)
     {
-        var results = new List<Dictionary<string, object>>();
-        using (var connection = new NpgsqlConnection(connectionString))
+        try
         {
-            await connection.OpenAsync();
+            var results = new List<Dictionary<string, object>>();
+            using (var connection = new NpgsqlConnection(connectionString))
+            {
+                await connection.OpenAsync();
 
-            using (var cmd = new NpgsqlCommand())
-            {     
-                cmd.Connection = connection;
-                string sql = $"SELECT * FROM {functionName}({string.Join(", ", Array.ConvertAll(paramNames, name => $"@{name}"))})";
-                cmd.CommandText = sql;
-                
-                for (int i = 0; i < paramNames.Length; i++)
-                {
-                    cmd.Parameters.AddWithValue(paramNames[i], paramValues[i]);
-                }
-
-                var reader = cmd.ExecuteReaderAsync().Result;
-                while (reader.Read())
-                {
-                    var row = new Dictionary<string, object>();
-                    for (int i = 0; i < reader.FieldCount; i++)
+                using (var cmd = new NpgsqlCommand())
+                {     
+                    cmd.Connection = connection;
+                    string sql = $"SELECT * FROM {functionName}({string.Join(", ", Array.ConvertAll(paramNames, name => $"@{name}"))})";
+                    cmd.CommandText = sql;
+                    
+                    for (int i = 0; i < paramNames.Length; i++)
                     {
-                        string columnName = reader.GetName(i);
-                        object value = reader[i];
-                        row[columnName] = value;
+                        cmd.Parameters.AddWithValue(paramNames[i], paramValues[i]);
                     }
-                    results.Add(row);
+
+                    var reader = cmd.ExecuteReaderAsync().Result;
+                    while (reader.Read())
+                    {
+                        var row = new Dictionary<string, object>();
+                        for (int i = 0; i < reader.FieldCount; i++)
+                        {
+                            string columnName = reader.GetName(i);
+                            object value = reader[i];
+                            row[columnName] = value;
+                        }
+                        results.Add(row);
+                    }
                 }
+                await connection.CloseAsync();
             }
-            await connection.CloseAsync();
+            return results.AsQueryable();
+         }
+        catch (Exception ex)
+        {
+          throw new Exception(ex.Message[37..]);
         }
-        return results.AsQueryable();
     }
 
     public async Task SaveDataAsync<T>(string storedProcedure, T parameters, string connectionString)
@@ -55,7 +62,7 @@ public class SqlDataAccess :ISqlDataAccess,  IDisposable
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message);
+            throw new Exception(ex.Message[7..]);
         }
     }
 

@@ -15,6 +15,14 @@ DECLARE
     _service_duration int;
 BEGIN
 
+    --check if the user want to book in the same availability
+    PERFORM 1
+    FROM clientreservation AS cr
+    WHERE cr.clientid = client_id AND cr.doctoravailabilityid = doctor_availability_id;
+    IF FOUND THEN
+        RAISE EXCEPTION 'You already book for this availability, to update your reservation go to the update place';
+    END IF;
+
     -- Check to see if we can afford one more reservation
     SELECT maxclient, currentreservations 
 	INTO _max_client, _current_reservations
@@ -22,35 +30,27 @@ BEGIN
     WHERE doctoravailability.id = doctor_availability_id;
 
     IF _current_reservations >= _max_client THEN
-        RETURN;
+        RAISE EXCEPTION 'Sorry Doctor can not serve more than % client. He is full for this day.', _max_client;
     END IF;
-
-
 
     -- to calculate the estimated duration for the services that the user wants
 	FOREACH _id IN ARRAY doctor_service_ids LOOP 
-        _duration := _duration + 
-			(
-				SELECT doctorservice.duration 
-				FROM doctorservice 
-				WHERE doctorservice.id = _id
-			);
-        -- SELECT doctorservice.duration
-        -- INTO _service_duration
-        -- FROM doctorservice
-        -- WHERE doctorservice.id = _id;
+        SELECT doctorservice.duration
+        INTO _service_duration
+        FROM doctorservice
+        WHERE doctorservice.id = _id;
 
-        -- IF NOT FOUND THEN
-        --     RETURN;
-        -- END IF;
+        IF NOT FOUND THEN
+            RAISE EXCEPTION 'You Selected Service That is Not Found Please check your selection';
+        END IF;
 
-        -- _duration := _duration + _service_duration;
+        _duration := _duration + _service_duration;
     END LOOP;
 
     -- to select the last end time for the specific doctor availability
     SELECT Max(endtime) INTO _last_end_time
     FROM clientreservation
-    WHERE clientreservation.doctoravailabiltyid = doctor_availability_id;
+    WHERE clientreservation.doctoravailabilityid = doctor_availability_id;
 
     IF _last_end_time IS NULL THEN
         SELECT starthour INTO _last_end_time 
@@ -59,7 +59,7 @@ BEGIN
     END IF;
 
     -- to insert data in the client reservation
-    INSERT INTO clientreservation (starttime, endtime, clientid, doctoravailabiltyid)
+    INSERT INTO clientreservation (starttime, endtime, clientid, doctoravailabilityid)
     VALUES (_last_end_time, _last_end_time + (_duration * INTERVAL '1 minute'), client_id, doctor_availability_id)
     RETURNING id INTO _reservation_id;
 

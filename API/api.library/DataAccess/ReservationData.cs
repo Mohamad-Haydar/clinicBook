@@ -17,16 +17,15 @@ public class ReservationData
         _connectionStrings = connectionStrings;
     }
 
-    public async Task<bool> CreateQueueReservationAsync(CreateQueueReservationRequest data)
+    public async Task CreateQueueReservationAsync(CreateQueueReservationRequest data)
     {
         try
         {
             await _sql.SaveDataAsync<CreateQueueReservationRequest>("sp_create_queue_reservation",data,_connectionStrings.Value.AppDbConnection);
-            return true;
         }
         catch (Exception)
         {
-            return false;
+            throw;
         }
     }
 
@@ -41,9 +40,9 @@ public class ReservationData
 
             return result.First();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return null;
+            throw;
         }
     }
 
@@ -58,9 +57,9 @@ public class ReservationData
 
             return result;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return null;
+            throw;
         }
     }
 
@@ -71,7 +70,7 @@ public class ReservationData
             await _sql.SaveDataAsync("sp_delete_specific_reservation", new {client_reservation_id = ClientReservationId}, _connectionStrings.Value.AppDbConnection);
             return true;
         }
-        catch (System.Exception)
+        catch (Exception)
         {
             return false;
         }

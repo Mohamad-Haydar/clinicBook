@@ -5,23 +5,15 @@ AS $$
 DECLARE
     res reservation_detail;
 BEGIN
-    SELECT cr.id, cr.starttime, cr.endtime, cr.doctoravailabiltyid, ds.doctorid 
-    INTO res.id, res.start_time, res.end_time, res.doctor_availability_id, res.doctor_id
+    SELECT cr.id, cr.starttime, cr.endtime, cr.doctoravailabilityid, ds.doctorid, array_agg(ds.servicename) 
+    INTO res.id, res.start_time, res.end_time, res.doctor_availability_id, res.doctor_id, res.service_names
     FROM clientreservation as cr
     JOIN reservationdetail rd ON cr.id = rd.clientreservationid
     JOIN doctorservice as ds ON ds.id = rd.doctorserviceid
-    WHERE cr.id = _id;
+    WHERE cr.id = _id
+	GROUP BY cr.id, ds.doctorid;
 
-    IF FOUND THEN
-        SELECT array_agg(ds.servicename)
-        FROM clientreservation as cr
-        JOIN reservationdetail rd ON cr.id = rd.clientreservationid
-        JOIN doctorservice as ds ON ds.id = rd.doctorserviceid
-        WHERE cr.id = _id
-        INTO res.service_names;
-    END IF;
-
-    RETURN res;
-
+	RETURN res;
+    
 END;
 $$;
