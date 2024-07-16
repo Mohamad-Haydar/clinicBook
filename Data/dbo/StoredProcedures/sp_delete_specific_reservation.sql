@@ -6,7 +6,7 @@ AS $$
 DECLARE
     doctor_availability_id int;
     removed_end_time time;
-    gap interval;
+    gap time;
 BEGIN 
 
     -- Delete the row from client reservation table
@@ -27,7 +27,9 @@ BEGIN
 
 
     -- reorder all the other reservations in the doctor reservation table
-    
+    UPDATE clientreservation
+    SET starttime = starttime - gap, endtime = endtime - gap
+    WHERE doctoravailabilityid = doctor_availability_id AND starttime >= removed_end_time;
 
 END;
 $$;

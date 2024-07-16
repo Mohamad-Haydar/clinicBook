@@ -133,8 +133,7 @@ public class AuthenticationController : Controller
         }
     }
 
-    // [AuthorizeRoles(Roles.Secretary, Roles.Admin)]
-    [AllowAnonymous]
+    [AuthorizeRoles(Roles.Secretary, Roles.Admin)]
     [Route("RegisterDoctor")]
     [HttpPost]
     public async Task<IActionResult> RegisterDoctor([FromBody] CreateDoctorRequest createDoctorRequest)
@@ -150,7 +149,14 @@ public class AuthenticationController : Controller
             try
             {
                 string userName =  createDoctorRequest.FirstName +  createDoctorRequest.LastName;
-                var user = new UserModel { UserName = userName , Email = createDoctorRequest.Email, PhoneNumber = createDoctorRequest.PhoneNumber };
+                var user = new UserModel
+                {
+                    UserName = userName,
+                    Email = createDoctorRequest.Email,
+                    PhoneNumber = createDoctorRequest.PhoneNumber,
+                    RefreshToken = "",
+                    RefreshTokenExpiryTime = DateTime.MinValue
+                };
                 var result = await _userManager.CreateAsync(user, createDoctorRequest.password);
                 await _userManager.AddToRoleAsync(user, Roles.Doctor.ToString());
                 DoctorModel doctor = new(){

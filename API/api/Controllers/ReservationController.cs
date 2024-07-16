@@ -11,14 +11,14 @@ using Microsoft.Extensions.Options;
 
 namespace api.Controllers;
 
-// [Authorize]
+[Authorize]
 [Route("/api/[controller]")]
-public class MakeReservationController : Controller
+public class ReservationController : Controller
 {
     private readonly ApplicationDbContext _appDbContext;
     private readonly ReservationData _reservationData;
 
-    public MakeReservationController(ApplicationDbContext appDbContext, ReservationData reservationData)
+    public ReservationController(ApplicationDbContext appDbContext, ReservationData reservationData)
     {
         _appDbContext = appDbContext;
         _reservationData = reservationData;
