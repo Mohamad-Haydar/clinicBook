@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 
 namespace api.Controllers;
 
-[Authorize]
+//[Authorize]
 [Route("/api/[controller]")]
 public class ReservationController : Controller
 {
@@ -129,12 +129,35 @@ public class ReservationController : Controller
         if(!ModelState.IsValid)
             return BadRequest(new {message = "Please enter a valid input"});
 
-        var result = await _reservationData.DeleteSpecificReservationAsync(clientReservationId);
-        if(result)
+        try
         {
+            await _reservationData.DeleteSpecificReservationAsync(clientReservationId);
             return Ok(new {message="your reservation is removed successfully"}); 
         }
-        return BadRequest(new {message = "Please check your input and try again"});
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+
+        
     }
 
+    [HttpPatch]
+    [Route("UpdatespecificReservation")]
+    public async Task<IActionResult> UpdatespecificReservation([Required] UpdateReservationRequest model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new { message = "please enter valid data" });
+        }
+        try
+        {
+            await _reservationData.UpdateSpecificReservationAsync(model);
+            return Ok(new { message = "your reservation is Updated successfully" });
+        }
+        catch (Exception)
+        {
+            return BadRequest(new { message = "Please check your input and try again" });
+        }
+    }
 }

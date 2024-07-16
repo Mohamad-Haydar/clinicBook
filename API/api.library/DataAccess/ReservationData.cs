@@ -63,19 +63,6 @@ public class ReservationData
         }
     }
 
-    public async Task<bool> DeleteSpecificReservationAsync(int ClientReservationId)
-    {
-        try
-        {
-            await _sql.SaveDataAsync("sp_delete_specific_reservation", new {client_reservation_id = ClientReservationId}, _connectionStrings.Value.AppDbConnection);
-            return true;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
-    }
-
     public async Task<IQueryable<Dictionary<string, object>>> GetConcurrentBookingsAsync(int id)
     {
          try
@@ -109,4 +96,28 @@ public class ReservationData
         }
     }
 
+    public async Task<bool> DeleteSpecificReservationAsync(int ClientReservationId)
+    {
+        try
+        {
+            await _sql.SaveDataAsync("sp_delete_specific_reservation", new { client_reservation_id = ClientReservationId }, _connectionStrings.Value.AppDbConnection);
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    public async Task UpdateSpecificReservationAsync(UpdateReservationRequest model)
+    {
+        try
+        {
+            await _sql.SaveDataAsync("sp_update_specific_reservation", model, _connectionStrings.Value.AppDbConnection);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
 }
