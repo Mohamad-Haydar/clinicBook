@@ -9,7 +9,7 @@ BEGIN
     WITH target_doctoravailability AS (
         SELECT doctoravailabilityid
         FROM clientreservation
-        WHERE id = _id
+        WHERE id = client_reservation_id
     )
     SELECT cr.*
     FROM clientreservation cr

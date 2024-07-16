@@ -35,8 +35,8 @@ public class DoctorAvailabilityController : Controller
                                         id = x.Id,
                                         day = new DateOnly(x.AvailableDate.Year,x.AvailableDate.Month, x.AvailableDate.Day), 
                                         dayName = x.DayName,
-                                        startHour = CalcTime.GetTime(x.StartHour), 
-                                        endHour = CalcTime.GetTime(x.EndHour),
+                                        startHour = x.StartHour, 
+                                        endHour = x.EndHour,
                                         maxClient = x.MaxClient
                                     });
         return Ok(doctoravailabilities);
@@ -44,7 +44,6 @@ public class DoctorAvailabilityController : Controller
 
     [HttpPost]
     [Route("openavailabledate")]
-    [AllowAnonymous]
     public async Task<IActionResult> OpenAvailableDate([FromBody] OpenAvailableDateRequest model)
     {
         if(!ModelState.IsValid || model == null)
@@ -81,13 +80,13 @@ public class DoctorAvailabilityController : Controller
     [Route("updateAvailableDate")]
     public async Task<IActionResult> UpdateAvailableDate([FromBody] OpenAvailableDateRequest model)
     {
-        if(!ModelState.IsValid || model == null)
-            return BadRequest(new {message="please enter valid data"});
+        // if(!ModelState.IsValid || model == null)
+        //     return BadRequest(new {message="please enter valid data"});
 
         var existedAvailability = await _appDbContext.DoctorAvailabilities.FirstOrDefaultAsync(x => x.Id == model.Id);
         if(existedAvailability == null)
         {
-            return BadRequest(new {message="their is no available date to remove"});
+            return BadRequest(new {message="their is no available date to update"});
         }
         if(model.StartHour > model.EndHour)
         {

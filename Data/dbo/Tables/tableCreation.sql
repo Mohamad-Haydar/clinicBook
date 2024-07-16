@@ -42,8 +42,8 @@ Create Table DoctorAvailability(
   Id int primary key GENERATED ALWAYS AS IDENTITY,
   AvailableDate date NOT NULL,
   DayName varchar(10) NOT NULL,
-  StartHour timetz NOT NULL,
-  EndHour timetz NOT NULL,
+  StartHour time NOT NULL,
+  EndHour time NOT NULL,
   MaxClient int NOT NULL,
   CurrentReservations int NOT NULL DEFAULT 0,
   DoctorId varchar(128) NOT NULL,
@@ -54,8 +54,8 @@ Create Table DoctorAvailability(
 
 Create Table ClientReservation(
   Id int primary key GENERATED ALWAYS AS IDENTITY,
-  StartTime timetz NOT NULL,
-  endtime timetz NOT NULL, -- Duration in minutes and calculated based on the services reserved
+  StartTime time NOT NULL,
+  endtime time NOT NULL, -- Duration in minutes and calculated based on the services reserved
   ClientId varchar(128) NOT NULL,
   DoctorAvailabiltyId int NOT NULL,
   CONSTRAINT fk_client FOREIGN KEY(ClientId) REFERENCES Client(Id) ON DELETE CASCADE,

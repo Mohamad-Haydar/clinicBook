@@ -2,14 +2,14 @@ namespace api.Helper;
 
 public static class CalcTime
 {
-    public static TimeOnly GetTime(DateTimeOffset date)
+    public static TimeSpan GetTime(TimeSpan date)
     {
-        return new TimeOnly(date.Hour, date.Minute);
+        return new TimeSpan(date.Hours, date.Minutes, 0);
     }
 
-    public static int GetlocalMinutes(DateTimeOffset date)
+    public static int GetlocalMinutes(TimeSpan date)
     {
-        return date.Minute;
+        return date.Minutes;
     }
     
 }

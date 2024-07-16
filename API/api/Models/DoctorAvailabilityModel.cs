@@ -13,9 +13,9 @@ public class DoctorAvailabilityModel
     [Column("dayname")]
     public string DayName { get; set; }
     [Column("starthour")]
-    public DateTimeOffset StartHour { get; set; }
+    public TimeSpan StartHour { get; set; }
     [Column("endhour")]
-    public DateTimeOffset EndHour { get; set; }
+    public TimeSpan EndHour { get; set; }
     [Column("maxclient")]
     public int MaxClient { get; set; }
     [Column("currentreservations")]

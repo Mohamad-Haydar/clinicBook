@@ -53,7 +53,7 @@ public class ReservationData
             string[] paramsName = ["client_id"];
             object[] paramsValue = [ClientId];
 
-            var result = await _sql.LoadDataAsync("get_all_personal_reservations",paramsName,paramsValue,_connectionStrings.Value.AppDbConnection);
+            var result = await _sql.LoadDataAsync("f_get_all_personal_reservations",paramsName,paramsValue,_connectionStrings.Value.AppDbConnection);
 
             return result;
         }

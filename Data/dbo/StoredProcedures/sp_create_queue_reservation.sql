@@ -8,7 +8,7 @@ AS $$
 DECLARE
 	_duration int := 0;
     _reservation_id int;
-    _last_end_time timetz;
+    _last_end_time time;
     _id int;
     _max_client int;
     _current_reservations int;

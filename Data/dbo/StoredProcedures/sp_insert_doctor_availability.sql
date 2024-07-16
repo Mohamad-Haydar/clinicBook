@@ -1,8 +1,8 @@
 CREATE OR REPLACE PROCEDURE sp_insert_doctor_availability(
 	IN availabledate date,
 	IN dayname character varying,
-	IN starthour timetz,
-	IN endhour timetz,
+	IN starthour time,
+	IN endhour time,
 	IN maxclient int,
 	IN doctorid character varying
 	)

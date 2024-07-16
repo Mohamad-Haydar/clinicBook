@@ -8,9 +8,9 @@ public class ClientReservation
     [Column("id")]
     public int Id { get; set; }
     [Column("starttime")]
-    public DateTimeOffset StartTime { get; set; }
+    public TimeSpan StartTime { get; set; }
     [Column("endtime")]
-    public DateTimeOffset EndTime { get; set; }
+    public TimeSpan EndTime { get; set; }
     [Column("doctoravailabilityid")]
     public int DoctorAvailabilityId { get; set; }
     [Column("clientid")]

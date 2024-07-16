@@ -5,17 +5,29 @@ LANGUAGE plpgsql
 AS $$
 DECLARE
     doctor_availability_id int;
+    removed_end_time time;
+    gap interval;
 BEGIN 
+
+    -- Delete the row from client reservation table
     DELETE FROM clientreservation
     WHERE id = client_reservation_id
-    RETURNING doctoravailabilityid INTO doctor_availability_id;
+    RETURNING doctoravailabilityid, endtime, endtime - starttime
+    INTO doctor_availability_id, removed_end_time, gap;
 
+    -- to check if the reservation does not exists to stop and return
     IF doctor_availability_id IS NULL THEN
         RAISE EXCEPTION 'Reservation with ID % does not exist', client_reservation_id;
     END IF;
 
+    -- to reduce 1 from the reservations from the doctoravailability table
     UPDATE doctoravailability
     SET currentreservations = currentreservations - 1
     WHERE id = doctor_availability_id;
+
+
+    -- reorder all the other reservations in the doctor reservation table
+    
+
 END;
 $$;

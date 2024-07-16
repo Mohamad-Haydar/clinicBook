@@ -8,6 +8,7 @@ using api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 
 
@@ -94,6 +95,11 @@ builder.Services.AddSwaggerGen(c =>
 
             }
         }
+    });
+    c.MapType<TimeSpan>(() => new OpenApiSchema
+    {
+        Type = "string",
+        Example = new OpenApiString("00:00:00")
     });
 });
 
