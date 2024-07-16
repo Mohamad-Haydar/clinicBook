@@ -14,15 +14,13 @@ DECLARE
     _gap time;
 BEGIN 
     --check if the reservation exists or the user should create new one
-    SELECT extract(epoch from ( endtime - starttime )) as "minutes", doctoravailabilityid
+    SELECT extract(epoch from ( endtime - starttime )) / 60 AS minutes_difference, doctoravailabilityid
 	INTO old_duration, doctor_availability_id
 	FROM clientreservation AS cr
 	WHERE cr.id = client_reservation_id;
 	IF NOT FOUND THEN
 	    RAISE EXCEPTION 'You do not have a reservation, please go to book a reservation';
 	END IF;
-    -- Output the removed_end_time for testing
-    RAISE NOTICE 'old_duration: %', old_duration;
 
      -- to calculate the estimated duration for the services that the user wants
 	FOREACH _id IN ARRAY doctor_service_ids LOOP 
@@ -49,18 +47,22 @@ BEGIN
     RETURNING starttime + old_duration * INTERVAL '1 minute'
     INTO removed_end_time;
 
-    -- Output the removed_end_time for testing
-    RAISE NOTICE 'Removed End Time: %', removed_end_time;
-
     -- reorder all the other reservations in the doctor reservation table
     UPDATE clientreservation
     SET starttime = starttime + (_duration - old_duration) * INTERVAL '1 minute', 
     endtime = endtime + (_duration - old_duration) * INTERVAL '1 minute'
     WHERE doctoravailabilityid = doctor_availability_id AND starttime >= removed_end_time;
 
-    -- Output the result for testing
-    RAISE NOTICE 'Reordered reservations for doctor availability ID: %', doctor_availability_id;
+    -- Update the join table to remove services not in the new list
+    DELETE FROM reservationdetail
+    WHERE clientreservationid = client_reservation_id;
 
+
+    -- Insert new services into the join table
+    FOREACH _id IN ARRAY doctor_service_ids LOOP 
+        INSERT INTO reservationdetail(doctorserviceid, clientreservationid)
+        VALUES(_id, client_reservation_id);
+    END LOOP;
 
 END;
 $$;
