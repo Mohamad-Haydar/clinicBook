@@ -79,6 +79,7 @@ public class ReservationData
             return null;
         }
     }
+   
     public async Task<IQueryable<Dictionary<string, object>>> GetPreviousBookingsAsync(int id)
     {
          try
@@ -120,4 +121,22 @@ public class ReservationData
             throw;
         }
     }
+
+    public async Task<IQueryable<Dictionary<string, object>>> GetAllReservationForTheDayAsync(int DoctorAvailabilityId)
+    {
+        try
+        {
+            string[] paramsName = ["doctor_availability_id"];
+            object[] paramsValue = [DoctorAvailabilityId];
+
+            var result = await _sql.LoadDataAsync("f_get_all_reservation_for_the_day", paramsName, paramsValue, _connectionStrings.Value.AppDbConnection);
+
+            return result;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
 }

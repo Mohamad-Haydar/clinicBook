@@ -3,11 +3,10 @@ using api.Data;
 using api.library.DataAccess;
 using api.library.Helper;
 using api.library.Models.Request;
+using api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace api.Controllers;
 
@@ -158,6 +157,25 @@ public class ReservationController : Controller
         catch (Exception)
         {
             return BadRequest(new { message = "Please check your input and try again" });
+        }
+    }
+
+    [HttpGet]
+    [Route("GetAllReservationForTheDay")] 
+    public async Task<IActionResult> GetAllReservationForTheDay([Required] int DoctorAvailabilityId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new { message = "please enter valid input" });
+        }
+        try
+        {
+            var result = await _reservationData.GetAllReservationForTheDayAsync(DoctorAvailabilityId);
+            return Ok(result);
+        }
+        catch (Exception)
+        {
+            return BadRequest(new { message = "something when wrong please check you input and try again" });
         }
     }
 }
