@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace api.Models.Request;
+namespace api.library.Models.Request;
 
 public class CreateDoctorRequest : CreateUserRequest
 {

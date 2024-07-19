@@ -68,37 +68,15 @@ public class AuthenticationController : Controller
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
             return BadRequest(new { message = "Please enter a valid input", errors });
         }
-        var userExists = await _userManager.FindByEmailAsync(model.Email);
-        if(userExists != null)
+        try
         {
-            return BadRequest(new {message="email already exists"});
+            return Ok(new { message = "Client created successfully. You can login to your account." });
+        }
+        catch (Exception)
+        {
+            return BadRequest(new { message = "Something went wrong. Please try again." });
         }
 
-        using (var transaction = _identityContext.Database.BeginTransaction())
-        {
-            try
-            {
-                var user = new UserModel { UserName = model.Email, Email = model.Email, PhoneNumber = model.PhoneNumber };
-                var result = await _userManager.CreateAsync(user, model.Password);
-                await _userManager.AddToRoleAsync(user, Roles.Client.ToString());
-                ClientModel client = new(){
-                    Id = user.Id,
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    Email = model.Email,
-                    PhoneNumber = model.PhoneNumber,
-                };
-                await _appContext.Clients.AddAsync(client);
-                await _appContext.SaveChangesAsync();
-                transaction.Commit();
-                return Ok(new { message = "Client created successfully. You can login to your account." });
-            }
-            catch (Exception)
-            {
-                transaction.Rollback();
-                return BadRequest(new { message = "Something went wrong. Please try again." });
-            }
-        }
     }
 
     [Route("RegisterSecretary")]
