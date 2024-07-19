@@ -58,6 +58,7 @@ Create Table ClientReservation(
   endtime time NOT NULL, -- Duration in minutes and calculated based on the services reserved
   ClientId varchar(128) NOT NULL,
   DoctorAvailabilityId int NOT NULL,
+  isdone boolean NOT NULL DEFAULT false,
   CONSTRAINT fk_client FOREIGN KEY(ClientId) REFERENCES Client(Id) ON DELETE CASCADE,
   CONSTRAINT fk_doctor_availability FOREIGN KEY(DoctorAvailabilityId) REFERENCES DoctorAvailability(Id) ON DELETE CASCADE,
   CONSTRAINT unique_client_doctor_availability UNIQUE (clientid, doctoravailabilityid)

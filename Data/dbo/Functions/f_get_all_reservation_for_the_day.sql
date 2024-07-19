@@ -6,12 +6,13 @@ DECLARE
     res reservation_detail;
 BEGIN
    RETURN QUERY
-  SELECT 
+   SELECT 
         cr.id, 
         da.availabledate,
         cr.starttime, 
         cr.endtime, 
         cr.doctoravailabilityid, 
+        cr.isdone,
         array_agg(ds.servicename) AS service_names,
         ds.doctorid
    FROM clientreservation AS cr

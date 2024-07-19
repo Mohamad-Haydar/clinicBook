@@ -7,6 +7,7 @@ using api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace api.Controllers;
 
@@ -30,7 +31,8 @@ public class ReservationController : Controller
     {
         if(!ModelState.IsValid)
         {
-            return BadRequest(new {message="please enter a valid input"});
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+            return BadRequest(new { message = "Please enter a valid input", errors });
         }
 
         try
@@ -38,11 +40,11 @@ public class ReservationController : Controller
             await _reservationData.CreateQueueReservationAsync(model);
             return Ok(new {message="Reservation added successfully"});
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return BadRequest(new {message=ex.Message});
+            return BadRequest(new {message= "An error occurred while processing your request." });
         }
-    }
+    }   
 
     [HttpGet]
     [Route("GetReservationDetail")]
@@ -172,6 +174,31 @@ public class ReservationController : Controller
         {
             var result = await _reservationData.GetAllReservationForTheDayAsync(DoctorAvailabilityId);
             return Ok(result);
+        }
+        catch (Exception)
+        {
+            return BadRequest(new { message = "something when wrong please check you input and try again" });
+        }
+    }
+
+    [HttpPost]
+    [Route("MarkCompleteReservation")]
+    public async Task<IActionResult> MarkCompleteReservation([Required] int ClientReservationId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new { message = "please enter valid input" });
+        }
+        try
+        {
+            var ClientReservation = await _appDbContext.ClientReservations.FirstOrDefaultAsync(x => x.Id == ClientReservationId);
+            if(ClientReservation == null)
+            {
+                return NotFound(new {message="This client reservation was not found"});
+            }
+            ClientReservation.IsDone = true;
+            await _appDbContext.SaveChangesAsync();
+            return Ok(new {message = "reservation marked as finished"});
         }
         catch (Exception)
         {

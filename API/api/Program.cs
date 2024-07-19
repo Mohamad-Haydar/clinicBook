@@ -6,6 +6,7 @@ using api.library.Internal.DataAccess;
 using api.Models;
 using api.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Any;
@@ -13,6 +14,8 @@ using Microsoft.OpenApi.Models;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+// TPDO: Create Custom DateOnly and TimeOnly Model Binder
 
 // Add services to the container.
 var appConnectionString = builder.Configuration.GetConnectionString("AppDbConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -99,7 +102,12 @@ builder.Services.AddSwaggerGen(c =>
     c.MapType<TimeSpan>(() => new OpenApiSchema
     {
         Type = "string",
-        Example = new OpenApiString("00:00:00")
+        Example = new OpenApiString("08:00:00")
+    });
+    c.MapType<DateOnly>(() => new OpenApiSchema
+    {
+        Type = "string",
+        Example = new OpenApiString("2024-01-01")
     });
 });
 

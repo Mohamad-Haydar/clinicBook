@@ -13,6 +13,8 @@ public class ClientReservation
     public TimeSpan EndTime { get; set; }
     [Column("doctoravailabilityid")]
     public int DoctorAvailabilityId { get; set; }
+    [Column("isdone")]
+    public bool IsDone { get; set; }
     [Column("clientid")]
     public string ClientId { get; set; }
 }

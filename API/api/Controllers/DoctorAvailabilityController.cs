@@ -24,7 +24,7 @@ public class DoctorAvailabilityController : Controller
     [HttpGet]
     [Route("availableDates")]
     [AllowAnonymous]
-    public IActionResult GetAvailableDates(string id)
+    public IActionResult GetAvailableDates([Required] string id)
     {
         if(!ModelState.IsValid)
             return BadRequest(new {message="doctor not found"});
@@ -44,11 +44,15 @@ public class DoctorAvailabilityController : Controller
 
     [HttpPost]
     [Route("openavailabledate")]
+    [AllowAnonymous]
     public async Task<IActionResult> OpenAvailableDate([FromBody] OpenAvailableDateRequest model)
     {
-        if(!ModelState.IsValid || model == null)
-            return BadRequest(new {message="doctor not found"});
-        
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+            return BadRequest(new { message = "Please enter a valid input", errors });
+        }
+
         DoctorAvailabilityModel available = new()
         {
             AvailableDate = model.AvailableDate,
@@ -78,10 +82,13 @@ public class DoctorAvailabilityController : Controller
 
     [HttpPatch]
     [Route("updateAvailableDate")]
-    public async Task<IActionResult> UpdateAvailableDate([FromBody] OpenAvailableDateRequest model)
+    public async Task<IActionResult> UpdateAvailableDate([FromBody] UpdateAvailableDateRequest model)
     {
-        // if(!ModelState.IsValid || model == null)
-        //     return BadRequest(new {message="please enter valid data"});
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+            return BadRequest(new { message = "Please enter a valid input", errors });
+        }
 
         var existedAvailability = await _appDbContext.DoctorAvailabilities.FirstOrDefaultAsync(x => x.Id == model.Id);
         if(existedAvailability == null)
@@ -109,7 +116,7 @@ public class DoctorAvailabilityController : Controller
             
             return Ok(new {message = "Available date added successfully"});
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return BadRequest(new {message="check your dates start date should be less that end date, and check availability date should not be previouse today"});
         }
@@ -120,7 +127,7 @@ public class DoctorAvailabilityController : Controller
     public async Task<IActionResult> DeleteAvailableDate([Required] int id)
     {
         if(!ModelState.IsValid)
-            return BadRequest(new{message="Please select valid date to remove"});
+            return BadRequest(new { message = "Please select valid date to remove" });
         
         var availableDate = await _appDbContext.DoctorAvailabilities.FirstOrDefaultAsync(x => x.Id == id);
         if(availableDate == null)
