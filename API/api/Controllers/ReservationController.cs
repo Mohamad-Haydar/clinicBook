@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using api.Data;
-using api.library.DataAccess;
-using api.library.Helper;
-using api.library.Models.Request;
+using api.BusinessLogic.DataAccess;
+using api.Helper;
+using api.Models.Request;
 using api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -191,13 +191,7 @@ public class ReservationController : Controller
         }
         try
         {
-            var ClientReservation = await _appDbContext.ClientReservations.FirstOrDefaultAsync(x => x.Id == ClientReservationId);
-            if(ClientReservation == null)
-            {
-                return NotFound(new {message="This client reservation was not found"});
-            }
-            ClientReservation.IsDone = true;
-            await _appDbContext.SaveChangesAsync();
+            await _reservationData.MarkCompleteReservationAsync(ClientReservationId);
             return Ok(new {message = "reservation marked as finished"});
         }
         catch (Exception)

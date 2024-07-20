@@ -1,14 +1,16 @@
 using api.Attributes;
 using api.Data;
-using api.library.DataAccess;
-using api.library.Models.Request;
-using api.library.Models.Responce;
+using api.BusinessLogic.DataAccess;
+using api.Models.Request;
+using api.Models.Responce;
 using api.Models;
 using api.Models.Request;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using api.Exceptions;
+using System.ComponentModel.DataAnnotations;
 
 namespace api.Controllers;
 
@@ -19,102 +21,143 @@ public class DoctorManagementController : ControllerBase
     private readonly IdentityAppDbContext _identityContext;
     private readonly UserManager<UserModel> _userManager;
     private readonly ApplicationDbContext _appDbContext;
-    private readonly DoctorServiceData _doctorServiceData;
-    public DoctorManagementController(ApplicationDbContext appDbContext, IdentityAppDbContext identityContext, UserManager<UserModel> userManager, DoctorServiceData doctorServiceData)
+    private readonly DoctorManagementData _doctorManagementData;
+    public DoctorManagementController(ApplicationDbContext appDbContext, IdentityAppDbContext identityContext, UserManager<UserModel> userManager, DoctorManagementData doctorManagementData)
     {
         _appDbContext = appDbContext;
         _identityContext = identityContext;
         _userManager = userManager;
-        _doctorServiceData = doctorServiceData;
+        _doctorManagementData = doctorManagementData;
     }
 
     [HttpPost]
     [Route("addDoctorService")]
     public async Task<IActionResult> AddDoctorService([FromBody] DoctorServiceRequest doctorService)
     {
-        var res = await _doctorServiceData.AddDoctorServiceAsync(doctorService);
-        if(res)
+        if(!ModelState.IsValid)
         {
-            return Ok(new {message="Service added successfully"});
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+            return BadRequest(new { message = "Please enter a valid input", errors });
         }
-        return BadRequest(new {message="something whent wrong please check your input data"});
+        try
+        {
+            await _doctorManagementData.AddDoctorServiceAsync(doctorService);
+            return Ok(new {message="Service Added Successfully to the doctor"});
+        }
+        catch (BusinessException ex)
+        {
+            return BadRequest(new {message=ex.Message});
+        }
+        catch (Exception)
+        {
+            return BadRequest(new {message="check your dates start date should be less that end date, and check availability date should not be previouse today"});
+        }
     }
 
     [HttpPost]
     [Route("addMultipleService")]
     public async Task<IActionResult> AddMultipleService([FromBody] List<DoctorServiceRequest> doctorServices)
     {
-        using (var transaction = _appDbContext.Database.BeginTransaction())
+         if(!ModelState.IsValid)
         {
-            foreach (var doctorService in doctorServices)
-            {
-                var res = await _doctorServiceData.AddDoctorServiceAsync(doctorService);    
-                if(!res)
-                {
-                    transaction.Rollback();
-                    return BadRequest(new {message="something whent wrong please check your input data"});
-                }
-            }
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+            return BadRequest(new { message = "Please enter a valid input", errors });
+        }
+        try
+        {
+            await _doctorManagementData.AddMultipleServiceAsync(doctorServices);
             return Ok(new {message="All Services added successfully"});
         }
+        catch (BusinessException ex)
+        {
+            return BadRequest(new {message=ex.Message});
+        }
+        catch (Exception)
+        {
+            return BadRequest(new {message="check your dates start date should be less that end date, and check availability date should not be previouse today"});
+        }
+        
     }
 
     [HttpPatch]
     [Route("updateDoctorServiceDuration")]
-    public async Task<IActionResult> UpdateDoctorServiceDuration(int id, int duration)
+    public async Task<IActionResult> UpdateDoctorServiceDuration([Required] int id, [Required] int duration)
     {
-        var service = await _appDbContext.DoctorServiceModels.FirstOrDefaultAsync(x => x.Id == id);
-        if(service == null)
+        if(!ModelState.IsValid)
         {
-            return BadRequest(new {message="something whent wrong please check your input data"});
+            return BadRequest(new {message = "please enter valid data"});
         }
-        service.Duration = duration;
-        await _appDbContext.SaveChangesAsync();
-        return Ok(new {message="Service Duration updated successfully"});
+        try
+        {
+            await _doctorManagementData.UpdateDoctorServiceDurationAsync(id, duration);
+            return Ok(new {message="Service Duration updated successfully"});
+        }
+        catch (NotFoundException ex)
+        {
+            return BadRequest(new {message=ex.Message});
+        }
+        catch (BusinessException ex)
+        {
+            return BadRequest(new {message=ex.Message});
+        }
+        catch (Exception)
+        {
+            return BadRequest(new {message="check your dates start date should be less that end date, and check availability date should not be previouse today"});
+        }
     }
 
     [HttpDelete]
     [Route("deleteDoctorService")]
-    //TODO: when deleting i should delete the reservation detail 
-    // and check if i want to delete the client reservation
-    public async Task<IActionResult> DeleteDoctorService(int id)
+    public async Task<IActionResult> DeleteDoctorService([Required] int id)
     {
         var service = await _appDbContext.DoctorServiceModels.FirstOrDefaultAsync(x => x.Id == id);
         if(service == null)
         {
             return BadRequest(new {message="something whent wrong please check your input data"});
         }
-        var res = _appDbContext.DoctorServiceModels.Remove(service);
-        await _appDbContext.SaveChangesAsync();
-        return Ok(new {message="Service Deleted successfully"});
+        try
+        {
+            await _doctorManagementData.DeleteDoctorServiceAsync(id);
+            return Ok(new {message="Service Deleted successfully"});
+        }
+        catch (NotFoundException ex)
+        {
+            return BadRequest(new {message=ex.Message});
+        }
+        catch (BusinessException ex)
+        {
+            return BadRequest(new {message=ex.Message});
+        }
+        catch (Exception)
+        {
+            return BadRequest(new {message="check your dates start date should be less that end date, and check availability date should not be previouse today"});
+        }
     }
 
     [HttpDelete]
     [Route("removeDoctor")]
-    public async Task<IActionResult> RemoveDoctor(string id)
+    public async Task<IActionResult> RemoveDoctor([Required] string id)
     {
-        var doctor = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.Id == id);
-        var user = await _userManager.FindByIdAsync(id);
-        if(doctor == null || user == null)
+        if(!ModelState.IsValid)
         {
-            return BadRequest(new {message="Doctor not foud, enter a correct email"});
+            return BadRequest(new {message = "Please enter valid input"});
         }
-        using (var transaction = _identityContext.Database.BeginTransaction())
+        try
         {
-            try
-            {
-                _appDbContext.Remove(doctor);
-                await _userManager.DeleteAsync(user);
-                await _identityContext.SaveChangesAsync();
-                await _appDbContext.SaveChangesAsync();
-                transaction.Commit();
-                return Ok(new { message = "Doctor Deleted successfully." });
-            }
-            catch (Exception ex)
-            {
-                transaction.Rollback();
-                return BadRequest(new { message = "Something went wrong. Please try again." });
-            }
+            await _doctorManagementData.RemoveDoctorAsync(id);
+            return Ok(new {message="doctor removed successfully"});
+        }
+        catch (NotFoundException ex)
+        {
+            return BadRequest(new {message=ex.Message});
+        }
+        catch (BusinessException ex)
+        {
+            return BadRequest(new {message=ex.Message});
+        }
+        catch (Exception)
+        {
+            return BadRequest(new {message="check your dates start date should be less that end date, and check availability date should not be previouse today"});
         }
     }
 
@@ -123,54 +166,56 @@ public class DoctorManagementController : ControllerBase
     [AuthorizeRoles(Roles.Doctor,Roles.Admin, Roles.Secretary)]
     public async Task<IActionResult> UpdateDoctorInfo([FromBody] CreateDoctorRequest model)
     {
-        var user = await _userManager.FindByEmailAsync(model.Email);
-        var doctor = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.Email == model.Email);
-        if(user == null || doctor == null)
+        if(!ModelState.IsValid)
         {
-            return BadRequest(new {message="Doctor Does not exists"});
+            return BadRequest("Please enter valid input");
         }
-
-        using (var transaction = _identityContext.Database.BeginTransaction())
+        try
         {
-            try
-            {
-                string userName = model.FirstName ?? doctor.FirstName +  model.LastName ?? doctor.LastName;
-                user.UserName = userName;
-                user.PhoneNumber = model.PhoneNumber ?? user.PhoneNumber;
-
-                doctor.FirstName  =  model.FirstName ?? doctor.FirstName;
-                doctor.LastName  =  model.LastName ?? doctor.LastName;
-                doctor.PhoneNumber  =  model.PhoneNumber ?? doctor.PhoneNumber;
-                doctor.Description  =  model.Description ?? doctor.Description;
-                doctor.CategoryId = model.CategoryId > 0 ? model.CategoryId : doctor.CategoryId;
-
-                await _appDbContext.SaveChangesAsync();
-                await _identityContext.SaveChangesAsync();
-                transaction.Commit();
-                return Ok(new { message = "Doctor Data updated successfully." });
-            }
-            catch (Exception ex)
-            {
-                transaction.Rollback();
-                return BadRequest(new { message = "Something went wrong. Please try again." });
-            }
+            await _doctorManagementData.UpdateDoctorInfoAsync(model);
+            return Ok(new { message = "Doctor Data updated successfully." });
+        }
+        catch (NotFoundException ex)
+        {
+            return BadRequest(new {message=ex.Message});
+        }
+        catch (BusinessException ex)
+        {
+            return BadRequest(new {message=ex.Message});
+        }
+        catch (Exception)
+        {
+            return BadRequest(new {message="check your dates start date should be less that end date, and check availability date should not be previouse today"});
         }
     }
 
     [HttpGet]
     [Route("getDoctorInfo")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetDoctorInfo(string email)
+    public async Task<IActionResult> GetDoctorInfo([Required] string email)
     {
         if(!ModelState.IsValid)
         {
             return BadRequest(new {message="please enter the email"});
         }
-
-        IQueryable<DoctorInfoResponce> doctor = from d in _appDbContext.Doctors 
-                    where d.Email == email
-                    join c in _appDbContext.CategoryModels on d.CategoryId equals c.Id
-                    select new DoctorInfoResponce {Id = d.Id,FirstName = d.FirstName,LastName = d.LastName, Email = d.Email,PhoneNumber = d.PhoneNumber,Description = d.Description, CategoryName = c.CategoryName};
-        return Ok(doctor);
+        try
+        {
+            var doctor = await _doctorManagementData.GetDoctorInfoAsync(email);
+            return Ok(doctor);
+        }
+        catch (NotFoundException ex)
+        {
+            return BadRequest(new {message=ex.Message});
+        }
+        catch (BusinessException ex)
+        {
+            return BadRequest(new {message=ex.Message});
+        }
+        catch (Exception)
+        {
+            return BadRequest(new {message="check your dates start date should be less that end date, and check availability date should not be previouse today"});
+        }
     }
+
+
 }

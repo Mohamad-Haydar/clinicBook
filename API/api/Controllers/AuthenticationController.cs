@@ -2,6 +2,9 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using api.Attributes;
 using api.Data;
+using api.BusinessLogic.DataAccess;
+using api.Exceptions;
+using Microsoft.AspNetCore.Mvc;
 using api.Models;
 using api.Models.Request;
 using api.Models.Responce;
@@ -18,30 +21,32 @@ public class AuthenticationController : Controller
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly ApplicationDbContext _appContext;
     private readonly ITokenService _tokenService;
+    private readonly AuthenticationData _authenticationData;
 
-    public AuthenticationController(IdentityAppDbContext identityContext, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext appContext, ITokenService tokenService)
+    public AuthenticationController(IdentityAppDbContext identityContext, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext appContext, ITokenService tokenService, AuthenticationData authenticationData)
     {
         _identityContext = identityContext;
         _userManager = userManager;
         _roleManager = roleManager;
         _appContext = appContext;
         _tokenService = tokenService;
+        _authenticationData = authenticationData;
     }
 
     [Route("GenerateInitialData")]
     [HttpPost]
     public async Task GenerateInitialData()
     {
-        var values = Enum.GetValues(typeof(Roles));
-        foreach (var val in values)
-        {
-            var role = val.ToString();
-            bool roleExists = await _roleManager.RoleExistsAsync(role);
-            if (roleExists == false)
-            {
-                await _roleManager.CreateAsync(new IdentityRole(role));
-            }
-        }
+        // var values = Enum.GetValues(typeof(Roles));
+        // foreach (var val in values)
+        // {
+        //     var role = val.ToString();
+        //     bool roleExists = await _roleManager.RoleExistsAsync(role);
+        //     if (roleExists == false)
+        //     {
+        //         await _roleManager.CreateAsync(new IdentityRole(role));
+        //     }
+        // }
 
         // string[] emails = ["zeinab@gmail.com", "mohamad@gmail.com"];
         // foreach (var email in emails)
@@ -70,7 +75,16 @@ public class AuthenticationController : Controller
         }
         try
         {
+            await _authenticationData.RegisterClientAsync(model);
             return Ok(new { message = "Client created successfully. You can login to your account." });
+        }
+        catch (UserExistsException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (BusinessException ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
         catch (Exception)
         {
@@ -83,94 +97,56 @@ public class AuthenticationController : Controller
     [HttpPost]
     public async Task<IActionResult> RegisterSecretary([FromBody] CreateSecretaryRequest model)
     {
-        if (!ModelState.IsValid)
+        if (!ModelState.IsValid) 
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
             return BadRequest(new { message = "Please enter a valid input", errors });
         }
-        var userExists = await _userManager.FindByEmailAsync(model.Email);
-        if(userExists != null)
+        try
         {
-            return BadRequest(new {message="email already exists"});
+            await _authenticationData.RegisterSecretaryAsync(model);
+            return Ok(new { message = "Secretary created successfully. You can login to your account." });
         }
-
-        using (var transaction = _identityContext.Database.BeginTransaction())
+        catch (UserExistsException ex)
         {
-            try
-            {
-                var user = new UserModel { UserName = model.Email, Email = model.Email, PhoneNumber = model.PhoneNumber };
-                var result = await _userManager.CreateAsync(user, model.Password);
-                await _userManager.AddToRoleAsync(user, Roles.Secretary.ToString());
-                SecretaryModel secretary = new(){
-                    Id = user.Id,
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    Email = model.Email,
-                    PhoneNumber = model.PhoneNumber,
-                };
-                await _appContext.Secretaries.AddAsync(secretary);
-                await _appContext.SaveChangesAsync();
-                transaction.Commit();
-                return Ok(new { message = "Secretary created successfully. You can login to your account." });
-            }
-            catch (Exception ex)
-            {
-                transaction.Rollback();
-                return BadRequest(new { message = ex.Message });
-            }
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (BusinessException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception)
+        {
+            return BadRequest(new { message = "Something went wrong. Please try again." });
         }
     }
 
-    [AuthorizeRoles(Roles.Secretary, Roles.Admin)]
+    //[AuthorizeRoles(Roles.Secretary, Roles.Admin)]
     [Route("RegisterDoctor")]
     [HttpPost]
     public async Task<IActionResult> RegisterDoctor([FromBody] CreateDoctorRequest model)
     {
-        if (!ModelState.IsValid)
+        if (!ModelState.IsValid) 
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
             return BadRequest(new { message = "Please enter a valid input", errors });
         }
-        var userExists = await _userManager.FindByEmailAsync(model.Email);
-        if(userExists != null)
+        try
         {
-            return BadRequest(new {message="email already exists"});
+            await _authenticationData.RegisterDoctorAsync(model);
+            return Ok(new { message = "Doctor created successfully. You can login to your account." });
         }
-
-        using (var transaction = _identityContext.Database.BeginTransaction())
+        catch (UserExistsException ex)
         {
-            try
-            {
-                string userName =  model.FirstName +  model.LastName;
-                var user = new UserModel
-                {
-                    UserName = userName,
-                    Email = model.Email,
-                    PhoneNumber = model.PhoneNumber,
-                    RefreshToken = "",
-                    RefreshTokenExpiryTime = DateTime.MinValue
-                };
-                var result = await _userManager.CreateAsync(user, model.Password);
-                await _userManager.AddToRoleAsync(user, Roles.Doctor.ToString());
-                DoctorModel doctor = new(){
-                    Id = user.Id,
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    Email = model.Email,
-                    PhoneNumber = model.PhoneNumber,
-                    Description = model.Description,
-                    CategoryId = model.CategoryId
-                };
-                await _appContext.Doctors.AddAsync(doctor);
-                await _appContext.SaveChangesAsync();
-                transaction.Commit();
-                return Ok(new { message = "Doctor created successfully. You can login to your account." });
-            }
-            catch (Exception)
-            {
-                transaction.Rollback();
-                return BadRequest(new { message = "Something went wrong. Please try again." });
-            }
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (BusinessException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception)
+        {
+            return BadRequest(new { message = "Something went wrong. Please try again." });
         }
     }
 
@@ -178,24 +154,25 @@ public class AuthenticationController : Controller
     [HttpPost]
     public async Task<IActionResult> RegisterAdmin(string email, string password)
     {
-        if (!ModelState.IsValid)
+        if (!ModelState.IsValid) 
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
             return BadRequest(new { message = "Please enter a valid input", errors });
         }
-        var userExists = await _userManager.FindByEmailAsync(email);
-        if(userExists != null)
-        {
-            return BadRequest(new {message="email already exists"});
-        }
         try
         {
-            var user = new UserModel { UserName = "admin", Email = email, PhoneNumber = "76612235" };
-            var result = await _userManager.CreateAsync(user,password);
-            await _userManager.AddToRoleAsync(user, Roles.Admin.ToString());
+            await _authenticationData.RegisterAdminAsync(email, password);
             return Ok(new { message = "Admin created successfully. You can login to your account." });
         }
-        catch (Exception ex)
+        catch (UserExistsException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (BusinessException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception)
         {
             return BadRequest(new { message = "Something went wrong. Please try again." });
         }
@@ -211,41 +188,42 @@ public class AuthenticationController : Controller
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
             return BadRequest(new { message = "Please enter a valid input", errors });
         }
-        var user = await _userManager.FindByEmailAsync(model.Email);
-        if(await _userManager.CheckPasswordAsync(user, model.Password))
+        try
         {
-            var accessToken = await _tokenService.GenerateAccessTokenAsync(model.Email);
-            var refreshToken = _tokenService.GenerateRefreshToken();
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-            _identityContext.SaveChanges();
+            var result = await _authenticationData.LoginUserAsync(model);
 
-            Response.Cookies.Append("accessToken", accessToken, new CookieOptions
+            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = false,
                 SameSite = SameSiteMode.Lax
             });
 
-            Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+            Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = false,
                 SameSite = SameSiteMode.Lax
-            });
-
-            return new ObjectResult(
-                new AuthenticationResponse
-                    {
-                        AccessToken = accessToken, 
-                        RefreshToken = refreshToken
-                    }
-                );
+            }); 
+            
+            return Ok(result);
         }
-        else
+        catch (UserExistsException ex)
         {
-            return BadRequest(new {message = "Wrong password"});
-        }    
+            return BadRequest(new { message = ex.Message });
+        }
+         catch (WrongPasswordException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (BusinessException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception)
+        {
+            return BadRequest(new { message = "Something went wrong. Please try again." });
+        }   
     }
 
     [Route("logout")]

@@ -1,8 +1,8 @@
 using System.Text;
 using api.Data;
-using api.library.DataAccess;
-using api.library.Helper;
-using api.library.Internal.DataAccess;
+using api.BusinessLogic.DataAccess;
+using api.Helper;
+using api.Internal.DataAccess;
 using api.Models;
 using api.Services;
 using Microsoft.AspNetCore.Identity;
@@ -58,12 +58,15 @@ builder.Services.AddAuthentication(options =>
         };
 });
 
-builder.Services.AddTransient<ITokenService, TokenService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("ConnectionStrings"));
-builder.Services.AddSingleton<ISqlDataAccess, SqlDataAccess>();
-builder.Services.AddSingleton<SecretaryData, SecretaryData>();
-builder.Services.AddSingleton<DoctorServiceData, DoctorServiceData>();
-builder.Services.AddSingleton<ReservationData, ReservationData>();
+builder.Services.AddScoped<ISqlDataAccess, SqlDataAccess>();
+builder.Services.AddScoped<SecretaryData>();
+builder.Services.AddScoped<TokenData>();
+builder.Services.AddScoped<DoctorManagementData>();
+builder.Services.AddScoped<DoctorAvailabilityData>();
+builder.Services.AddScoped<ReservationData>();
+builder.Services.AddScoped<AuthenticationData>();
 
 
 
