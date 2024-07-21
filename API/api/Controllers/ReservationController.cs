@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using api.Data;
-using api.BusinessLogic.DataAccess;
+using api.BusinessLogic.DataAccess.IDataAccess;
 using api.Helper;
 using api.Models.Request;
 using api.Models;
@@ -15,12 +15,10 @@ namespace api.Controllers;
 [Route("/api/[controller]")]
 public class ReservationController : Controller
 {
-    private readonly ApplicationDbContext _appDbContext;
-    private readonly ReservationData _reservationData;
+    private readonly IReservationData _reservationData;
 
-    public ReservationController(ApplicationDbContext appDbContext, ReservationData reservationData)
+    public ReservationController(IReservationData reservationData)
     {
-        _appDbContext = appDbContext;
         _reservationData = reservationData;
     }
 

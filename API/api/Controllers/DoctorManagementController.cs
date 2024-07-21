@@ -1,6 +1,5 @@
 using api.Attributes;
 using api.Data;
-using api.BusinessLogic.DataAccess;
 using api.Models.Request;
 using api.Models.Responce;
 using api.Models;
@@ -11,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using api.Exceptions;
 using System.ComponentModel.DataAnnotations;
+using api.BusinessLogic.DataAccess.IDataAccess;
 
 namespace api.Controllers;
 
@@ -18,15 +18,9 @@ namespace api.Controllers;
 [Route("api/[controller]")]
 public class DoctorManagementController : ControllerBase
 {
-    private readonly IdentityAppDbContext _identityContext;
-    private readonly UserManager<UserModel> _userManager;
-    private readonly ApplicationDbContext _appDbContext;
-    private readonly DoctorManagementData _doctorManagementData;
-    public DoctorManagementController(ApplicationDbContext appDbContext, IdentityAppDbContext identityContext, UserManager<UserModel> userManager, DoctorManagementData doctorManagementData)
+    private readonly IDoctorManagementData _doctorManagementData;
+    public DoctorManagementController(IDoctorManagementData doctorManagementData)
     {
-        _appDbContext = appDbContext;
-        _identityContext = identityContext;
-        _userManager = userManager;
         _doctorManagementData = doctorManagementData;
     }
 
@@ -110,10 +104,9 @@ public class DoctorManagementController : ControllerBase
     [Route("deleteDoctorService")]
     public async Task<IActionResult> DeleteDoctorService([Required] int id)
     {
-        var service = await _appDbContext.DoctorServiceModels.FirstOrDefaultAsync(x => x.Id == id);
-        if(service == null)
+        if(!ModelState.IsValid)
         {
-            return BadRequest(new {message="something whent wrong please check your input data"});
+            return BadRequest(new {message = "Please enter a valid input"});
         }
         try
         {

@@ -7,8 +7,8 @@ using api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using api.BusinessLogic.DataAccess;
 using api.Exceptions;
+using api.BusinessLogic.DataAccess.IDataAccess;
 
 namespace api.Controllers;
 
@@ -16,13 +16,10 @@ namespace api.Controllers;
 [Route("api/[controller]")]
 public class DoctorAvailabilityController : Controller
 {
-    private readonly ApplicationDbContext _appDbContext;
-    private readonly DoctorAvailabilityData _doctorAvailabilityData;
+    private readonly IDoctorAvailabilityData _doctorAvailabilityData;
 
-    public DoctorAvailabilityController(ApplicationDbContext appDbContext,
-                                        DoctorAvailabilityData doctorAvailabilityData)
+    public DoctorAvailabilityController(IDoctorAvailabilityData doctorAvailabilityData)
     {
-        _appDbContext = appDbContext;
         _doctorAvailabilityData = doctorAvailabilityData;
     }
 

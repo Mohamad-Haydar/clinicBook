@@ -1,35 +1,38 @@
 using api.Attributes;
 using api.Data;
-using api.BusinessLogic.DataAccess;
+using api.BusinessLogic.DataAccess.IDataAccess;
 using api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using api.Exceptions;
 
 namespace api.Controllers;
 
 public class SecretaryController : Controller
 {
 
-    private readonly SecretaryData _secretaryData;
-    private readonly ApplicationDbContext _appDbContext;
+    private readonly ISecretaryData _secretaryData;
 
-    public SecretaryController(SecretaryData secretaryData, ApplicationDbContext appDbContext)
+    public SecretaryController(ISecretaryData secretaryData)
     {
         _secretaryData = secretaryData;
-        _appDbContext = appDbContext;
     }
 
     // [AuthorizeRoles(Roles.Admin)]
     [Route("GetSecretaries")]
     [HttpGet]
-    public async Task<IActionResult> GetSecretaries(string email)
+    public async Task<IActionResult> GetSecretarieByEmail(string email)
     {
         try
         {
-            var secretarie = await _appDbContext.Secretaries.FirstOrDefaultAsync(x => x.Email == email);
+            var secretarie = await _secretaryData.GetSecretariebyEmailAsync(email);
             return Ok(secretarie);
         }
-        catch (System.Exception)
+        catch(NotFoundException ex)
+        {
+            return BadRequest(new {message=ex.Message});
+        }
+        catch (Exception)
         {
             return BadRequest(new {message = "something went wrong please try again"});
         }

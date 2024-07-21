@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using api.Attributes;
 using api.Data;
-using api.BusinessLogic.DataAccess;
 using api.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using api.Models;
@@ -11,25 +10,16 @@ using api.Models.Responce;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using api.BusinessLogic.DataAccess.IDataAccess;
 
 namespace api.Controllers;
 
 public class AuthenticationController : Controller
 {
-    private readonly IdentityAppDbContext _identityContext;
-    private readonly UserManager<UserModel> _userManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
-    private readonly ApplicationDbContext _appContext;
-    private readonly ITokenService _tokenService;
-    private readonly AuthenticationData _authenticationData;
+    private readonly IAuthenticationData _authenticationData;
 
-    public AuthenticationController(IdentityAppDbContext identityContext, UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext appContext, ITokenService tokenService, AuthenticationData authenticationData)
+    public AuthenticationController(IAuthenticationData authenticationData)
     {
-        _identityContext = identityContext;
-        _userManager = userManager;
-        _roleManager = roleManager;
-        _appContext = appContext;
-        _tokenService = tokenService;
         _authenticationData = authenticationData;
     }
 
@@ -233,11 +223,25 @@ public class AuthenticationController : Controller
     {
         KeyValuePair<string, string> refreshPair = Request.Cookies.FirstOrDefault(x => x.Key=="refreshToken");
         KeyValuePair<string, string> accessPair = Request.Cookies.FirstOrDefault(x => x.Key=="accessToken");
-        var principal = _tokenService.GetPrincipalFromExpiredToken(accessPair.Value);
-        var userId = principal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier)?.Value;
 
-        var user = await _userManager.FindByIdAsync(userId);
-        if(user.RefreshToken != refreshPair.Value)
+        try
+        {
+            await _authenticationData.LogoutAsync(refreshPair, accessPair);
+            Response.Cookies.Delete("accessToken", new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = false,
+                    SameSite = SameSiteMode.Lax
+                });
+            Response.Cookies.Delete("refreshToken", new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = false,
+                    SameSite = SameSiteMode.Lax
+                });
+            return Ok(new {message="Log out Successfully"});
+        }
+        catch (Exception)
         {
             Response.Cookies.Delete("accessToken", new CookieOptions
                 {
@@ -251,28 +255,8 @@ public class AuthenticationController : Controller
                     Secure = false,
                     SameSite = SameSiteMode.Lax
                 });
-
-           return BadRequest("Invalid client request");
+            return BadRequest("Invalid client request");
         }
-        user.RefreshToken = null;
-        user.RefreshTokenExpiryTime = DateTime.MinValue;
-        _identityContext.SaveChanges();
-
-        Response.Cookies.Delete("accessToken", new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = false,
-                SameSite = SameSiteMode.Lax
-            });
-        Response.Cookies.Delete("refreshToken", new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = false,
-                SameSite = SameSiteMode.Lax
-            });
-        
-        
-        return Ok(new {message="Log out Successfully"});
     }
 
 }

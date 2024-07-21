@@ -5,6 +5,7 @@ using api.Models.Responce;
 using Microsoft.AspNetCore.Identity;
 using api.Exceptions;
 using api.BusinessLogic.DataAccess.IDataAccess;
+using System.Security.Claims;
 
 namespace api.BusinessLogic.DataAccess;
 
@@ -188,6 +189,30 @@ public class AuthenticationData : IAuthenticationData
         {
             throw new WrongPasswordException("Wrong password, please enter a valid password.");
         }
+    }
+
+    public async Task LogoutAsync(KeyValuePair<string, string> refreshPair, KeyValuePair<string, string> accessPair)
+    {
+        try
+        {
+            var principal = _tokenService.GetPrincipalFromExpiredToken(accessPair.Value);
+            var userId = principal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if(user.RefreshToken != refreshPair.Value)
+            {
+                throw new NotFoundException("Invalid client request");
+            }
+
+            user.RefreshToken = null;
+            user.RefreshTokenExpiryTime = DateTime.MinValue;
+            _identityContext.SaveChanges();
+        }
+        catch (System.Exception)
+        {   
+            throw;
+        }
+
     }
 
 }

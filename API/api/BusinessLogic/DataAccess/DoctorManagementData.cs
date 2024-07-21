@@ -84,11 +84,7 @@ public class DoctorManagementData : IDoctorManagementData
     // and check if i want to delete the client reservation
     public async Task DeleteDoctorServiceAsync(int id)
     {
-        var service = await _appDbContext.DoctorServiceModels.FirstOrDefaultAsync(x => x.Id == id);
-        if (service == null)
-        {
-            throw new NotFoundException("Service not found");
-        }
+        var service = await _appDbContext.DoctorServiceModels.FirstOrDefaultAsync(x => x.Id == id) ?? throw new NotFoundException("Service not found");
         try
         {
             var res = _appDbContext.DoctorServiceModels.Remove(service);

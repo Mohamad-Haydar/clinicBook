@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using api.BusinessLogic.DataAccess;
+using api.BusinessLogic.DataAccess.IDataAccess;
 using api.Data;
 using api.Exceptions;
 using api.Models;
@@ -13,15 +13,9 @@ namespace api.Controllers;
 
 public class TokenController : Controller
 {
-    private readonly UserManager<UserModel> _userManager;
-    private readonly IdentityAppDbContext _identityContext;
-    private readonly ITokenService _tokenService;
-    private readonly TokenData _tokenData;
-    public TokenController(UserManager<UserModel> userManager, ITokenService tokenService, IdentityAppDbContext identityContext, TokenData tokenData)
+    private readonly ITokenData _tokenData;
+    public TokenController(ITokenData tokenData)
     {
-        _userManager = userManager;
-        _tokenService = tokenService;
-        _identityContext = identityContext;
         _tokenData = tokenData;
     }
 
