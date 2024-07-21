@@ -8,10 +8,11 @@ using api.Internal.DataAccess;
 using api.Data;
 using Microsoft.EntityFrameworkCore;
 using api.Exceptions;
+using api.BusinessLogic.DataAccess.IDataAccess;
 
 namespace api.BusinessLogic.DataAccess;
 
-public class ReservationData
+public class ReservationData : IReservationData
 {
     private readonly IOptions<ConnectionStrings> _connectionStrings;
     private readonly ApplicationDbContext _appDbContext;
@@ -27,7 +28,7 @@ public class ReservationData
     {
         try
         {
-            await _sql.SaveDataAsync<CreateQueueReservationRequest>("sp_create_queue_reservation",data,_connectionStrings.Value.AppDbConnection);
+            await _sql.SaveDataAsync<CreateQueueReservationRequest>("sp_create_queue_reservation", data, _connectionStrings.Value.AppDbConnection);
         }
         catch (Exception)
         {
@@ -37,12 +38,12 @@ public class ReservationData
 
     public async Task<Dictionary<string, object>> GetReservationDetailsAsync(int id)
     {
-         try
+        try
         {
             string[] paramsName = ["_id"];
             object[] paramsValue = [id];
 
-            var result = await _sql.LoadDataAsync("f_get_reservation_detail",paramsName,paramsValue,_connectionStrings.Value.AppDbConnection);
+            var result = await _sql.LoadDataAsync("f_get_reservation_detail", paramsName, paramsValue, _connectionStrings.Value.AppDbConnection);
 
             return result.First();
         }
@@ -54,12 +55,12 @@ public class ReservationData
 
     public async Task<IQueryable<Dictionary<string, object>>> GetAllPersonalReservationsAsync(string ClientId)
     {
-         try
+        try
         {
             string[] paramsName = ["client_id"];
             object[] paramsValue = [ClientId];
 
-            var result = await _sql.LoadDataAsync("f_get_all_personal_reservations",paramsName,paramsValue,_connectionStrings.Value.AppDbConnection);
+            var result = await _sql.LoadDataAsync("f_get_all_personal_reservations", paramsName, paramsValue, _connectionStrings.Value.AppDbConnection);
 
             return result;
         }
@@ -71,12 +72,12 @@ public class ReservationData
 
     public async Task<IQueryable<Dictionary<string, object>>> GetConcurrentBookingsAsync(int id)
     {
-         try
+        try
         {
             string[] paramsName = ["client_reservation_id"];
             object[] paramsValue = [id];
 
-            var result = await _sql.LoadDataAsync("f_get_concurrent_reservations",paramsName,paramsValue,_connectionStrings.Value.AppDbConnection);
+            var result = await _sql.LoadDataAsync("f_get_concurrent_reservations", paramsName, paramsValue, _connectionStrings.Value.AppDbConnection);
 
             return result;
         }
@@ -85,15 +86,15 @@ public class ReservationData
             return null;
         }
     }
-   
+
     public async Task<IQueryable<Dictionary<string, object>>> GetPreviousBookingsAsync(int id)
     {
-         try
+        try
         {
             string[] paramsName = ["client_reservation_id"];
             object[] paramsValue = [id];
 
-            var result = await _sql.LoadDataAsync("f_get_previous_reservations",paramsName,paramsValue,_connectionStrings.Value.AppDbConnection);
+            var result = await _sql.LoadDataAsync("f_get_previous_reservations", paramsName, paramsValue, _connectionStrings.Value.AppDbConnection);
 
             return result;
         }
@@ -150,7 +151,7 @@ public class ReservationData
         try
         {
             var ClientReservation = await _appDbContext.ClientReservations.FirstOrDefaultAsync(x => x.Id == ClientReservationId);
-            if(ClientReservation == null)
+            if (ClientReservation == null)
             {
                 throw new NotFoundException("This client reservation was not found");
             }

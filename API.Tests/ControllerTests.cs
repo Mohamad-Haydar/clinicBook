@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using System.Net.Http.Json;
+using Xunit;
 
 namespace API.Tests
 {
@@ -11,7 +12,7 @@ namespace API.Tests
         public void  Test_Testing(double x, double y, double expected)
         {
             // Arrange
-
+            var client = new HttpClient();
             // Act
             double actual = x + y;
 

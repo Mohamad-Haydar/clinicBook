@@ -1,3 +1,4 @@
+using api.BusinessLogic.DataAccess.IDataAccess;
 using api.Data;
 using api.Exceptions;
 using api.Helper;
@@ -11,14 +12,14 @@ using Microsoft.Extensions.Options;
 
 namespace api.BusinessLogic.DataAccess;
 
-public class DoctorManagementData
+public class DoctorManagementData : IDoctorManagementData
 {
 
     private readonly IOptions<ConnectionStrings> _connectionStrings;
     private readonly ISqlDataAccess _sql;
     private readonly ApplicationDbContext _appDbContext;
     private readonly UserManager<UserModel> _userManager;
-        private readonly IdentityAppDbContext _identityContext;
+    private readonly IdentityAppDbContext _identityContext;
 
     public DoctorManagementData(IOptions<ConnectionStrings> connectionStrings, ISqlDataAccess sql, ApplicationDbContext appDbContext, UserManager<UserModel> userManager, IdentityAppDbContext identityContext)
     {
@@ -34,7 +35,7 @@ public class DoctorManagementData
     {
         try
         {
-            await _sql.SaveDataAsync<DoctorServiceRequest>("sp_insert_doctor_service",data,_connectionStrings.Value.AppDbConnection);
+            await _sql.SaveDataAsync<DoctorServiceRequest>("sp_insert_doctor_service", data, _connectionStrings.Value.AppDbConnection);
         }
         catch (Exception)
         {
@@ -49,14 +50,14 @@ public class DoctorManagementData
             {
                 foreach (var doctorService in doctorServices)
                 {
-                    await AddDoctorServiceAsync(doctorService);    
+                    await AddDoctorServiceAsync(doctorService);
                 }
-            
+
             }
             catch (Exception)
             {
                 transaction.Rollback();
-                throw new BusinessException("Something when wrong, please try again"); 
+                throw new BusinessException("Something when wrong, please try again");
             }
         }
     }
@@ -66,7 +67,7 @@ public class DoctorManagementData
         try
         {
             var service = await _appDbContext.DoctorServiceModels.FirstOrDefaultAsync(x => x.Id == id);
-            if(service == null)
+            if (service == null)
             {
                 throw new NotFoundException("something whent wrong please check your input data");
             }
@@ -75,7 +76,7 @@ public class DoctorManagementData
         }
         catch (Exception)
         {
-            throw new BusinessException("Something when wrong, please try again"); 
+            throw new BusinessException("Something when wrong, please try again");
         }
     }
 
@@ -84,7 +85,7 @@ public class DoctorManagementData
     public async Task DeleteDoctorServiceAsync(int id)
     {
         var service = await _appDbContext.DoctorServiceModels.FirstOrDefaultAsync(x => x.Id == id);
-        if(service == null)
+        if (service == null)
         {
             throw new NotFoundException("Service not found");
         }
@@ -95,7 +96,7 @@ public class DoctorManagementData
         }
         catch (Exception)
         {
-            throw new BusinessException("Something when wrong, please try again"); 
+            throw new BusinessException("Something when wrong, please try again");
         }
     }
 
@@ -103,13 +104,13 @@ public class DoctorManagementData
     {
         var doctor = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.Id == id);
         var user = await _userManager.FindByIdAsync(id);
-        if(doctor == null)
+        if (doctor == null)
         {
-             throw new NotFoundException("Doctor not found");
+            throw new NotFoundException("Doctor not found");
         }
-        if(user == null)
+        if (user == null)
         {
-             throw new NotFoundException("User not found");
+            throw new NotFoundException("User not found");
         }
         using (var transaction = _identityContext.Database.BeginTransaction())
         {
@@ -133,27 +134,27 @@ public class DoctorManagementData
     {
         var user = await _userManager.FindByEmailAsync(model.Email);
         var doctor = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.Email == model.Email);
-        if(doctor == null)
+        if (doctor == null)
         {
-             throw new NotFoundException("Doctor not found");
+            throw new NotFoundException("Doctor not found");
         }
-        if(user == null)
+        if (user == null)
         {
-             throw new NotFoundException("User not found");
+            throw new NotFoundException("User not found");
         }
 
         using (var transaction = _identityContext.Database.BeginTransaction())
         {
             try
             {
-                string userName = model.FirstName ?? doctor.FirstName +  model.LastName ?? doctor.LastName;
+                string userName = model.FirstName ?? doctor.FirstName + model.LastName ?? doctor.LastName;
                 user.UserName = userName;
                 user.PhoneNumber = model.PhoneNumber ?? user.PhoneNumber;
 
-                doctor.FirstName  =  model.FirstName ?? doctor.FirstName;
-                doctor.LastName  =  model.LastName ?? doctor.LastName;
-                doctor.PhoneNumber  =  model.PhoneNumber ?? doctor.PhoneNumber;
-                doctor.Description  =  model.Description ?? doctor.Description;
+                doctor.FirstName = model.FirstName ?? doctor.FirstName;
+                doctor.LastName = model.LastName ?? doctor.LastName;
+                doctor.PhoneNumber = model.PhoneNumber ?? doctor.PhoneNumber;
+                doctor.Description = model.Description ?? doctor.Description;
                 doctor.CategoryId = model.CategoryId > 0 ? model.CategoryId : doctor.CategoryId;
 
                 await _appDbContext.SaveChangesAsync();
@@ -172,10 +173,10 @@ public class DoctorManagementData
     {
         try
         {
-            IQueryable<DoctorInfoResponce> doctor = from d in _appDbContext.Doctors 
-                        where d.Email == email
-                        join c in _appDbContext.CategoryModels on d.CategoryId equals c.Id
-                        select new DoctorInfoResponce {Id = d.Id,FirstName = d.FirstName,LastName = d.LastName, Email = d.Email,PhoneNumber = d.PhoneNumber,Description = d.Description, CategoryName = c.CategoryName};
+            IQueryable<DoctorInfoResponce> doctor = from d in _appDbContext.Doctors
+                                                    where d.Email == email
+                                                    join c in _appDbContext.CategoryModels on d.CategoryId equals c.Id
+                                                    select new DoctorInfoResponce { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName };
             return doctor;
         }
         catch (Exception)

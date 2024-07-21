@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using api.BusinessLogic.DataAccess.IDataAccess;
 using api.Data;
 using api.Exceptions;
 using api.Models;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace api.BusinessLogic.DataAccess;
 
-public class TokenData
+public class TokenData : ITokenData
 {
     private readonly UserManager<UserModel> _userManager;
     private readonly IdentityAppDbContext _identityContext;
@@ -31,7 +32,7 @@ public class TokenData
             var user = await _userManager.FindByIdAsync(userId);
             if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
             {
-                 throw new InvalidRequestException("Invalid client request");
+                throw new InvalidRequestException("Invalid client request");
             }
             var newAccessToken = await _tokenService.GenerateAccessTokenAsync(email);
             var newRefreshToken = _tokenService.GenerateRefreshToken();
@@ -40,15 +41,15 @@ public class TokenData
             _identityContext.SaveChanges();
 
             return new AuthenticationResponse()
-                    {
-                        AccessToken = newAccessToken,
-                        RefreshToken = newRefreshToken
-                    };
+            {
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshToken
+            };
         }
         catch (Exception)
         {
             throw new BusinessException("Something went wrong. Please try again.");
         }
-        
+
     }
 }

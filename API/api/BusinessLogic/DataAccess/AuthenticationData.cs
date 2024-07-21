@@ -1,25 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Data;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using api.Data;
-using api.BusinessLogic.DataAccess;
+﻿using api.Data;
 using api.Models;
 using api.Models.Request;
 using api.Models.Responce;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using api.Exceptions;
+using api.BusinessLogic.DataAccess.IDataAccess;
 
 namespace api.BusinessLogic.DataAccess;
 
-public class AuthenticationData
+public class AuthenticationData : IAuthenticationData
 {
 
     private readonly IdentityAppDbContext _identityContext;
@@ -177,7 +166,7 @@ public class AuthenticationData
     public async Task<AuthenticationResponse> LoginUserAsync(LoginRequest model)
     {
         var user = await _userManager.FindByEmailAsync(model.Email);
-        if(user == null)
+        if (user == null)
         {
             throw new UserExistsException("User Not found Please enter a valid input");
         }
@@ -190,10 +179,10 @@ public class AuthenticationData
             _identityContext.SaveChanges();
 
             return new AuthenticationResponse
-                    {
-                        AccessToken = accessToken,
-                        RefreshToken = refreshToken
-                    };
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
+            };
         }
         else
         {
