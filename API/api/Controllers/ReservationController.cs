@@ -13,7 +13,7 @@ namespace api.Controllers;
 
 //[Authorize]
 [Route("/api/[controller]")]
-public class ReservationController : Controller
+public class ReservationController : ControllerBase
 {
     private readonly IReservationData _reservationData;
 
