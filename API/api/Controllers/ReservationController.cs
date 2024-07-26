@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using api.Models.Responce;
 
 namespace api.Controllers;
 
@@ -27,7 +28,7 @@ public class ReservationController : ControllerBase
     [Route("CreateQueueReservation")]
     public async Task<IActionResult> CreateQueueReservation([FromBody] CreateQueueReservationRequest model)
     {
-        if(!ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
             return BadRequest(new { message = "Please enter a valid input", errors });
@@ -36,21 +37,21 @@ public class ReservationController : ControllerBase
         try
         {
             await _reservationData.CreateQueueReservationAsync(model);
-            return Ok(new {message="Reservation added successfully"});
+            return Ok(new Reseponce("Reservation added successfully"));
         }
         catch (Exception)
         {
-            return BadRequest(new {message= "An error occurred while processing your request." });
+            return BadRequest(new Reseponce());
         }
-    }   
+    }
 
     [HttpGet]
     [Route("GetReservationDetail")]
     public async Task<IActionResult> GetReservationDetails([Required] int id)
     {
-        if(!ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            return BadRequest(new {message="please enter a valid input"});
+            return BadRequest(new { message = "please enter a valid input" });
         }
         try
         {
@@ -59,7 +60,7 @@ public class ReservationController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new {message="Something whent wrong please try again."});
+            return BadRequest(new { message = "Something whent wrong please try again." });
         }
     }
 
@@ -67,9 +68,9 @@ public class ReservationController : ControllerBase
     [Route("GetAllPersonalReservations")]
     public async Task<IActionResult> GetAllPersonalReservations([Required] string ClientId)
     {
-         if(!ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            return BadRequest(new {message="please enter a valid input"});
+            return BadRequest(new { message = "please enter a valid input" });
         }
         try
         {
@@ -78,7 +79,7 @@ public class ReservationController : ControllerBase
         }
         catch (Exception)
         {
-            return BadRequest(new { message="something when wrong please check you input and try again"});
+            return BadRequest(new { message = "something when wrong please check you input and try again" });
         }
     }
 
@@ -86,9 +87,9 @@ public class ReservationController : ControllerBase
     [Route("GetConcurrentBookings")]
     public async Task<IActionResult> GetConcurrentBookings([Required] int ClientReservationId)
     {
-        if(!ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            return BadRequest(new {message="please enter valid input"});
+            return BadRequest(new { message = "please enter valid input" });
         }
         try
         {
@@ -97,7 +98,7 @@ public class ReservationController : ControllerBase
         }
         catch (Exception)
         {
-            return BadRequest(new {message="something when wrong please check you input and try again"});
+            return BadRequest(new { message = "something when wrong please check you input and try again" });
         }
     }
 
@@ -105,9 +106,9 @@ public class ReservationController : ControllerBase
     [Route("GetPreviousBookings")]
     public async Task<IActionResult> GetPreviousBookings([Required] int ClientReservationId)
     {
-        if(!ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            return BadRequest(new {message="please enter valid input"});
+            return BadRequest(new { message = "please enter valid input" });
         }
         try
         {
@@ -116,7 +117,7 @@ public class ReservationController : ControllerBase
         }
         catch (Exception)
         {
-            return BadRequest(new {message="something when wrong please check you input and try again"});
+            return BadRequest(new { message = "something when wrong please check you input and try again" });
         }
 
     }
@@ -125,20 +126,20 @@ public class ReservationController : ControllerBase
     [Route("DeleteSpecificReservation")]
     public async Task<IActionResult> DeleteSpecificReservation([Required] int clientReservationId)
     {
-        if(!ModelState.IsValid)
-            return BadRequest(new {message = "Please enter a valid input"});
+        if (!ModelState.IsValid)
+            return BadRequest(new { message = "Please enter a valid input" });
 
         try
         {
             await _reservationData.DeleteSpecificReservationAsync(clientReservationId);
-            return Ok(new {message="your reservation is removed successfully"}); 
+            return Ok(new { message = "your reservation is removed successfully" });
         }
         catch (Exception ex)
         {
             return BadRequest(new { message = ex.Message });
         }
 
-        
+
     }
 
     [HttpPatch]
@@ -161,7 +162,7 @@ public class ReservationController : ControllerBase
     }
 
     [HttpGet]
-    [Route("GetAllReservationForTheDay")] 
+    [Route("GetAllReservationForTheDay")]
     public async Task<IActionResult> GetAllReservationForTheDay([Required] int DoctorAvailabilityId)
     {
         if (!ModelState.IsValid)
@@ -190,7 +191,7 @@ public class ReservationController : ControllerBase
         try
         {
             await _reservationData.MarkCompleteReservationAsync(ClientReservationId);
-            return Ok(new {message = "reservation marked as finished"});
+            return Ok(new { message = "reservation marked as finished" });
         }
         catch (Exception)
         {
