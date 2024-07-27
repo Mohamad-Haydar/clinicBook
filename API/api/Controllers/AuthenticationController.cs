@@ -66,19 +66,19 @@ public class AuthenticationController : Controller
         try
         {
             await _authenticationData.RegisterClientAsync(model);
-            return Ok(new { message = "Client created successfully. You can login to your account." });
+            return Ok(new Response("Client created successfully. You can login to your account." ));
         }
         catch (UserExistsException ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(new Response(ex.Message ));
         }
         catch (BusinessException ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(new Response(ex.Message ));
         }
         catch (Exception)
         {
-            return BadRequest(new { message = "Something went wrong. Please try again." });
+            return BadRequest(new Response("Something went wrong. Please try again." ));
         }
 
     }
@@ -95,19 +95,19 @@ public class AuthenticationController : Controller
         try
         {
             await _authenticationData.RegisterSecretaryAsync(model);
-            return Ok(new { message = "Secretary created successfully. You can login to your account." });
+            return Ok(new Response("Secretary created successfully. You can login to your account."));
         }
         catch (UserExistsException ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(new Response(ex.Message));
         }
         catch (BusinessException ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(new Response(ex.Message));
         }
         catch (Exception)
         {
-            return BadRequest(new { message = "Something went wrong. Please try again." });
+            return BadRequest(new Response("Something went wrong. Please try again."));
         }
     }
 
@@ -124,19 +124,19 @@ public class AuthenticationController : Controller
         try
         {
             await _authenticationData.RegisterDoctorAsync(model);
-            return Ok(new { message = "Doctor created successfully. You can login to your account." });
+            return Ok(new Response ("Doctor created successfully. You can login to your account." ));
         }
         catch (UserExistsException ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(new Response (ex.Message ));
         }
         catch (BusinessException ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(new Response (ex.Message ));
         }
         catch (Exception)
         {
-            return BadRequest(new { message = "Something went wrong. Please try again." });
+            return BadRequest(new Response ("Something went wrong. Please try again." ));
         }
     }
 
@@ -200,19 +200,19 @@ public class AuthenticationController : Controller
         }
         catch (UserExistsException ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(new Response(ex.Message ));
         }
          catch (WrongPasswordException ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(new Response(ex.Message ));
         }
         catch (BusinessException ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(new Response(ex.Message ));
         }
         catch (Exception)
         {
-            return BadRequest(new { message = "Something went wrong. Please try again." });
+            return BadRequest(new Response("Something went wrong. Please try again." ));
         }   
     }
 
@@ -239,7 +239,7 @@ public class AuthenticationController : Controller
                     Secure = false,
                     SameSite = SameSiteMode.Lax
                 });
-            return Ok(new {message="Log out Successfully"});
+            return Ok(new Response("Log out Successfully"));
         }
         catch (Exception)
         {
@@ -255,7 +255,7 @@ public class AuthenticationController : Controller
                     Secure = false,
                     SameSite = SameSiteMode.Lax
                 });
-            return BadRequest("Invalid client request");
+            return BadRequest( new Response("Invalid client request"));
         }
     }
 
