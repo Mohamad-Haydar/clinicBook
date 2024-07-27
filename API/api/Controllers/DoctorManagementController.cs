@@ -60,15 +60,15 @@ public class DoctorManagementController : ControllerBase
         try
         {
             await _doctorManagementData.AddMultipleServiceAsync(doctorServices);
-            return Ok(new {message="All Services added successfully"});
+            return Ok(new Response("All Services added successfully"));
         }
         catch (BusinessException ex)
         {
-            return BadRequest(new {message=ex.Message});
+            return BadRequest(new Response(ex.Message));
         }
         catch (Exception)
         {
-            return BadRequest(new {message="check your dates start date should be less that end date, and check availability date should not be previouse today"});
+            return BadRequest(new Response("check your dates start date should be less that end date, and check availability date should not be previouse today"));
         }
         
     }
@@ -84,19 +84,19 @@ public class DoctorManagementController : ControllerBase
         try
         {
             await _doctorManagementData.UpdateDoctorServiceDurationAsync(id, duration);
-            return Ok(new {message="Service Duration updated successfully"});
+            return Ok(new Response("Service Duration updated successfully"));
         }
         catch (NotFoundException ex)
         {
-            return BadRequest(new {message=ex.Message});
+            return BadRequest(new Response(ex.Message));
         }
         catch (BusinessException ex)
         {
-            return BadRequest(new {message=ex.Message});
+            return BadRequest(new Response(ex.Message));
         }
         catch (Exception)
         {
-            return BadRequest(new {message="check your dates start date should be less that end date, and check availability date should not be previouse today"});
+            return BadRequest(new Response("Something whent wrong, please try again."));
         }
     }
 
@@ -111,19 +111,19 @@ public class DoctorManagementController : ControllerBase
         try
         {
             await _doctorManagementData.DeleteDoctorServiceAsync(id);
-            return Ok(new {message="Service Deleted successfully"});
+            return Ok(new Response("Service Deleted successfully"));
         }
         catch (NotFoundException ex)
         {
-            return BadRequest(new {message=ex.Message});
+            return BadRequest(new Response(ex.Message));
         }
         catch (BusinessException ex)
         {
-            return BadRequest(new {message=ex.Message});
+            return BadRequest(new Response(ex.Message));
         }
         catch (Exception)
         {
-            return BadRequest(new {message="check your dates start date should be less that end date, and check availability date should not be previouse today"});
+            return BadRequest(new Response("Something whent wrong, please try again."));
         }
     }
 
@@ -138,19 +138,19 @@ public class DoctorManagementController : ControllerBase
         try
         {
             await _doctorManagementData.RemoveDoctorAsync(id);
-            return Ok(new {message="doctor removed successfully"});
+            return Ok(new Response("doctor removed successfully"));
         }
         catch (NotFoundException ex)
         {
-            return BadRequest(new {message=ex.Message});
+            return BadRequest(new Response(ex.Message));
         }
         catch (BusinessException ex)
         {
-            return BadRequest(new {message=ex.Message});
+            return BadRequest(new Response(ex.Message));
         }
         catch (Exception)
         {
-            return BadRequest(new {message="check your dates start date should be less that end date, and check availability date should not be previouse today"});
+            return BadRequest(new Response("Something whent wrong, please try again."));
         }
     }
 
@@ -166,19 +166,19 @@ public class DoctorManagementController : ControllerBase
         try
         {
             await _doctorManagementData.UpdateDoctorInfoAsync(model);
-            return Ok(new { message = "Doctor Data updated successfully." });
+            return Ok(new Response("Doctor Data updated successfully." ));
         }
         catch (NotFoundException ex)
         {
-            return BadRequest(new {message=ex.Message});
+            return BadRequest(new Response(ex.Message));
         }
         catch (BusinessException ex)
         {
-            return BadRequest(new {message=ex.Message});
+            return BadRequest(new Response(ex.Message));
         }
         catch (Exception)
         {
-            return BadRequest(new {message="check your dates start date should be less that end date, and check availability date should not be previouse today"});
+            return BadRequest(new Response("Something whent wrong, please try again."));
         }
     }
 
@@ -198,15 +198,15 @@ public class DoctorManagementController : ControllerBase
         }
         catch (NotFoundException ex)
         {
-            return BadRequest(new {message=ex.Message});
+            return BadRequest(new Response(ex.Message));
         }
         catch (BusinessException ex)
         {
-            return BadRequest(new {message=ex.Message});
+            return BadRequest(new Response(ex.Message));
         }
         catch (Exception)
         {
-            return BadRequest(new {message="check your dates start date should be less that end date, and check availability date should not be previouse today"});
+            return BadRequest(new Response("Something whent wrong, please try again."));
         }
     }
 

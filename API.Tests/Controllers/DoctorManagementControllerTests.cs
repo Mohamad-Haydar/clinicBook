@@ -82,5 +82,214 @@ namespace API.Tests.Controllers
             Assert.NotNull(okResponse);
             Assert.Equal("Service Added Successfully to the doctor", okResponse.Message);
         }
+    
+        [Fact]
+        public async Task AddMultipleService_FaildLogic()
+        {
+            // Arrange 
+            List<DoctorServiceRequest> models = new();
+            _doctorAvailabilityData.AddMultipleServiceAsync(models).Throws(new Exception());
+
+            // Act
+            var result = await _sut.AddMultipleService(models);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var badResponse = badRequestResult.Value as Response;
+            Assert.NotNull(badResponse);
+            Assert.Equal("check your dates start date should be less that end date, and check availability date should not be previouse today", badResponse.Message);
+        }
+
+        [Fact]
+        public async Task AddMultipleService_AccessLogic()
+        {
+            // Arrange 
+            List<DoctorServiceRequest> models = new();
+            _doctorAvailabilityData.AddMultipleServiceAsync(models).Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _sut.AddMultipleService(models);
+
+            // Assert
+            var okObjectResult = Assert.IsType<OkObjectResult>(result);
+            var okResponse = okObjectResult.Value as Response;
+            Assert.NotNull(okResponse);
+            Assert.Equal("All Services added successfully", okResponse.Message);
+        
+        }
+
+        [Fact]
+        public async Task UpdateDoctorServiceDuration_FailedLogic()
+        {
+            // Given
+            int id = 1, duration = 15;
+            _doctorAvailabilityData.UpdateDoctorServiceDurationAsync(id, duration).Throws(new Exception());
+
+            // When
+            var result = await _sut.UpdateDoctorServiceDuration(id, duration);
+
+            // Then
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var badResponse = badRequestResult.Value as Response;
+            Assert.NotNull(badResponse);
+            Assert.Equal("Something whent wrong, please try again.", badResponse.Message);
+        }
+
+        [Fact]
+        public async Task UpdateDoctorServiceDuration_AccessdLogic()
+        {
+            // Given
+            int id = 1, duration = 15;
+            _doctorAvailabilityData.UpdateDoctorServiceDurationAsync(id, duration).Returns(Task.CompletedTask);
+
+            // When
+            var result = await _sut.UpdateDoctorServiceDuration(id, duration);
+
+            // Then
+            var okRequestResult = Assert.IsType<OkObjectResult>(result);
+            var okResponse = okRequestResult.Value as Response;
+            Assert.NotNull(okResponse);
+            Assert.Equal("Service Duration updated successfully", okResponse.Message);
+        }
+
+        [Fact]
+        public async Task DeleteDoctorService_FailedLogic()
+        {
+            // Given
+            int id = 1;
+            _doctorAvailabilityData.DeleteDoctorServiceAsync(id).Throws(new Exception());
+
+            // When
+            var result = await _sut.DeleteDoctorService(id);
+
+            // Then
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var badResponse = badRequestResult.Value as Response;
+            Assert.NotNull(badResponse);
+            Assert.Equal("Something whent wrong, please try again.", badResponse.Message);
+        }
+
+        [Fact]
+        public async Task DeleteDoctorService_AccessdLogic()
+        {
+            // Given
+            int id = 1;
+            _doctorAvailabilityData.DeleteDoctorServiceAsync(id).Returns(Task.CompletedTask);
+
+            // When
+            var result = await _sut.DeleteDoctorService(id);
+
+            // Then
+            var okRequestResult = Assert.IsType<OkObjectResult>(result);
+            var okResponse = okRequestResult.Value as Response;
+            Assert.NotNull(okResponse);
+            Assert.Equal("Service Deleted successfully", okResponse.Message);
+        }
+
+        [Fact]
+        public async Task RemoveDoctor_FailedLogic()
+        {
+            // Given
+            string id = "some id";
+            _doctorAvailabilityData.RemoveDoctorAsync(id).Throws(new Exception());
+
+            // When
+            var result = await _sut.RemoveDoctor(id);
+
+            // Then
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var badResponse = badRequestResult.Value as Response;
+            Assert.NotNull(badResponse);
+            Assert.Equal("Something whent wrong, please try again.", badResponse.Message);
+        }
+
+        [Fact]
+        public async Task RemoveDoctor_AccessdLogic()
+        {
+            // Given
+            string id = "some id";
+            _doctorAvailabilityData.RemoveDoctorAsync(id).Returns(Task.CompletedTask);
+
+            // When
+            var result = await _sut.RemoveDoctor(id);
+
+            // Then
+            var okRequestResult = Assert.IsType<OkObjectResult>(result);
+            var okResponse = okRequestResult.Value as Response;
+            Assert.NotNull(okResponse);
+            Assert.Equal("doctor removed successfully", okResponse.Message);
+        }
+
+        [Fact]
+        public async Task UpdateDoctorInfo_FailedLogic()
+        {
+            // Given
+            CreateDoctorRequest model = new();
+            _doctorAvailabilityData.UpdateDoctorInfoAsync(model).Throws(new Exception());
+
+            // When
+            var result = await _sut.UpdateDoctorInfo(model);
+
+            // Then
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var badResponse = badRequestResult.Value as Response;
+            Assert.NotNull(badResponse);
+            Assert.Equal("Something whent wrong, please try again.", badResponse.Message);
+        }
+
+        [Fact]
+        public async Task UpdateDoctorInfo_AccessdLogic()
+        {
+            // Given
+            CreateDoctorRequest model = new();
+            _doctorAvailabilityData.UpdateDoctorInfoAsync(model).Returns(Task.CompletedTask);
+
+            // When
+            var result = await _sut.UpdateDoctorInfo(model);
+
+            // Then
+            var okRequestResult = Assert.IsType<OkObjectResult>(result);
+            var okResponse = okRequestResult.Value as Response;
+            Assert.NotNull(okResponse);
+            Assert.Equal("Doctor Data updated successfully.", okResponse.Message);
+        }
+
+        [Fact]
+        public async Task GetDoctorInfo_FailedLogic()
+        {
+            // Given
+            string email = "email@gmail.com";
+            _doctorAvailabilityData.GetDoctorInfoAsync(email).Throws(new Exception());
+
+            // When
+            var result = await _sut.GetDoctorInfo(email);
+
+            // Then
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var badResponse = badRequestResult.Value as Response;
+            Assert.NotNull(badResponse);
+            Assert.Equal("Something whent wrong, please try again.", badResponse.Message);
+        }
+
+        [Fact]
+        public async Task GetDoctorInfo_AccessdLogic()
+        {
+            // Given
+            string email = "email@gmail.com";
+            var reservations = new List<DoctorInfoResponce>
+            {
+                new() {}
+            }.AsQueryable();
+            _doctorAvailabilityData.GetDoctorInfoAsync(email).Returns(Task.FromResult(reservations));
+
+            // When
+            var result = await _sut.GetDoctorInfo(email);
+
+            // Then
+            var okRequestResult = Assert.IsType<OkObjectResult>(result);
+            var okResponse = okRequestResult.Value as IQueryable<DoctorInfoResponce>;
+            Assert.NotNull(okResponse);
+        }
+
     }
 }
