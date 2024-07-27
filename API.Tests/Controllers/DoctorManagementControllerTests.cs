@@ -66,6 +66,21 @@ namespace API.Tests.Controllers
             Assert.Equal("check your dates start date should be less that end date, and check availability date should not be previouse today", badResponse.Message);
         }
 
+        [Fact]
+        public async Task AddDoctorService_AccessLogic()
+        {
+            // Arrange
+            DoctorServiceRequest model = new();
+            _doctorAvailabilityData.AddDoctorServiceAsync(model).Returns(Task.CompletedTask);
 
+            // Act
+            var result = await _sut.AddDoctorService(model);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var okResponse = okResult.Value as Response;
+            Assert.NotNull(okResponse);
+            Assert.Equal("Service Added Successfully to the doctor", okResponse.Message);
+        }
     }
 }
