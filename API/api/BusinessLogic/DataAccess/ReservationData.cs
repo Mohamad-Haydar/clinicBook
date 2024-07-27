@@ -104,16 +104,15 @@ public class ReservationData : IReservationData
         }
     }
 
-    public async Task<bool> DeleteSpecificReservationAsync(int ClientReservationId)
+    public async Task DeleteSpecificReservationAsync(int ClientReservationId)
     {
         try
         {
             await _sql.SaveDataAsync("sp_delete_specific_reservation", new { client_reservation_id = ClientReservationId }, _connectionStrings.Value.AppDbConnection);
-            return true;
         }
         catch (Exception)
         {
-            return false;
+            throw;
         }
     }
 

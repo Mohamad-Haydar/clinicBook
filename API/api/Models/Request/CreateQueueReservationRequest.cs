@@ -10,7 +10,7 @@ public class CreateQueueReservationRequest
 
     [Required(ErrorMessage = "doctor_availability_id is required"), 
     Range(1, maximum: double.MaxValue, ErrorMessage = "Enter a valid availability")]
-    public int doctor_availability_id { get; set; }
+    public int? doctor_availability_id { get; set; }
     
     [Required(ErrorMessage = "doctor_service_ids is required")]
     public IList<int> doctor_service_ids { get; set; }
