@@ -7,7 +7,8 @@ namespace api.Models.Request;
 
 public class UpdateAvailableDateRequest
 {
-    [Required(ErrorMessage = "Id is required")]
+    [Required(ErrorMessage = "Id is required"),
+     Range(minimum: 1, maximum: double.MaxValue, ErrorMessage = "Id is required and it should be greater than 0")]
     public int Id { get; set; }
 
     [Required(ErrorMessage = "AvailableDate is required")]

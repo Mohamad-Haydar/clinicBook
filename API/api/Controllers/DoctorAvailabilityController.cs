@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using api.Exceptions;
 using api.BusinessLogic.DataAccess.IDataAccess;
+using api.Models.Responce;
 
 namespace api.Controllers;
 
@@ -28,7 +29,7 @@ public class DoctorAvailabilityController : Controller
     public IActionResult GetAvailableDates([Required] string id)
     {
         if(!ModelState.IsValid)
-            return BadRequest(new {message="doctor not found"});
+            return BadRequest(new Response("doctor not found"));
         
         try
         {
@@ -37,11 +38,11 @@ public class DoctorAvailabilityController : Controller
         }
         catch (BusinessException ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(new Response(ex.Message));
         }
         catch (Exception)
         {
-            return BadRequest(new { message = "Something went wrong. Please try again." });
+            return BadRequest(new Response("Something went wrong. Please try again."));
         }
     }
 
@@ -57,19 +58,19 @@ public class DoctorAvailabilityController : Controller
         try
         {
             await _doctorAvailabilityData.OpenAvailableDateAsync(model);   
-            return Ok(new {message = "Available date added successfully"});
+            return Ok(new Response( "Available date added successfully"));
         }
          catch(NotFoundException ex)
         {
-            return BadRequest(new {message = ex.Message});
+            return BadRequest(new Response(ex.Message));
         }
         catch(BusinessException ex)
         {
-            return BadRequest(new {message = ex.Message});
+            return BadRequest(new Response(ex.Message));
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return BadRequest(new {message="something when wrong please try again"});
+            return BadRequest(new Response("something when wrong please try again"));
         }
         
     }
@@ -86,23 +87,23 @@ public class DoctorAvailabilityController : Controller
         try
         {
             await _doctorAvailabilityData.UpdateAvailableDateAsync(model);
-            return Ok(new {message = "Available date added successfully"});
+            return Ok(new Response ( "Available date added successfully"));
         }
         catch (NotFoundException ex)
         {
-            return BadRequest(new {message=ex.Message});
+            return BadRequest(new Response (ex.Message));
         }
         catch (InvalidDataException ex)
         {
-            return BadRequest(new {message=ex.Message});
+            return BadRequest(new Response (ex.Message));
         }
         catch (BusinessException ex)
         {
-            return BadRequest(new {message=ex.Message});
+            return BadRequest(new Response (ex.Message));
         }
         catch (Exception)
         {
-            return BadRequest(new {message="Something when wrong, please try again"});
+            return BadRequest(new Response ("Something when wrong, please try again"));
         }
     }
 
@@ -116,19 +117,19 @@ public class DoctorAvailabilityController : Controller
         try
         {
             await _doctorAvailabilityData.DeleteAvailableDateAsync(id);
-            return Ok(new {message="availabel date removed successfully"});
+            return Ok(new Response("availabel date removed successfully"));
         }
         catch (NotFoundException ex)
         {
-            return BadRequest(new {message=ex.Message});
+            return BadRequest(new Response(ex.Message));
         }
          catch (BusinessException ex)
         {
-            return BadRequest(new {message=ex.Message});
+            return BadRequest(new Response(ex.Message));
         }
         catch (Exception)
         {
-            return BadRequest(new {message="something when wrong please try again"});
+            return BadRequest(new Response("something when wrong please try again"));
         }
     }
 

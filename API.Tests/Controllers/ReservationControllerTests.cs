@@ -108,7 +108,7 @@ public class ReservationControllerTests
 
                 // Assert
                 var badRequestResult = Assert.IsType<OkObjectResult>(result);
-                var Responce = badRequestResult.Value as Responce;
+                var Responce = badRequestResult.Value as Response;
                 Assert.NotNull(Responce);
                 Assert.Equal("Reservation added successfully", Responce.Message);
         }
@@ -125,7 +125,7 @@ public class ReservationControllerTests
 
                 // Assert
                 var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-                var errorResponse = badRequestResult.Value as Responce;
+                var errorResponse = badRequestResult.Value as Response;
                 Assert.NotNull(errorResponse);
                 Assert.Equal("An error occurred while processing your request.", errorResponse.Message);
         }
@@ -142,7 +142,7 @@ public class ReservationControllerTests
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var Responce = badRequestResult.Value as Responce;
+            var Responce = badRequestResult.Value as Response;
             Assert.NotNull(Responce);
             Assert.Equal("Something whent wrong please try again.", Responce.Message);
         }
@@ -175,7 +175,7 @@ public class ReservationControllerTests
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var Responce = badRequestResult.Value as Responce;
+            var Responce = badRequestResult.Value as Response;
             Assert.NotNull(Responce);
             Assert.Equal("something when wrong please check you input and try again", Responce.Message);
         }
@@ -213,7 +213,7 @@ public class ReservationControllerTests
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var Responce = badRequestResult.Value as Responce;
+            var Responce = badRequestResult.Value as Response;
             Assert.NotNull(Responce);
             Assert.Equal("something when wrong please check you input and try again", Responce.Message);
 
@@ -252,7 +252,7 @@ public class ReservationControllerTests
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var Responce = badRequestResult.Value as Responce;
+            var Responce = badRequestResult.Value as Response;
             Assert.NotNull(Responce);
             Assert.Equal("something when wrong please check you input and try again", Responce.Message);
         }
@@ -291,7 +291,7 @@ public class ReservationControllerTests
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var Responce = badRequestResult.Value as Responce;
+            var Responce = badRequestResult.Value as Response;
             Assert.NotNull(Responce);
             Assert.Equal("something when wrong please check you input and try again", Responce.Message);
         }
@@ -308,7 +308,7 @@ public class ReservationControllerTests
 
             // Assert
             var OkResult = Assert.IsType<OkObjectResult>(result);
-            var Responce = OkResult.Value as Responce;
+            var Responce = OkResult.Value as Response;
             Assert.NotNull(Responce);
             Assert.Equal("your reservation is removed successfully", Responce.Message);
         }
@@ -382,7 +382,7 @@ public class ReservationControllerTests
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var Responce = badRequestResult.Value as Responce;
+            var Responce = badRequestResult.Value as Response;
             Assert.NotNull(Responce);
             Assert.Equal("Please check your input and try again", Responce.Message);
         }
@@ -399,7 +399,7 @@ public class ReservationControllerTests
 
             // Assert
             var OkResult = Assert.IsType<OkObjectResult>(result);
-            var Responce = OkResult.Value as Responce;
+            var Responce = OkResult.Value as Response;
             Assert.NotNull(Responce);
             Assert.Equal("your reservation is Updated successfully", Responce.Message);
         }
@@ -416,7 +416,7 @@ public class ReservationControllerTests
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var Responce = badRequestResult.Value as Responce;
+            var Responce = badRequestResult.Value as Response;
             Assert.NotNull(Responce);
             Assert.Equal("something when wrong please check you input and try again", Responce.Message);
         }
@@ -455,7 +455,7 @@ public class ReservationControllerTests
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var Responce = badRequestResult.Value as Responce;
+            var Responce = badRequestResult.Value as Response;
             Assert.NotNull(Responce);
             Assert.Equal("something when wrong please check you input and try again", Responce.Message);
         }
