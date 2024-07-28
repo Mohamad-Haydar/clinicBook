@@ -183,9 +183,9 @@ public class DoctorManagementController : ControllerBase
     }
 
     [HttpGet]
-    [Route("getDoctorInfo")]
+    [Route("getDoctorByEmail")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetDoctorInfo([Required] string email)
+    public async Task<IActionResult> GetDoctorByEmail([Required] string email)
     {
         if(!ModelState.IsValid)
         {
@@ -193,7 +193,7 @@ public class DoctorManagementController : ControllerBase
         }
         try
         {
-            var doctor = await _doctorManagementData.GetDoctorInfoAsync(email);
+            var doctor = await _doctorManagementData.GetDoctorByEmailAsync(email);
             return Ok(doctor);
         }
         catch (NotFoundException ex)
@@ -210,5 +210,56 @@ public class DoctorManagementController : ControllerBase
         }
     }
 
+    [HttpGet]
+    [Route("GetDoctorById")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetDoctorById([Required] string DoctorId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new Response("Please enter valid input"));
+        }
 
+        try
+        {
+            var doctor = await _doctorManagementData.GetDoctorByIdAsync(DoctorId);
+            return Ok(doctor);
+        }
+        catch (Exception)
+        {
+            return BadRequest(new Response("Something whent wrong, please try again"));
+        }
+    }
+
+    [HttpGet]
+    [Route("GetAllDoctorsNameAndId")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetAllDoctorsNameAndId()
+    {
+        try
+        {
+            var doctors = await _doctorManagementData.GetAllDoctorsNameAndIdAsync();
+            return doctors.Count() > 0 ? Ok(doctors) : NoContent();
+        }
+        catch (Exception)
+        {
+            return BadRequest(new Response("Something whent wrong, please try again"));
+        }
+    }
+
+    [HttpGet]
+    [Route("GetDoctorsByCategory")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetDoctorsByCategory([Required] int CategoryId)
+    {
+        try
+        {
+            var doctors = await _doctorManagementData.GetDoctorsByCategoryAsync(CategoryId);
+            return doctors.Count() > 0 ? Ok(doctors) : NoContent();
+        }
+        catch (Exception)
+        {
+            return BadRequest(new Response("Something whent wrong, please try again"));
+        }
+    }
 }

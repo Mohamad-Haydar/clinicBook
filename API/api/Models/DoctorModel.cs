@@ -15,6 +15,8 @@ public class DoctorModel
     public string Email { get; set; }
     [Column("phonenumber")]
     public string PhoneNumber { get; set; }
+    [Column("image")]
+    public string? Image { get; set; }
     [Column("description")]
     public string Description { get; set; }
     [Column("categoryid")]

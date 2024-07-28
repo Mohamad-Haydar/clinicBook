@@ -9,6 +9,8 @@ using api.Models.Responce;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Numerics;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace api.BusinessLogic.DataAccess;
 
@@ -165,19 +167,64 @@ public class DoctorManagementData : IDoctorManagementData
         }
     }
 
-    public async Task<IQueryable<DoctorInfoResponce>> GetDoctorInfoAsync(string email)
+    public async Task<DoctorInfoResponce> GetDoctorByEmailAsync(string email)
     {
         try
         {
             IQueryable<DoctorInfoResponce> doctor = from d in _appDbContext.Doctors
                                                     where d.Email == email
                                                     join c in _appDbContext.CategoryModels on d.CategoryId equals c.Id
-                                                    select new DoctorInfoResponce { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName };
-            return doctor;
+                                                    select new DoctorInfoResponce { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
+            return await doctor.FirstOrDefaultAsync();
         }
         catch (Exception)
         {
             throw new BusinessException("Something went wrong. Please try again.");
+        }
+    }
+
+    public async Task<DoctorInfoResponce> GetDoctorByIdAsync(string id)
+    {
+        try
+        {
+            var doctor = from d in _appDbContext.Doctors
+                         where d.Id == id
+                         join c in _appDbContext.CategoryModels on d.CategoryId equals c.Id
+                         select new DoctorInfoResponce { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
+            return await doctor.FirstOrDefaultAsync();
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    public async Task<IEnumerable<DoctorNameResponse>> GetAllDoctorsNameAndIdAsync()
+    {
+        try
+        {
+            var doctors = await _appDbContext.Doctors.Select(x => new DoctorNameResponse { Id = x.Id, FirstName = x.FirstName , LastName = x.LastName}).ToListAsync();
+            return doctors;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    public async Task<IEnumerable<DoctorInfoResponce>> GetDoctorsByCategoryAsync(int CategoryId)
+    {
+        try
+        {
+            var doctors = from c in _appDbContext.CategoryModels
+                          where c.Id == CategoryId
+                          join d in _appDbContext.Doctors on c.Id equals  d.CategoryId 
+                          select new DoctorInfoResponce { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
+            return await doctors.ToListAsync();
+        }
+        catch (Exception)
+        {
+            throw;
         }
     }
 

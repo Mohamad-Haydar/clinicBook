@@ -23,6 +23,7 @@ Create Table Doctor(
   LastName varchar(20) NOT NULL,
   Email varchar(50) NOT NULL,
   PhoneNumber varchar(15) NOT NULL,
+  Image string,
   Description text NOT NULL,
   CategoryId int NOT NULL,
   CONSTRAINT fk_category FOREIGN KEY(CategoryId) REFERENCES Category(Id) ON DELETE CASCADE

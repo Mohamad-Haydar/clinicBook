@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using api.BusinessLogic.DataAccess.IDataAccess;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -62,11 +63,12 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("ConnectionStrings"));
 builder.Services.AddScoped<ISqlDataAccess, SqlDataAccess>();
 builder.Services.AddScoped<SecretaryData>();
-builder.Services.AddScoped<TokenData>();
-builder.Services.AddScoped<DoctorManagementData>();
-builder.Services.AddScoped<DoctorAvailabilityData>();
-builder.Services.AddScoped<ReservationData>();
-builder.Services.AddScoped<AuthenticationData>();
+builder.Services.AddScoped<ITokenData, TokenData>();
+builder.Services.AddScoped<IDoctorManagementData, DoctorManagementData>();
+builder.Services.AddScoped<IDoctorAvailabilityData, DoctorAvailabilityData>();
+builder.Services.AddScoped<IReservationData, ReservationData>();
+builder.Services.AddScoped<IAuthenticationData, AuthenticationData>();
+builder.Services.AddScoped<ICategoryData, CategoryData>();
 
 
 
