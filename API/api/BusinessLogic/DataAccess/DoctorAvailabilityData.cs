@@ -3,6 +3,7 @@ using api.Data;
 using api.Exceptions;
 using api.Models;
 using api.Models.Request;
+using api.Models.Responce;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,13 +30,13 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
         _tokenService = tokenService;
     }
 
-    public object GetAvailableDates(string id)
+    public async Task<IEnumerable<DoctorAvailabilityResponse>> GetAvailableDates(string id)
     {
         try
         {
-            var doctoravailabilities = _appDbContext.DoctorAvailabilities
+            var doctoravailabilities = await _appDbContext.DoctorAvailabilities
                                    .Where(x => x.DoctorId == id)
-                                   .Select(x => new
+                                   .Select(x => new DoctorAvailabilityResponse
                                    {
                                        id = x.Id,
                                        day = new DateOnly(x.AvailableDate.Year, x.AvailableDate.Month, x.AvailableDate.Day),
@@ -43,7 +44,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
                                        startHour = x.StartHour,
                                        endHour = x.EndHour,
                                        maxClient = x.MaxClient
-                                   });
+                                   }).ToListAsync();
             return doctoravailabilities;
         }
         catch (Exception)
