@@ -59,6 +59,18 @@ builder.Services.AddAuthentication(options =>
         };
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "AllowLocalhost",
+        policy =>
+        {
+            policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+        });
+});
+
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("ConnectionStrings"));
 builder.Services.AddScoped<ISqlDataAccess, SqlDataAccess>();
@@ -126,7 +138,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors("AllowLocalhost");
 app.UseAuthorization();
 
 app.MapControllers();
