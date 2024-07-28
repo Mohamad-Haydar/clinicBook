@@ -255,14 +255,14 @@ namespace API.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetDoctorInfo_FailedLogic()
+        public async Task GetDoctorByEmail_FailedLogic()
         {
             // Given
             string email = "email@gmail.com";
-            _doctorAvailabilityData.GetDoctorInfoAsync(email).Throws(new Exception());
+            _doctorAvailabilityData.GetDoctorByEmailAsync(email).Throws(new Exception());
 
             // When
-            var result = await _sut.GetDoctorInfo(email);
+            var result = await _sut.GetDoctorByEmail(email);
 
             // Then
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
@@ -272,23 +272,153 @@ namespace API.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetDoctorInfo_AccessdLogic()
+        public async Task GetDoctorByEmail_AccessdLogic()
         {
             // Given
             string email = "email@gmail.com";
-            var reservations = new List<DoctorInfoResponce>
-            {
-                new() {}
-            }.AsQueryable();
-            _doctorAvailabilityData.GetDoctorInfoAsync(email).Returns(Task.FromResult(reservations));
+            var reservations = new DoctorInfoResponce(){Email = "email@gmail.com" };
+            _doctorAvailabilityData.GetDoctorByEmailAsync(email).Returns(Task.FromResult(reservations));
 
             // When
-            var result = await _sut.GetDoctorInfo(email);
+            var result = await _sut.GetDoctorByEmail(email);
 
             // Then
             var okRequestResult = Assert.IsType<OkObjectResult>(result);
-            var okResponse = okRequestResult.Value as IQueryable<DoctorInfoResponce>;
+            var okResponse = okRequestResult.Value as DoctorInfoResponce;
             Assert.NotNull(okResponse);
+        }
+
+        [Fact]
+        public async Task GetDoctorById_FailedLogic()
+        {
+            // Given
+            string id = "someId";
+            _doctorAvailabilityData.GetDoctorByIdAsync(id).Throws(new Exception());
+
+            // When
+            var result = await _sut.GetDoctorById(id);
+
+            // Then
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var badResponse = badRequestResult.Value as Response;
+            Assert.NotNull(badResponse);
+            Assert.Equal("Something whent wrong, please try again", badResponse.Message);
+        }
+
+        [Fact]
+        public async Task GetDoctorById_AccessdLogic()
+        {
+            // Given
+            string id = "someId";
+            var reservations = new DoctorInfoResponce() { Id = "someId" };
+            _doctorAvailabilityData.GetDoctorByIdAsync(id).Returns(Task.FromResult(reservations));
+
+            // When
+            var result = await _sut.GetDoctorById(id);
+
+            // Then
+            var okRequestResult = Assert.IsType<OkObjectResult>(result);
+            var okResponse = okRequestResult.Value as DoctorInfoResponce;
+            Assert.NotNull(okResponse);
+        }
+
+        [Fact]
+        public async Task GetAllDoctorsNameAndId_FailedLogic()
+        {
+            // Given
+            _doctorAvailabilityData.GetAllDoctorsNameAndIdAsync().Throws(new Exception());
+
+            // When
+            var result = await _sut.GetAllDoctorsNameAndId();
+
+            // Then
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var badResponse = badRequestResult.Value as Response;
+            Assert.NotNull(badResponse);
+            Assert.Equal("Something whent wrong, please try again", badResponse.Message);
+        }
+
+        [Fact]
+        public async Task GetAllDoctorsNameAndId_AccessdLogic_NoContent()
+        {
+            // Given
+            IEnumerable<DoctorNameResponse> reservations = new List<DoctorNameResponse>();
+            _doctorAvailabilityData.GetAllDoctorsNameAndIdAsync().Returns(Task.FromResult(reservations));
+
+            // When
+            var result = await _sut.GetAllDoctorsNameAndId();
+
+            // Then
+            var noContent = Assert.IsType<NoContentResult>(result);
+            Assert.NotNull(noContent);
+        }
+
+        [Fact]
+        public async Task GetAllDoctorsNameAndId_AccessdLogic()
+        {
+            // Given
+            IEnumerable<DoctorNameResponse> reservations = new List<DoctorNameResponse>() { new(), new() };
+            _doctorAvailabilityData.GetAllDoctorsNameAndIdAsync().Returns(Task.FromResult(reservations));
+
+            // When
+            var result = await _sut.GetAllDoctorsNameAndId();
+
+            // Then
+            var okRequestResult = Assert.IsType<OkObjectResult>(result);
+            var okResponse = okRequestResult.Value as IEnumerable<DoctorNameResponse>;
+            Assert.NotNull(okResponse);
+            Assert.Equal(2, okResponse.Count());
+        }
+
+        [Fact]
+        public async Task GetDoctorsByCategory_FailedLogic()
+        {
+            // Given
+            int categoryId = 1;
+            _doctorAvailabilityData.GetDoctorsByCategoryAsync(categoryId).Throws(new Exception());
+
+            // When
+            var result = await _sut.GetDoctorsByCategory(categoryId);
+
+            // Then
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var badResponse = badRequestResult.Value as Response;
+            Assert.NotNull(badResponse);
+            Assert.Equal("Something whent wrong, please try again", badResponse.Message);
+        }
+
+        [Fact]
+        public async Task GetDoctorsByCategory_AccessdLogic_NoContent()
+        {
+            // Given
+            int categoryId = 1;
+            IEnumerable<DoctorInfoResponce> reservations = [];
+            _doctorAvailabilityData.GetDoctorsByCategoryAsync(categoryId).Returns(Task.FromResult(reservations));
+
+            // When
+            var result = await _sut.GetDoctorsByCategory(categoryId);
+
+            // Then
+            var noContent = Assert.IsType<NoContentResult>(result);
+            Assert.NotNull(noContent);
+        }
+
+        [Fact]
+        public async Task GetDoctorsByCategory_AccessdLogic()
+        {
+            // Given
+            int categoryId = 1;
+            IEnumerable<DoctorInfoResponce> reservations = [new(), new()];
+            _doctorAvailabilityData.GetDoctorsByCategoryAsync(categoryId).Returns(Task.FromResult(reservations));
+
+            // When
+            var result = await _sut.GetDoctorsByCategory(categoryId);
+
+            // Then
+            var okRequestResult = Assert.IsType<OkObjectResult>(result);
+            var okResponse = okRequestResult.Value as IEnumerable<DoctorInfoResponce>;
+            Assert.NotNull(okResponse);
+            Assert.Equal(2, okResponse.Count());
         }
 
     }
