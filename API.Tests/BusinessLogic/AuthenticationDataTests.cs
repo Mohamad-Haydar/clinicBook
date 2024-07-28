@@ -1,13 +1,16 @@
 ﻿using api.BusinessLogic.DataAccess;
+using api.Controllers;
 using api.Data;
 using api.Exceptions;
 using api.Models;
 using api.Models.Request;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using NSubstitute.ReturnsExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -61,17 +64,6 @@ namespace API.Tests.BusinessLogic
             _sut = new AuthenticationData(_identityContext, _userManager, _roleManager, _appContext, _tokenService);
         }
 
-       // [Fact]
-        //public async Task RegisterClientAsync_UserAlreadyExists_ThrowUserExistsException()
-        //{
-        //    // Arrange
-        //    CreateUserRequest model = new() { Email = "someemail" };
-        //    _userManager.FindByEmailAsync("someemail").Returns(new UserModel());
-
-        //    // Act & Assert
-        //    await Assert.ThrowsAsync<UserExistsException>(() => _sut.RegisterClientAsync(model));
-        //}
-
         [Fact]
         public async Task RegisterClientAsync_UserAlreadyExists_ThrowUserExistsException()
         {
@@ -80,15 +72,12 @@ namespace API.Tests.BusinessLogic
             _userManager.FindByEmailAsync("someemail").Returns(new UserModel());
 
             // Act 
-            try
-            {
-                await _sut.RegisterClientAsync(model);
-            }
-            catch (UserExistsException ex)
-            {
-                Assert.Equal("This email already exists", actual: ex.Message);
-               // Assert.ThrowsAsync<UserExistsException>();
-            }
+            UserExistsException exception = await Assert.ThrowsAsync<UserExistsException>(() => _sut.RegisterClientAsync(model));
+
+            // Assert
+            Assert.Equal("This email already exists", exception.Message);
         }
+
+       
     }
 }
