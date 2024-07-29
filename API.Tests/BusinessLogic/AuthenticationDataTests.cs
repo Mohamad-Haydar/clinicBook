@@ -30,12 +30,12 @@ namespace API.Tests.BusinessLogic
         private readonly ApplicationDbContext _appContext;
         private readonly ITokenService _tokenService;
         private readonly AuthenticationData _sut;
-        private readonly AppDbContextFactory _contextFactory;
+        private readonly DbFactory _contextFactory;
 
 
         public AuthenticationDataTests()
         {
-            _contextFactory = new AppDbContextFactory();
+            _contextFactory = new DbFactory();
             _userManager = _contextFactory.CreateUserManager();
             _appContext = _contextFactory.CreateAppContext();
             _identityContext = _contextFactory.CreateIdentityContext();

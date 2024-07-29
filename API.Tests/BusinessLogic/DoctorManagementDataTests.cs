@@ -30,14 +30,14 @@ namespace API.Tests.BusinessLogic
         private readonly ApplicationDbContext _appContext;
         private readonly UserManager<UserModel> _userManager;
         private readonly IdentityAppDbContext _identityContext;
-        private readonly AppDbContextFactory _contextFactory;
+        private readonly DbFactory _contextFactory;
 
 
         private readonly DoctorManagementData _sut;
 
         public DoctorManagementDataTests()
         {
-            _contextFactory = new AppDbContextFactory();
+            _contextFactory = new DbFactory();
 
             _appContext = _contextFactory.CreateAppContext();
             _userManager = _contextFactory.CreateUserManager();

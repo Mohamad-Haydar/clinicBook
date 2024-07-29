@@ -31,13 +31,13 @@ namespace API.Tests.BusinessLogic
     public class DoctorAvailabilityTests
     {
         private readonly UserManager<UserModel> _userManager;
-        private readonly AppDbContextFactory _contextFactory;
+        private readonly DbFactory _contextFactory;
         private readonly IDoctorAvailabilityData _sut;
         private readonly ApplicationDbContext _appContext;
 
         public DoctorAvailabilityTests()
         {
-            _contextFactory = new AppDbContextFactory();
+            _contextFactory = new DbFactory();
             _userManager = _contextFactory.CreateUserManager();
             _appContext = _contextFactory.CreateAppContext();
             _sut = new DoctorAvailabilityData(_userManager, _appContext);

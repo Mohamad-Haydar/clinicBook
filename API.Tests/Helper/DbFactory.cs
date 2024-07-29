@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace API.Tests.Helper
 {
-    public class AppDbContextFactory
+    public class DbFactory
     {
         public ApplicationDbContext CreateAppContext()
         {

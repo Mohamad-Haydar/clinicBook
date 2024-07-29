@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace api.Models;
 
 [Table("clientreservation")]
-public class ClientReservation
+public class ClientReservationModel
 {
     [Column("id")]
     public int Id { get; set; }
