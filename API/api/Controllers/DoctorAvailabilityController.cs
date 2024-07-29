@@ -26,14 +26,14 @@ public class DoctorAvailabilityController : Controller
 
     [HttpGet]
     [Route("availableDates")]
-    public IActionResult GetAvailableDates([Required] string id)
+    public async Task<IActionResult> GetAvailableDates([Required] string id)
     {
         if(!ModelState.IsValid)
             return BadRequest(new Response("doctor not found"));
         
         try
         {
-            var result = _doctorAvailabilityData.GetAvailableDates(id);
+            var result = await _doctorAvailabilityData.GetAvailableDatesAsync(id);
             return Ok(result);
         }
         catch (BusinessException ex)

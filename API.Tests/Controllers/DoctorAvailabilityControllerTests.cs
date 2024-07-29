@@ -22,14 +22,14 @@ namespace API.Tests.Controllers
         }
 
         [Fact]
-        public void GetAvailableDates_ValidModel_FailedLogic()
+        public async Task GetAvailableDates_ValidModel_FailedLogic()
         {
             // Arrange
             string id = "some random id";
-            _doctorAvailabilityData.GetAvailableDates(id).Throws(new Exception());
+            _doctorAvailabilityData.GetAvailableDatesAsync(id).Throws(new Exception());
 
             // Act
-            var result = _sut.GetAvailableDates(id);
+            var result = await _sut.GetAvailableDates(id);
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
@@ -39,14 +39,14 @@ namespace API.Tests.Controllers
         }
 
         [Fact]
-        public void GetAvailableDates_ValidModel_FailedInternalLogic()
+        public async Task GetAvailableDates_ValidModel_FailedInternalLogic()
         {
             // Arrange
             string id = "some random id";
-            _doctorAvailabilityData.GetAvailableDates(id).Throws(new BusinessException("An error occurred while registering the client"));
+            _doctorAvailabilityData.GetAvailableDatesAsync(id).Throws(new BusinessException("An error occurred while registering the client"));
 
             // Act
-            var result = _sut.GetAvailableDates(id);
+            var result = await _sut.GetAvailableDates(id);
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
@@ -56,14 +56,14 @@ namespace API.Tests.Controllers
         }
 
         [Fact]
-        public void GetAvailableDates_ValidModel_AccessLogic()
+        public async Task GetAvailableDates_ValidModel_AccessLogic()
         {
             // Arrange
             string id = "some random id";
-            _doctorAvailabilityData.GetAvailableDates(id).Returns(x => new object());
+            _doctorAvailabilityData.GetAvailableDatesAsync(id).Returns(x => []);
 
             // Act
-            var result = _sut.GetAvailableDates(id);
+            var result = await _sut.GetAvailableDates(id);
 
             // Assert
             var badRequestResult = Assert.IsType<OkObjectResult>(result);

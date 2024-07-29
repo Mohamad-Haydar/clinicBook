@@ -11,26 +11,17 @@ namespace api.BusinessLogic.DataAccess;
 
 public class DoctorAvailabilityData : IDoctorAvailabilityData
 {
-    private readonly IdentityAppDbContext _identityContext;
     private readonly UserManager<UserModel> _userManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
     private readonly ApplicationDbContext _appDbContext;
-    private readonly ITokenService _tokenService;
 
-    public DoctorAvailabilityData(IdentityAppDbContext identityContext,
-                              UserManager<UserModel> userManager,
-                              RoleManager<IdentityRole> roleManager,
-                              ApplicationDbContext appDbContext,
-                              ITokenService tokenService)
+    public DoctorAvailabilityData(UserManager<UserModel> userManager,
+                              ApplicationDbContext appDbContext)
     {
-        _identityContext = identityContext;
         _userManager = userManager;
-        _roleManager = roleManager;
         _appDbContext = appDbContext;
-        _tokenService = tokenService;
     }
 
-    public async Task<IEnumerable<DoctorAvailabilityResponse>> GetAvailableDates(string id)
+    public async Task<IEnumerable<DoctorAvailabilityResponse>> GetAvailableDatesAsync(string id)
     {
         try
         {
@@ -119,13 +110,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
 
     public async Task DeleteAvailableDateAsync(int id)
     {
-
-
-        var availableDate = await _appDbContext.DoctorAvailabilities.FirstOrDefaultAsync(x => x.Id == id);
-        if (availableDate == null)
-        {
-            throw new NotFoundException("Not Found, Enter a valid input");
-        }
+        var availableDate = await _appDbContext.DoctorAvailabilities.FirstOrDefaultAsync(x => x.Id == id) ?? throw new NotFoundException("Not Found, Enter a valid input");
         try
         {
             var available = _appDbContext.Remove(availableDate);
