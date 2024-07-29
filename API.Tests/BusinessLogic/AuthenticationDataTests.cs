@@ -4,8 +4,10 @@ using api.Data;
 using api.Exceptions;
 using api.Models;
 using api.Models.Request;
+using API.Tests.Helper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -28,39 +30,18 @@ namespace API.Tests.BusinessLogic
         private readonly ApplicationDbContext _appContext;
         private readonly ITokenService _tokenService;
         private readonly AuthenticationData _sut;
+        private readonly AppDbContextFactory _contextFactory;
+
 
         public AuthenticationDataTests()
         {
-            // Create context options for both database
-            var _identitycontextOptions = new DbContextOptionsBuilder<IdentityAppDbContext>().UseInMemoryDatabase("clinicusers");
-            var _appcontextOptions = new DbContextOptionsBuilder<ApplicationDbContext>().UseInMemoryDatabase("clinicbook");
-
-            // create the context for both database
-            _identityContext = new IdentityAppDbContext(_identitycontextOptions.Options);
-            _appContext = new ApplicationDbContext(_appcontextOptions.Options);
-
-            // Ensure creation
-            _identityContext.Database.EnsureCreated();
-            _appContext.Database.EnsureCreated();
-
-            // Substitute all the dependency of usermanager
-            var userStore = Substitute.For<IUserStore<UserModel>>();
-            var roleStore = Substitute.For<IRoleStore<IdentityRole>>();
-            var options = Substitute.For<IOptions<IdentityOptions>>();
-            var passwordHasher = Substitute.For<IPasswordHasher<UserModel>>();
-            var userValidators = new List<IUserValidator<UserModel>> { Substitute.For<IUserValidator<UserModel>>() };
-            var passwordValidators = new List<IPasswordValidator<UserModel>> { Substitute.For<IPasswordValidator<UserModel>>() };
-            var keyNormalizer = Substitute.For<ILookupNormalizer>();
-            var errors = Substitute.For<IdentityErrorDescriber>();
-            var services = Substitute.For<IServiceProvider>();
-            var logger = Substitute.For<ILogger<UserManager<UserModel>>>();
-            var loggerRole = Substitute.For<ILogger<RoleManager<IdentityRole>>>();
-            var roleValidators = new List<IRoleValidator<IdentityRole>>();
-
-            _userManager = Substitute.For<UserManager<UserModel>>(userStore, options, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger);
-            _roleManager = Substitute.For<RoleManager<IdentityRole>>(roleStore, roleValidators, keyNormalizer, errors, loggerRole);
+            _contextFactory = new AppDbContextFactory();
+            _userManager = _contextFactory.CreateUserManager();
+            _appContext = _contextFactory.CreateAppContext();
+            _identityContext = _contextFactory.CreateIdentityContext();
+            _roleManager = _contextFactory.CreateRoleManager();
             _tokenService = Substitute.For<ITokenService>();
-
+            
             _sut = new AuthenticationData(_identityContext, _userManager, _roleManager, _appContext, _tokenService);
         }
 
