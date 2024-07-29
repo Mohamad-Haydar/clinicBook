@@ -68,13 +68,17 @@ public class DoctorManagementData : IDoctorManagementData
     {
         try
         {
-            var service = await _appDbContext.DoctorServiceModels.FirstOrDefaultAsync(x => x.Id == id);
+            var service = await _appDbContext.DoctorServices.FirstOrDefaultAsync(x => x.Id == id);
             if (service == null)
             {
                 throw new NotFoundException("something whent wrong please check your input data");
             }
             service.Duration = duration;
             await _appDbContext.SaveChangesAsync();
+        }
+        catch (NotFoundException)
+        {
+            throw;
         }
         catch (Exception)
         {
@@ -86,11 +90,15 @@ public class DoctorManagementData : IDoctorManagementData
     // and check if i want to delete the client reservation
     public async Task DeleteDoctorServiceAsync(int id)
     {
-        var service = await _appDbContext.DoctorServiceModels.FirstOrDefaultAsync(x => x.Id == id) ?? throw new NotFoundException("Service not found");
+        var service = await _appDbContext.DoctorServices.FirstOrDefaultAsync(x => x.Id == id) ?? throw new NotFoundException("Service not found");
         try
         {
-            var res = _appDbContext.DoctorServiceModels.Remove(service);
+            var res = _appDbContext.DoctorServices.Remove(service);
             await _appDbContext.SaveChangesAsync();
+        }
+        catch (NotFoundException)
+        {
+            throw;
         }
         catch (Exception)
         {
@@ -173,9 +181,17 @@ public class DoctorManagementData : IDoctorManagementData
         {
             IQueryable<DoctorInfoResponce> doctor = from d in _appDbContext.Doctors
                                                     where d.Email == email
-                                                    join c in _appDbContext.CategoryModels on d.CategoryId equals c.Id
+                                                    join c in _appDbContext.Categories on d.CategoryId equals c.Id
                                                     select new DoctorInfoResponce { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
-            return await doctor.FirstOrDefaultAsync();
+            if (!doctor.Any())
+            {
+                throw new NotFoundException("doctor not found");
+            }
+            return await doctor.FirstAsync();
+        }
+        catch (NotFoundException)
+        {
+            throw new NotFoundException("doctor not found");
         }
         catch (Exception)
         {
@@ -189,9 +205,17 @@ public class DoctorManagementData : IDoctorManagementData
         {
             var doctor = from d in _appDbContext.Doctors
                          where d.Id == id
-                         join c in _appDbContext.CategoryModels on d.CategoryId equals c.Id
+                         join c in _appDbContext.Categories on d.CategoryId equals c.Id
                          select new DoctorInfoResponce { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
-            return await doctor.FirstOrDefaultAsync();
+            if (!doctor.Any())
+            {
+                throw new NotFoundException("doctor not found");
+            }
+            return await doctor.FirstAsync();
+        }
+        catch (NotFoundException)
+        {
+            throw new NotFoundException("doctor not found");
         }
         catch (Exception)
         {
@@ -216,7 +240,7 @@ public class DoctorManagementData : IDoctorManagementData
     {
         try
         {
-            var doctors = from c in _appDbContext.CategoryModels
+            var doctors = from c in _appDbContext.Categories
                           where c.Id == CategoryId
                           join d in _appDbContext.Doctors on c.Id equals  d.CategoryId 
                           select new DoctorInfoResponce { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
