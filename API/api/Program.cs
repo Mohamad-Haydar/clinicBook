@@ -81,6 +81,7 @@ builder.Services.AddScoped<IDoctorAvailabilityData, DoctorAvailabilityData>();
 builder.Services.AddScoped<IReservationData, ReservationData>();
 builder.Services.AddScoped<IAuthenticationData, AuthenticationData>();
 builder.Services.AddScoped<ICategoryData, CategoryData>();
+builder.Services.AddScoped<IBackupService, BackupService>();
 
 
 
