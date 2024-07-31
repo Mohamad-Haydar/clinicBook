@@ -184,7 +184,7 @@ public class AuthenticationController : Controller
 
             Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
             {
-                HttpOnly = true,
+                HttpOnly = false,
                 Secure = false,
                 SameSite = SameSiteMode.Lax
             });
