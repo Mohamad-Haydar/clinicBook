@@ -373,7 +373,7 @@ namespace API.Tests.Controllers
         {
             // Arrange
             LoginRequest model = new();
-            AuthenticationResponse response = new()
+            TokenResponse response = new()
             {
                 AccessToken = "AccessToken",
                 RefreshToken = "RefreshToken"
@@ -391,7 +391,7 @@ namespace API.Tests.Controllers
 
             //Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var responseContent = okResult.Value as AuthenticationResponse;
+            var responseContent = okResult.Value as TokenResponse;
             Assert.NotNull(responseContent);
             Assert.Equal("AccessToken", responseContent.AccessToken);
             Assert.Equal("RefreshToken", responseContent.RefreshToken);

@@ -196,7 +196,12 @@ public class AuthenticationController : Controller
                 SameSite = SameSiteMode.Lax
             }); 
             
-            return Ok(result);
+            return Ok(new{
+                Id = result.Id,
+                UserName = result.UserName,
+                Email = result.Email,
+                PhoneNumber = result.PhoneNumber,
+            });
         }
         catch (UserExistsException ex)
         {

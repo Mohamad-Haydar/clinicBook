@@ -181,6 +181,10 @@ public class AuthenticationData : IAuthenticationData
 
             return new AuthenticationResponse
             {
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = model.Email,
+                PhoneNumber = user.PhoneNumber,
                 AccessToken = accessToken,
                 RefreshToken = refreshToken
             };
