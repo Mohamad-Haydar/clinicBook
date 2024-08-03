@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using api.Data;
 using api.BusinessLogic.DataAccess;
 using api.Helper;
@@ -12,6 +12,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using api.BusinessLogic.DataAccess.IDataAccess;
+using Microsoft.AspNetCore.Localization;
+using System.Globalization;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,8 +28,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDbContext<IdentityAppDbContext>(options =>
         options.UseNpgsql(identityConnectionString));
 
-builder.Services.AddIdentity<UserModel, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<IdentityAppDbContext>();
+builder.Services.AddIdentity<UserModel, IdentityRole>(options => {
+    options.SignIn.RequireConfirmedAccount = true;
+    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+/ ابتثجحخدذرزسشصضطظعغفقكلمنهويىأ";
+}).AddEntityFrameworkStores<IdentityAppDbContext>();
 
 builder.Services.Configure<IdentityOptions>(options =>
     {
@@ -54,8 +58,7 @@ builder.Services.AddAuthentication(options =>
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("loreamipsumissomesecreatekeytobeused")),
                 ValidateIssuer = false,
                 ValidateAudience = false,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.FromMinutes(5)
+                ValidateLifetime = true
         };
 });
 

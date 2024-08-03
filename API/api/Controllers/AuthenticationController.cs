@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using api.BusinessLogic.DataAccess.IDataAccess;
+using api.BusinessLogic.DataAccess;
 
 namespace api.Controllers;
 

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using api.Exceptions;
 using api.BusinessLogic.DataAccess.IDataAccess;
 using System.Security.Claims;
+using System.Transactions;
 
 namespace api.BusinessLogic.DataAccess;
 
@@ -38,7 +39,8 @@ public class AuthenticationData : IAuthenticationData
             throw new UserExistsException("This email already exists");
         }
 
-        using (var transaction = _identityContext.Database.BeginTransaction())
+        using (var identityTransaction = await _identityContext.Database.BeginTransactionAsync())
+        using (var appTransaction = await _appContext.Database.BeginTransactionAsync())
         {
             try
             {
@@ -55,11 +57,14 @@ public class AuthenticationData : IAuthenticationData
                 };
                 await _appContext.Clients.AddAsync(client);
                 await _appContext.SaveChangesAsync();
-                transaction.Commit();
+                await _identityContext.SaveChangesAsync();
+                await identityTransaction.CommitAsync();
+                await appTransaction.CommitAsync();
             }
             catch
             {
-                await transaction.RollbackAsync();
+                identityTransaction.Rollback();
+                appTransaction.Rollback();
                 throw new BusinessException("An error occurred while registering the client");
             }
         }
@@ -73,7 +78,8 @@ public class AuthenticationData : IAuthenticationData
             throw new UserExistsException("This email already exists");
         }
 
-        using (var transaction = _identityContext.Database.BeginTransaction())
+        using (var identityTransaction = await _identityContext.Database.BeginTransactionAsync())
+        using (var appTransaction = await _appContext.Database.BeginTransactionAsync())
         {
             try
             {
@@ -90,11 +96,14 @@ public class AuthenticationData : IAuthenticationData
                 };
                 await _appContext.Secretaries.AddAsync(secretary);
                 await _appContext.SaveChangesAsync();
-                transaction.Commit();
+                await _identityContext.SaveChangesAsync();
+                await identityTransaction.CommitAsync();
+                await appTransaction.RollbackAsync();
             }
             catch (Exception)
             {
-                await transaction.RollbackAsync();
+                identityTransaction.Rollback();
+                appTransaction.Rollback();
                 throw new BusinessException("An error occurred while registering the client");
             }
         }
@@ -108,7 +117,8 @@ public class AuthenticationData : IAuthenticationData
             throw new UserExistsException("This email already exists");
         }
 
-        using (var transaction = _identityContext.Database.BeginTransaction())
+        using (var identityTransaction = await _identityContext.Database.BeginTransactionAsync())
+        using (var appTransaction = await _appContext.Database.BeginTransactionAsync())
         {
             try
             {
@@ -122,7 +132,7 @@ public class AuthenticationData : IAuthenticationData
                     RefreshTokenExpiryTime = DateTime.MinValue
                 };
                 var result = await _userManager.CreateAsync(user, model.Password);
-                await _userManager.AddToRoleAsync(user, Roles.Doctor.ToString());
+                var added = await _userManager.AddToRoleAsync(user, Roles.Doctor.ToString());
                 DoctorModel doctor = new()
                 {
                     Id = user.Id,
@@ -135,11 +145,15 @@ public class AuthenticationData : IAuthenticationData
                 };
                 await _appContext.Doctors.AddAsync(doctor);
                 await _appContext.SaveChangesAsync();
-                transaction.Commit();
+                await _identityContext.SaveChangesAsync();
+
+                await appTransaction.CommitAsync();
+                await identityTransaction.CommitAsync();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                transaction.Rollback();
+                await appTransaction.RollbackAsync();
+                await identityTransaction.RollbackAsync();
                 throw new BusinessException("An error occurred while registering the client");
             }
         }
@@ -157,6 +171,8 @@ public class AuthenticationData : IAuthenticationData
             var user = new UserModel { UserName = "admin", Email = email, PhoneNumber = "76612235" };
             var result = await _userManager.CreateAsync(user, password);
             await _userManager.AddToRoleAsync(user, Roles.Admin.ToString());
+            await _appContext.SaveChangesAsync();
+            await _identityContext.SaveChangesAsync();
         }
         catch (Exception)
         {

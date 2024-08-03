@@ -14,11 +14,13 @@ public class TokenData : ITokenData
     private readonly UserManager<UserModel> _userManager;
     private readonly IdentityAppDbContext _identityContext;
     private readonly ITokenService _tokenService;
-    public TokenData(UserManager<UserModel> userManager, IdentityAppDbContext identityContext, ITokenService tokenService)
+    private readonly ApplicationDbContext _appContext;
+    public TokenData(UserManager<UserModel> userManager, IdentityAppDbContext identityContext, ITokenService tokenService, ApplicationDbContext appContext)
     {
         _userManager = userManager;
         _identityContext = identityContext;
         _tokenService = tokenService;
+        _appContext = appContext;
     }
     public async Task<AuthenticationResponse> RefreshAsync(RefreshRequest tokenApiModel)
     {
@@ -34,6 +36,7 @@ public class TokenData : ITokenData
             {
                 throw new InvalidRequestException("Invalid client request");
             }
+           
             var newAccessToken = await _tokenService.GenerateAccessTokenAsync(email);
             var newRefreshToken = _tokenService.GenerateRefreshToken();
             user.RefreshToken = newRefreshToken;
@@ -44,10 +47,10 @@ public class TokenData : ITokenData
             {
                 Id = user.Id,
                 UserName = user.UserName,
-                Email = user.Email,
+                Email = email,
                 PhoneNumber = user.PhoneNumber,
-                AccessToken = accessToken,
-                RefreshToken = refreshToken
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshToken
             };
         }
         catch (Exception)
