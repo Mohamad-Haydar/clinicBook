@@ -195,15 +195,15 @@ public class AuthenticationData : IAuthenticationData
         }
     }
 
-    public async Task LogoutAsync(KeyValuePair<string, string> refreshPair, KeyValuePair<string, string> accessPair)
+    public async Task LogoutAsync(string refreshToken, string accessToken)
     {
         try
         {
-            var principal = _tokenService.GetPrincipalFromExpiredToken(accessPair.Value);
+            var principal = _tokenService.GetPrincipalFromExpiredToken(accessToken);
             var userId = principal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier)?.Value;
 
             var user = await _userManager.FindByIdAsync(userId);
-            if(user.RefreshToken != refreshPair.Value)
+            if(user.RefreshToken != refreshToken)
             {
                 throw new NotFoundException("Invalid client request");
             }

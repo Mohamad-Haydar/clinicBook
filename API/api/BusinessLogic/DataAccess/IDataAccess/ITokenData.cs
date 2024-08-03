@@ -5,6 +5,6 @@ namespace api.BusinessLogic.DataAccess.IDataAccess
 {
     public interface ITokenData
     {
-        Task<TokenResponse> RefreshAsync(RefreshRequest tokenApiModel);
+        Task<AuthenticationResponse> RefreshAsync(RefreshRequest tokenApiModel);
     }
 }

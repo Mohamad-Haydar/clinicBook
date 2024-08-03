@@ -10,6 +10,6 @@ namespace api.BusinessLogic.DataAccess.IDataAccess
         Task RegisterClientAsync(CreateUserRequest model);
         Task RegisterDoctorAsync(CreateDoctorRequest model);
         Task RegisterSecretaryAsync(CreateSecretaryRequest model);
-        Task LogoutAsync(KeyValuePair<string, string> refreshPair, KeyValuePair<string, string> accessPair);
+        Task LogoutAsync(string refreshToken, string accessToken);
     }
 }

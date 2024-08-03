@@ -201,6 +201,7 @@ public class AuthenticationController : Controller
                 UserName = result.UserName,
                 Email = result.Email,
                 PhoneNumber = result.PhoneNumber,
+                AccessToken = result.AccessToken,
             });
         }
         catch (UserExistsException ex)
@@ -226,12 +227,12 @@ public class AuthenticationController : Controller
     [Authorize]
     public async Task<IActionResult> Logout()
     {
-        KeyValuePair<string, string> refreshPair = Request.Cookies.FirstOrDefault(x => x.Key=="refreshToken");
-        KeyValuePair<string, string> accessPair = Request.Cookies.FirstOrDefault(x => x.Key=="accessToken");
+        string refreshToken = Request.Cookies["refreshToken"];
+        string accessToken = Request.Cookies["accessToken"];
 
         try
         {
-            await _authenticationData.LogoutAsync(refreshPair, accessPair);
+            await _authenticationData.LogoutAsync(refreshToken, accessToken);
             Response.Cookies.Delete("accessToken", new CookieOptions
                 {
                     HttpOnly = true,

@@ -21,15 +21,20 @@ public class TokenController : Controller
 
     [HttpPost]
     [Route("refresh")]
-    public async Task<IActionResult> Refresh([FromBody] RefreshRequest tokenApiModel)
+    public async Task<IActionResult> Refresh()
     {
-        if (!ModelState.IsValid || tokenApiModel.AccessToken == null || tokenApiModel.RefreshToken == null)
+        RefreshRequest tokenApiModel = new RefreshRequest();
+
+        tokenApiModel.AccessToken = Request.Cookies["accessToken"];
+        tokenApiModel.RefreshToken = Request.Cookies["refreshToken"];
+
+        if (tokenApiModel.AccessToken == null || tokenApiModel.RefreshToken == null)
             return BadRequest("Invalid client request");
 
         try
         {
             var result = await _tokenData.RefreshAsync(tokenApiModel);
-            Response.Cookies.Append("jwtToken", result.AccessToken, new CookieOptions
+            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = false,
@@ -42,7 +47,14 @@ public class TokenController : Controller
                 Secure = false,
                 SameSite = SameSiteMode.Lax
             });
-            return Ok(result);
+            return Ok(new
+            {
+                Id = result.Id,
+                UserName = result.UserName,
+                Email = result.Email,
+                PhoneNumber = result.PhoneNumber,
+                AccessToken = result.AccessToken,
+            });
         }
         catch (InvalidRequestException)
         {

@@ -20,7 +20,7 @@ public class TokenData : ITokenData
         _identityContext = identityContext;
         _tokenService = tokenService;
     }
-    public async Task<TokenResponse> RefreshAsync(RefreshRequest tokenApiModel)
+    public async Task<AuthenticationResponse> RefreshAsync(RefreshRequest tokenApiModel)
     {
         string? accessToken = tokenApiModel.AccessToken;
         string? refreshToken = tokenApiModel.RefreshToken;
@@ -40,10 +40,14 @@ public class TokenData : ITokenData
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
             _identityContext.SaveChanges();
 
-            return new TokenResponse()
+            return new AuthenticationResponse
             {
-                AccessToken = newAccessToken,
-                RefreshToken = newRefreshToken
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
             };
         }
         catch (Exception)
