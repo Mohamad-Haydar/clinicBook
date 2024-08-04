@@ -327,7 +327,7 @@ namespace API.Tests.BusinessLogic
             var doctor = await _sut.GetDoctorByEmailAsync(email);
             
             // Assert
-            Assert.IsType<DoctorInfoResponce>(doctor);
+            Assert.IsType<DoctorInfoResponse>(doctor);
             Assert.Equal("lastname2", doctor.LastName);
             Assert.Equal("someemail2", doctor.Email);
             Assert.Equal("category1", doctor.CategoryName);
@@ -457,7 +457,7 @@ namespace API.Tests.BusinessLogic
             var doctor = await _sut.GetDoctorByIdAsync(ID);
 
             // Assert
-            Assert.IsType<DoctorInfoResponce>(doctor);
+            Assert.IsType<DoctorInfoResponse>(doctor);
             Assert.Equal("lastname2", doctor.LastName);
             Assert.Equal("someemail2", doctor.Email);
             Assert.Equal("category1", doctor.CategoryName);
@@ -470,7 +470,7 @@ namespace API.Tests.BusinessLogic
             // Arrange
 
             // Act
-            var result = await _sut.GetAllDoctorsNameAndIdAsync();
+            var result = await _sut.GetAllDoctorsAsync();
 
             // Assert
             Assert.Empty(result);
@@ -516,10 +516,10 @@ namespace API.Tests.BusinessLogic
             _appContext.SaveChanges();
 
             // Act
-            var result = await _sut.GetAllDoctorsNameAndIdAsync();
+            var result = await _sut.GetAllDoctorsAsync();
 
             // Assert
-            Assert.IsAssignableFrom<IEnumerable<DoctorNameResponse>>(result);
+            Assert.IsAssignableFrom<IEnumerable<DoctorInfoResponse>>(result);
             Assert.Equal(3, result.Count());
         }
 
@@ -595,7 +595,7 @@ namespace API.Tests.BusinessLogic
             var result = await _sut.GetDoctorsByCategoryAsync(categoryId);
 
             // Assert
-            Assert.IsAssignableFrom<IEnumerable<DoctorInfoResponce>>(result);
+            Assert.IsAssignableFrom<IEnumerable<DoctorInfoResponse>>(result);
             Assert.Equal(2, result.Count());
         }
 

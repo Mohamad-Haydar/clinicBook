@@ -1,6 +1,6 @@
 namespace api.Models.Responce;
 
-public class DoctorInfoResponce
+public class DoctorInfoResponse
 {
     public string Id { get; set; }
     public string FirstName { get; set; }

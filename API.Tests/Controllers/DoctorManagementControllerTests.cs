@@ -276,7 +276,7 @@ namespace API.Tests.Controllers
         {
             // Given
             string email = "email@gmail.com";
-            var reservations = new DoctorInfoResponce(){Email = "email@gmail.com" };
+            var reservations = new DoctorInfoResponse(){Email = "email@gmail.com" };
             _doctorAvailabilityData.GetDoctorByEmailAsync(email).Returns(Task.FromResult(reservations));
 
             // When
@@ -284,7 +284,7 @@ namespace API.Tests.Controllers
 
             // Then
             var okRequestResult = Assert.IsType<OkObjectResult>(result);
-            var okResponse = okRequestResult.Value as DoctorInfoResponce;
+            var okResponse = okRequestResult.Value as DoctorInfoResponse;
             Assert.NotNull(okResponse);
         }
 
@@ -310,7 +310,7 @@ namespace API.Tests.Controllers
         {
             // Given
             string id = "someId";
-            var reservations = new DoctorInfoResponce() { Id = "someId" };
+            var reservations = new DoctorInfoResponse() { Id = "someId" };
             _doctorAvailabilityData.GetDoctorByIdAsync(id).Returns(Task.FromResult(reservations));
 
             // When
@@ -318,7 +318,7 @@ namespace API.Tests.Controllers
 
             // Then
             var okRequestResult = Assert.IsType<OkObjectResult>(result);
-            var okResponse = okRequestResult.Value as DoctorInfoResponce;
+            var okResponse = okRequestResult.Value as DoctorInfoResponse;
             Assert.NotNull(okResponse);
         }
 
@@ -326,10 +326,10 @@ namespace API.Tests.Controllers
         public async Task GetAllDoctorsNameAndId_FailedLogic()
         {
             // Given
-            _doctorAvailabilityData.GetAllDoctorsNameAndIdAsync().Throws(new Exception());
+            _doctorAvailabilityData.GetAllDoctorsAsync().Throws(new Exception());
 
             // When
-            var result = await _sut.GetAllDoctorsNameAndId();
+            var result = await _sut.GetAllDoctors();
 
             // Then
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
@@ -342,11 +342,11 @@ namespace API.Tests.Controllers
         public async Task GetAllDoctorsNameAndId_AccessdLogic_NoContent()
         {
             // Given
-            IEnumerable<DoctorNameResponse> reservations = new List<DoctorNameResponse>();
-            _doctorAvailabilityData.GetAllDoctorsNameAndIdAsync().Returns(Task.FromResult(reservations));
+            IEnumerable<DoctorInfoResponse> reservations = new List<DoctorInfoResponse>();
+            _doctorAvailabilityData.GetAllDoctorsAsync().Returns(Task.FromResult(reservations));
 
             // When
-            var result = await _sut.GetAllDoctorsNameAndId();
+            var result = await _sut.GetAllDoctors();
 
             // Then
             var noContent = Assert.IsType<NoContentResult>(result);
@@ -357,15 +357,15 @@ namespace API.Tests.Controllers
         public async Task GetAllDoctorsNameAndId_AccessdLogic()
         {
             // Given
-            IEnumerable<DoctorNameResponse> reservations = new List<DoctorNameResponse>() { new(), new() };
-            _doctorAvailabilityData.GetAllDoctorsNameAndIdAsync().Returns(Task.FromResult(reservations));
+            IEnumerable<DoctorInfoResponse> reservations = new List<DoctorInfoResponse>() { new(), new() };
+            _doctorAvailabilityData.GetAllDoctorsAsync().Returns(Task.FromResult(reservations));
 
             // When
-            var result = await _sut.GetAllDoctorsNameAndId();
+            var result = await _sut.GetAllDoctors();
 
             // Then
             var okRequestResult = Assert.IsType<OkObjectResult>(result);
-            var okResponse = okRequestResult.Value as IEnumerable<DoctorNameResponse>;
+            var okResponse = okRequestResult.Value as IEnumerable<DoctorInfoResponse>;
             Assert.NotNull(okResponse);
             Assert.Equal(2, okResponse.Count());
         }
@@ -392,7 +392,7 @@ namespace API.Tests.Controllers
         {
             // Given
             int categoryId = 1;
-            IEnumerable<DoctorInfoResponce> reservations = [];
+            IEnumerable<DoctorInfoResponse> reservations = [];
             _doctorAvailabilityData.GetDoctorsByCategoryAsync(categoryId).Returns(Task.FromResult(reservations));
 
             // When
@@ -408,7 +408,7 @@ namespace API.Tests.Controllers
         {
             // Given
             int categoryId = 1;
-            IEnumerable<DoctorInfoResponce> reservations = [new(), new()];
+            IEnumerable<DoctorInfoResponse> reservations = [new(), new()];
             _doctorAvailabilityData.GetDoctorsByCategoryAsync(categoryId).Returns(Task.FromResult(reservations));
 
             // When
@@ -416,7 +416,7 @@ namespace API.Tests.Controllers
 
             // Then
             var okRequestResult = Assert.IsType<OkObjectResult>(result);
-            var okResponse = okRequestResult.Value as IEnumerable<DoctorInfoResponce>;
+            var okResponse = okRequestResult.Value as IEnumerable<DoctorInfoResponse>;
             Assert.NotNull(okResponse);
             Assert.Equal(2, okResponse.Count());
         }

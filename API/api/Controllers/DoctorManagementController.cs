@@ -232,13 +232,13 @@ public class DoctorManagementController : ControllerBase
     }
 
     [HttpGet]
-    [Route("GetAllDoctorsNameAndId")]
+    [Route("GetAllDoctors")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetAllDoctorsNameAndId()
+    public async Task<IActionResult> GetAllDoctors()
     {
         try
         {
-            var doctors = await _doctorManagementData.GetAllDoctorsNameAndIdAsync();
+            var doctors = await _doctorManagementData.GetAllDoctorsAsync();
             return doctors.Count() > 0 ? Ok(doctors) : NoContent();
         }
         catch (Exception)

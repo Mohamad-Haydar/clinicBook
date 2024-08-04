@@ -175,14 +175,14 @@ public class DoctorManagementData : IDoctorManagementData
         }
     }
 
-    public async Task<DoctorInfoResponce> GetDoctorByEmailAsync(string email)
+    public async Task<DoctorInfoResponse> GetDoctorByEmailAsync(string email)
     {
         try
         {
-            IQueryable<DoctorInfoResponce> doctor = from d in _appDbContext.Doctors
+            IQueryable<DoctorInfoResponse> doctor = from d in _appDbContext.Doctors
                                                     where d.Email == email
                                                     join c in _appDbContext.Categories on d.CategoryId equals c.Id
-                                                    select new DoctorInfoResponce { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
+                                                    select new DoctorInfoResponse { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
             if (!doctor.Any())
             {
                 throw new NotFoundException("doctor not found");
@@ -199,14 +199,14 @@ public class DoctorManagementData : IDoctorManagementData
         }
     }
 
-    public async Task<DoctorInfoResponce> GetDoctorByIdAsync(string id)
+    public async Task<DoctorInfoResponse> GetDoctorByIdAsync(string id)
     {
         try
         {
             var doctor = from d in _appDbContext.Doctors
                          where d.Id == id
                          join c in _appDbContext.Categories on d.CategoryId equals c.Id
-                         select new DoctorInfoResponce { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
+                         select new DoctorInfoResponse { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
             if (!doctor.Any())
             {
                 throw new NotFoundException("doctor not found");
@@ -223,12 +223,14 @@ public class DoctorManagementData : IDoctorManagementData
         }
     }
 
-    public async Task<IEnumerable<DoctorNameResponse>> GetAllDoctorsNameAndIdAsync()
+    public async Task<IEnumerable<DoctorInfoResponse>> GetAllDoctorsAsync()
     {
         try
         {
-            var doctors = await _appDbContext.Doctors.Select(x => new DoctorNameResponse { Id = x.Id, FirstName = x.FirstName , LastName = x.LastName}).ToListAsync();
-            return doctors;
+            var doctors = from d in _appDbContext.Doctors
+                          join c in _appDbContext.Categories on d.CategoryId equals c.Id
+                          select new DoctorInfoResponse { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
+            return await doctors.ToListAsync();
         }
         catch (Exception)
         {
@@ -236,14 +238,14 @@ public class DoctorManagementData : IDoctorManagementData
         }
     }
 
-    public async Task<IEnumerable<DoctorInfoResponce>> GetDoctorsByCategoryAsync(int CategoryId)
+    public async Task<IEnumerable<DoctorInfoResponse>> GetDoctorsByCategoryAsync(int CategoryId)
     {
         try
         {
             var doctors = from c in _appDbContext.Categories
                           where c.Id == CategoryId
                           join d in _appDbContext.Doctors on c.Id equals  d.CategoryId 
-                          select new DoctorInfoResponce { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
+                          select new DoctorInfoResponse { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
             return await doctors.ToListAsync();
         }
         catch (Exception)
