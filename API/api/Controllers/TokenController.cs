@@ -23,10 +23,11 @@ public class TokenController : Controller
     [Route("refresh")]
     public async Task<IActionResult> Refresh()
     {
-        RefreshRequest tokenApiModel = new RefreshRequest();
-
-        tokenApiModel.AccessToken = Request.Cookies["accessToken"];
-        tokenApiModel.RefreshToken = Request.Cookies["refreshToken"];
+        RefreshRequest tokenApiModel = new()
+        {
+            AccessToken = Request.Cookies["accessToken"],
+            RefreshToken = Request.Cookies["refreshToken"]
+        };
 
         if (tokenApiModel.AccessToken == null || tokenApiModel.RefreshToken == null)
             return BadRequest("Invalid client request");

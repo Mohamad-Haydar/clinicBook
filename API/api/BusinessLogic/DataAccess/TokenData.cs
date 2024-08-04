@@ -6,6 +6,7 @@ using api.Models;
 using api.Models.Request;
 using api.Models.Responce;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace api.BusinessLogic.DataAccess;
 
@@ -15,6 +16,8 @@ public class TokenData : ITokenData
     private readonly IdentityAppDbContext _identityContext;
     private readonly ITokenService _tokenService;
     private readonly ApplicationDbContext _appContext;
+    private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+
     public TokenData(UserManager<UserModel> userManager, IdentityAppDbContext identityContext, ITokenService tokenService, ApplicationDbContext appContext)
     {
         _userManager = userManager;
@@ -24,6 +27,7 @@ public class TokenData : ITokenData
     }
     public async Task<AuthenticationResponse> RefreshAsync(RefreshRequest tokenApiModel)
     {
+        await _semaphore.WaitAsync();
         string? accessToken = tokenApiModel.AccessToken;
         string? refreshToken = tokenApiModel.RefreshToken;
         try
@@ -32,16 +36,17 @@ public class TokenData : ITokenData
             var email = principal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email)?.Value;
             var userId = principal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier)?.Value;
             var user = await _userManager.FindByIdAsync(userId);
+
             if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
             {
                 throw new InvalidRequestException("Invalid client request");
             }
-           
+
             var newAccessToken = await _tokenService.GenerateAccessTokenAsync(email);
             var newRefreshToken = _tokenService.GenerateRefreshToken();
             user.RefreshToken = newRefreshToken;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-            _identityContext.SaveChanges();
+            await _identityContext.SaveChangesAsync();
 
             return new AuthenticationResponse
             {
@@ -53,9 +58,17 @@ public class TokenData : ITokenData
                 RefreshToken = newRefreshToken
             };
         }
+        catch(DbUpdateConcurrencyException)
+        {
+            throw;
+        }
         catch (Exception)
         {
             throw new BusinessException("Something went wrong. Please try again.");
+        }
+        finally
+        {
+            _semaphore.Release();
         }
 
     }

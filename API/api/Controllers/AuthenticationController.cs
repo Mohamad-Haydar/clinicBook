@@ -9,7 +9,6 @@ using api.Models.Request;
 using api.Models.Responce;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using api.BusinessLogic.DataAccess.IDataAccess;
 using api.BusinessLogic.DataAccess;
 
@@ -62,7 +61,7 @@ public class AuthenticationController : Controller
         if (!ModelState.IsValid) 
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new { message = "Please enter a valid input", errors });
+            return BadRequest(new Response("Please enter a valid input"));
         }
         try
         {
@@ -71,11 +70,11 @@ public class AuthenticationController : Controller
         }
         catch (UserExistsException ex)
         {
-            return BadRequest(new Response(ex.Message ));
+            return BadRequest(new Response(ex.Message));
         }
         catch (BusinessException ex)
         {
-            return BadRequest(new Response(ex.Message ));
+            return BadRequest(new Response(ex.Message));
         }
         catch (Exception)
         {
@@ -91,7 +90,7 @@ public class AuthenticationController : Controller
         if (!ModelState.IsValid) 
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new { message = "Please enter a valid input", errors });
+            return BadRequest(new Response("Please enter a valid input"));
         }
         try
         {
@@ -112,7 +111,7 @@ public class AuthenticationController : Controller
         }
     }
 
-    //[AuthorizeRoles(Roles.Secretary, Roles.Admin)]
+    [AuthorizeRoles(Roles.Secretary, Roles.Admin)]
     [Route("RegisterDoctor")]
     [HttpPost]
     public async Task<IActionResult> RegisterDoctor([FromBody] CreateDoctorRequest model)
@@ -120,7 +119,7 @@ public class AuthenticationController : Controller
         if (!ModelState.IsValid) 
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new { message = "Please enter a valid input", errors });
+            return BadRequest(new Response("Please enter a valid input"));
         }
         try
         {
@@ -148,7 +147,7 @@ public class AuthenticationController : Controller
         if (!ModelState.IsValid) 
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new { message = "Please enter a valid input", errors });
+            return BadRequest(new Response ("Please enter a valid input"));
         }
         try
         {
@@ -177,7 +176,7 @@ public class AuthenticationController : Controller
         if (!ModelState.IsValid)
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new { message = "Please enter a valid input", errors });
+            return BadRequest(new Response("Please enter a valid input"));
         }
         try
         {
