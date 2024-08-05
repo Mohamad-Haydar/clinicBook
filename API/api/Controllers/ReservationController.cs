@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using api.Models.Responce;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Net;
 
 namespace api.Controllers;
 
@@ -33,7 +34,7 @@ public class ReservationController : ControllerBase
         if (!ModelState.IsValid)
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new { message = "Please enter a valid input", errors });
+            return BadRequest(new Response("Please enter a valid input"));
         }
 
         try
@@ -41,9 +42,9 @@ public class ReservationController : ControllerBase
             await _reservationData.CreateQueueReservationAsync(model);
             return Ok(new Response("Reservation added successfully"));
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return BadRequest(new Response());
+            return BadRequest(new Response(ex.Message));
         }
     }
 
