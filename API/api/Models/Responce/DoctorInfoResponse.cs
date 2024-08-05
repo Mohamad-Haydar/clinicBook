@@ -9,5 +9,6 @@ public class DoctorInfoResponse
     public string PhoneNumber { get; set; }
     public string Description { get; set; }
     public string CategoryName { get; set; }
-    public string? Image {  get; set; }    
+    public string? Image { get; set; }  
+    public IEnumerable<DoctorServiceModel>? Services { get; set; } = null;  
 }

@@ -206,7 +206,26 @@ public class DoctorManagementData : IDoctorManagementData
             var doctor = from d in _appDbContext.Doctors
                          where d.Id == id
                          join c in _appDbContext.Categories on d.CategoryId equals c.Id
-                         select new DoctorInfoResponse { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
+                         join ds in _appDbContext.DoctorServices on d.Id equals ds.DoctorId into servicesGroup
+                         select new DoctorInfoResponse 
+                         { 
+                            Id = d.Id, 
+                            FirstName = d.FirstName, 
+                            LastName = d.LastName, 
+                            Email = d.Email, 
+                            PhoneNumber = d.PhoneNumber, 
+                            Description = d.Description, 
+                            CategoryName = c.CategoryName, 
+                            Image = d.Image,
+                            Services = servicesGroup.Select(s => new DoctorServiceModel
+                            {
+                                Id = s.Id,
+                                ServiceName = s.ServiceName,
+                                Duration = s.Duration,
+                                DoctorId = s.DoctorId,
+                                ServiceId = s.ServiceId
+                            }).ToList()
+                        };
             if (!doctor.Any())
             {
                 throw new NotFoundException("doctor not found");

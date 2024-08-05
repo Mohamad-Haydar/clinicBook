@@ -213,7 +213,7 @@ public class DoctorManagementController : ControllerBase
     [HttpGet]
     [Route("GetDoctorById")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetDoctorById([Required] string DoctorId)
+    public async Task<IActionResult> GetDoctorById([Required] string id)
     {
         if (!ModelState.IsValid)
         {
@@ -222,7 +222,7 @@ public class DoctorManagementController : ControllerBase
 
         try
         {
-            var doctor = await _doctorManagementData.GetDoctorByIdAsync(DoctorId);
+            var doctor = await _doctorManagementData.GetDoctorByIdAsync(id);
             return Ok(doctor);
         }
         catch (Exception)

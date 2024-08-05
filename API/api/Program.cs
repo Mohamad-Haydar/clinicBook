@@ -86,6 +86,7 @@ builder.Services.AddScoped<IReservationData, ReservationData>();
 builder.Services.AddScoped<IAuthenticationData, AuthenticationData>();
 builder.Services.AddScoped<ICategoryData, CategoryData>();
 builder.Services.AddScoped<IBackupService, BackupService>();
+builder.Services.AddScoped<IServiceData, ServiceData>();
 
 
 
