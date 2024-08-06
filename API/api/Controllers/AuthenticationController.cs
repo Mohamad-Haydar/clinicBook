@@ -65,8 +65,30 @@ public class AuthenticationController : Controller
         }
         try
         {
-            await _authenticationData.RegisterClientAsync(model);
-            return Ok(new Response("Client created successfully. You can login to your account." ));
+            var result = await _authenticationData.RegisterClientAsync(model);
+
+            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
+            {
+                HttpOnly = false,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
+
+            Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
+
+            return Ok(new
+            {
+                Id = result.Id,
+                UserName = result.UserName,
+                Email = result.Email,
+                PhoneNumber = result.PhoneNumber,
+                AccessToken = result.AccessToken,
+            });
         }
         catch (UserExistsException ex)
         {
@@ -94,8 +116,29 @@ public class AuthenticationController : Controller
         }
         try
         {
-            await _authenticationData.RegisterSecretaryAsync(model);
-            return Ok(new Response("Secretary created successfully. You can login to your account."));
+            var result = await _authenticationData.RegisterSecretaryAsync(model);
+            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
+            {
+                HttpOnly = false,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
+
+            Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
+
+            return Ok(new
+            {
+                Id = result.Id,
+                UserName = result.UserName,
+                Email = result.Email,
+                PhoneNumber = result.PhoneNumber,
+                AccessToken = result.AccessToken,
+            });
         }
         catch (UserExistsException ex)
         {
@@ -123,8 +166,29 @@ public class AuthenticationController : Controller
         }
         try
         {
-            await _authenticationData.RegisterDoctorAsync(model);
-            return Ok(new Response ("Doctor created successfully. You can login to your account." ));
+            var result = await _authenticationData.RegisterDoctorAsync(model);
+            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
+            {
+                HttpOnly = false,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
+
+            Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
+
+            return Ok(new
+            {
+                Id = result.Id,
+                UserName = result.UserName,
+                Email = result.Email,
+                PhoneNumber = result.PhoneNumber,
+                AccessToken = result.AccessToken,
+            });
         }
         catch (UserExistsException ex)
         {

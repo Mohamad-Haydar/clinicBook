@@ -7,9 +7,9 @@ namespace api.BusinessLogic.DataAccess.IDataAccess
     {
         Task<AuthenticationResponse> LoginUserAsync(LoginRequest model);
         Task RegisterAdminAsync(string email, string password);
-        Task RegisterClientAsync(CreateUserRequest model);
-        Task RegisterDoctorAsync(CreateDoctorRequest model);
-        Task RegisterSecretaryAsync(CreateSecretaryRequest model);
+        Task<AuthenticationResponse> RegisterClientAsync(CreateUserRequest model);
+        Task<AuthenticationResponse> RegisterDoctorAsync(CreateDoctorRequest model);
+        Task<AuthenticationResponse> RegisterSecretaryAsync(CreateSecretaryRequest model);
         Task LogoutAsync(string refreshToken, string accessToken);
     }
 }

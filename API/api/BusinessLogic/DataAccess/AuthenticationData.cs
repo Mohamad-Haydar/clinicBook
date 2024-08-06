@@ -31,7 +31,7 @@ public class AuthenticationData : IAuthenticationData
         _appContext = appContext;
         _tokenService = tokenService;
     }
-    public async Task RegisterClientAsync(CreateUserRequest model)
+    public async Task<AuthenticationResponse> RegisterClientAsync(CreateUserRequest model)
     {
         var userExists = await _userManager.FindByEmailAsync(model.Email);
         if (userExists != null)
@@ -60,6 +60,7 @@ public class AuthenticationData : IAuthenticationData
                 await _identityContext.SaveChangesAsync();
                 await identityTransaction.CommitAsync();
                 await appTransaction.CommitAsync();
+                return await LoginUserAsync(new LoginRequest { Email = model.Email, Password = model.Password });
             }
             catch
             {
@@ -70,7 +71,7 @@ public class AuthenticationData : IAuthenticationData
         }
     }
 
-    public async Task RegisterSecretaryAsync(CreateSecretaryRequest model)
+    public async Task<AuthenticationResponse> RegisterSecretaryAsync(CreateSecretaryRequest model)
     {
         var userExists = await _userManager.FindByEmailAsync(model.Email);
         if (userExists != null)
@@ -99,6 +100,7 @@ public class AuthenticationData : IAuthenticationData
                 await _identityContext.SaveChangesAsync();
                 await identityTransaction.CommitAsync();
                 await appTransaction.RollbackAsync();
+                return await LoginUserAsync(new LoginRequest { Email = model.Email, Password = model.Password });
             }
             catch (Exception)
             {
@@ -109,7 +111,7 @@ public class AuthenticationData : IAuthenticationData
         }
     }
 
-    public async Task RegisterDoctorAsync(CreateDoctorRequest model)
+    public async Task<AuthenticationResponse> RegisterDoctorAsync(CreateDoctorRequest model)
     {
         var userExists = await _userManager.FindByEmailAsync(model.Email);
         if (userExists != null)
@@ -149,6 +151,7 @@ public class AuthenticationData : IAuthenticationData
 
                 await appTransaction.CommitAsync();
                 await identityTransaction.CommitAsync();
+                return await LoginUserAsync(new LoginRequest { Email = model.Email, Password = model.Password });
             }
             catch (Exception ex)
             {
