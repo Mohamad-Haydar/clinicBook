@@ -98,6 +98,10 @@ public class AuthenticationController : Controller
         {
             return BadRequest(new Response(ex.Message));
         }
+        catch (WrongPasswordException ex)
+        {
+            return BadRequest(new Response(ex.Message));
+        }
         catch (Exception)
         {
             return BadRequest(new Response("Something went wrong. Please try again." ));

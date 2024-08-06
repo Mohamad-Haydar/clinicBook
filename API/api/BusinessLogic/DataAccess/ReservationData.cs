@@ -53,7 +53,7 @@ public class ReservationData : IReservationData
         }
     }
 
-    public async Task<IQueryable<Dictionary<string, object>>> GetAllPersonalReservationsAsync(string ClientId)
+    public async Task<IQueryable<MyReservationResponse>> GetAllPersonalReservationsAsync(string ClientId)
     {
         try
         {
@@ -62,7 +62,7 @@ public class ReservationData : IReservationData
 
             var result = await _sql.LoadDataAsync("f_get_all_personal_reservations", paramsName, paramsValue, _connectionStrings.Value.AppDbConnection);
 
-            return result;
+            return (IQueryable<MyReservationResponse>)result;
         }
         catch (Exception)
         {

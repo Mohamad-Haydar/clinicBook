@@ -66,7 +66,7 @@ public class AuthenticationData : IAuthenticationData
             {
                 identityTransaction.Rollback();
                 appTransaction.Rollback();
-                throw new BusinessException("An error occurred while registering the client");
+                throw new BusinessException("An error occurred while registering, please try again.");
             }
         }
     }
@@ -185,32 +185,35 @@ public class AuthenticationData : IAuthenticationData
 
     public async Task<AuthenticationResponse> LoginUserAsync(LoginRequest model)
     {
-        var user = await _userManager.FindByEmailAsync(model.Email);
-        if (user == null)
+        var user = await _userManager.FindByEmailAsync(model.Email) ?? throw new UserExistsException("User Not found Please enter a valid input.");
+        try
         {
-            throw new UserExistsException("User Not found Please enter a valid input");
-        }
-        if (await _userManager.CheckPasswordAsync(user, model.Password))
-        {
-            var accessToken = await _tokenService.GenerateAccessTokenAsync(model.Email);
-            var refreshToken = _tokenService.GenerateRefreshToken();
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-            _identityContext.SaveChanges();
-
-            return new AuthenticationResponse
+            if (await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                Id = user.Id,
-                UserName = user.UserName,
-                Email = model.Email,
-                PhoneNumber = user.PhoneNumber,
-                AccessToken = accessToken,
-                RefreshToken = refreshToken
-            };
+                var accessToken = await _tokenService.GenerateAccessTokenAsync(model.Email);
+                var refreshToken = _tokenService.GenerateRefreshToken();
+                user.RefreshToken = refreshToken;
+                user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+                _identityContext.SaveChanges();
+
+                return new AuthenticationResponse
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = model.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken
+                };
+            }
+            else
+            {
+                throw new WrongPasswordException("Wrong password, please enter a valid password.");
+            }
         }
-        else
+        catch (Exception)
         {
-            throw new WrongPasswordException("Wrong password, please enter a valid password.");
+            throw new BusinessException("Something whent wrong while loging in, Please try again.");
         }
     }
 
