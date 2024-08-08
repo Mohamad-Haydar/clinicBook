@@ -73,7 +73,6 @@ public class AuthenticationController : Controller
                 userName= result.UserName,
                 email= result.Email,
                 phoneNumber= result.PhoneNumber,
-                accessToken= result.AccessToken,
         });
 
             Response.Cookies.Append("userData", userDataJson, new CookieOptions
@@ -143,7 +142,6 @@ public class AuthenticationController : Controller
                 userName = result.UserName,
                 email = result.Email,
                 phoneNumber = result.PhoneNumber,
-                accessToken = result.AccessToken,
             });
 
             Response.Cookies.Append("userData", userDataJson, new CookieOptions
@@ -210,7 +208,6 @@ public class AuthenticationController : Controller
                 userName = result.UserName,
                 email = result.Email,
                 phoneNumber = result.PhoneNumber,
-                accessToken = result.AccessToken,
             });
 
             Response.Cookies.Append("userData", userDataJson, new CookieOptions
@@ -306,7 +303,6 @@ public class AuthenticationController : Controller
                 userName = result.UserName,
                 email = result.Email,
                 phoneNumber = result.PhoneNumber,
-                accessToken = result.AccessToken,
             });
 
             Response.Cookies.Append("userData", userDataJson, new CookieOptions
