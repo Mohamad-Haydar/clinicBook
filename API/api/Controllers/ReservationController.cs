@@ -12,10 +12,11 @@ using api.Models.Responce;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Net;
+using api.Attributes;
 
 namespace api.Controllers;
 
-//[Authorize]
+[AuthorizeRoles(Roles.Client)]
 [Route("/api/[controller]")]
 public class ReservationController : ControllerBase
 {
@@ -88,7 +89,7 @@ public class ReservationController : ControllerBase
 
     [HttpGet]
     [Route("GetConcurrentBookings")]
-    public async Task<IActionResult> GetConcurrentBookings([Required] int ClientReservationId)
+    public async Task<IActionResult> GetConcurrentBookings([Required] int id)
     {
         if (!ModelState.IsValid)
         {
@@ -96,7 +97,7 @@ public class ReservationController : ControllerBase
         }
         try
         {
-            var result = await _reservationData.GetConcurrentBookingsAsync(ClientReservationId);
+            var result = await _reservationData.GetConcurrentBookingsAsync(id);
             return Ok(result);
         }
         catch (Exception)
@@ -107,7 +108,7 @@ public class ReservationController : ControllerBase
 
     [HttpGet]
     [Route("GetPreviousBookings")]
-    public async Task<IActionResult> GetPreviousBookings([Required] int ClientReservationId)
+    public async Task<IActionResult> GetPreviousBookings([Required] int id)
     {
         if (!ModelState.IsValid)
         {
@@ -115,7 +116,7 @@ public class ReservationController : ControllerBase
         }
         try
         {
-            var result = await _reservationData.GetPreviousBookingsAsync(ClientReservationId);
+            var result = await _reservationData.GetPreviousBookingsAsync(id);
             return Ok(result);
         }
         catch (Exception)

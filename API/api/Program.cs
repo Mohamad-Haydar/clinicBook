@@ -14,6 +14,7 @@ using Microsoft.OpenApi.Models;
 using api.BusinessLogic.DataAccess.IDataAccess;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
+using api.Middlewares;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -58,7 +59,7 @@ builder.Services.AddAuthentication(options =>
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("loreamipsumissomesecreatekeytobeused")),
                 ValidateIssuer = false,
                 ValidateAudience = false,
-                ValidateLifetime = true
+                ValidateLifetime = true,
         };
 });
 
@@ -134,6 +135,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -145,7 +147,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowLocalhost");
+
+app.UseTokenMiddleware();
+
+app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllers();
 

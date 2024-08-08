@@ -29,6 +29,7 @@ public class TokenService : ITokenService
                 new Claim(ClaimTypes.Email,email),
                 new Claim(ClaimTypes.Name,email),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.MobilePhone, user.PhoneNumber),
                 new Claim(JwtRegisteredClaimNames.Nbf, new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds().ToString()),
                 new Claim(JwtRegisteredClaimNames.Exp, new DateTimeOffset(DateTime.UtcNow.AddHours(5)).ToUnixTimeSeconds().ToString()),
             };
@@ -72,10 +73,12 @@ public class TokenService : ITokenService
         };
         var tokenHandler = new JwtSecurityTokenHandler();
         SecurityToken securityToken;
+
         var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
         var jwtSecurityToken = securityToken as JwtSecurityToken;
         if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
             throw new SecurityTokenException("Invalid token");
+        
         return principal;
     }
     

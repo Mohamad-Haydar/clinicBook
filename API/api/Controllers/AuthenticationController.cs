@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using api.BusinessLogic.DataAccess.IDataAccess;
 using api.BusinessLogic.DataAccess;
+using System.Text.Json;
 
 namespace api.Controllers;
 
@@ -66,10 +67,25 @@ public class AuthenticationController : Controller
         try
         {
             var result = await _authenticationData.RegisterClientAsync(model);
+            var userDataJson = JsonSerializer.Serialize(new
+            {
+                id= result.Id,
+                userName= result.UserName,
+                email= result.Email,
+                phoneNumber= result.PhoneNumber,
+                accessToken= result.AccessToken,
+        });
+
+            Response.Cookies.Append("userData", userDataJson, new CookieOptions
+            {
+                HttpOnly = false,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
 
             Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
             {
-                HttpOnly = false,
+                HttpOnly = true,
                 Secure = false,
                 SameSite = SameSiteMode.Lax
             });
@@ -121,9 +137,25 @@ public class AuthenticationController : Controller
         try
         {
             var result = await _authenticationData.RegisterSecretaryAsync(model);
-            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
+            var userDataJson = JsonSerializer.Serialize(new
+            {
+                id = result.Id,
+                userName = result.UserName,
+                email = result.Email,
+                phoneNumber = result.PhoneNumber,
+                accessToken = result.AccessToken,
+            });
+
+            Response.Cookies.Append("userData", userDataJson, new CookieOptions
             {
                 HttpOnly = false,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
+
+            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
+            {
+                HttpOnly = true,
                 Secure = false,
                 SameSite = SameSiteMode.Lax
             });
@@ -134,6 +166,7 @@ public class AuthenticationController : Controller
                 Secure = false,
                 SameSite = SameSiteMode.Lax
             });
+
 
             return Ok(new
             {
@@ -171,9 +204,25 @@ public class AuthenticationController : Controller
         try
         {
             var result = await _authenticationData.RegisterDoctorAsync(model);
-            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
+            var userDataJson = JsonSerializer.Serialize(new
+            {
+                id = result.Id,
+                userName = result.UserName,
+                email = result.Email,
+                phoneNumber = result.PhoneNumber,
+                accessToken = result.AccessToken,
+            });
+
+            Response.Cookies.Append("userData", userDataJson, new CookieOptions
             {
                 HttpOnly = false,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
+
+            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
+            {
+                HttpOnly = true,
                 Secure = false,
                 SameSite = SameSiteMode.Lax
             });
@@ -184,6 +233,7 @@ public class AuthenticationController : Controller
                 Secure = false,
                 SameSite = SameSiteMode.Lax
             });
+
 
             return Ok(new
             {
@@ -250,9 +300,25 @@ public class AuthenticationController : Controller
         {
             var result = await _authenticationData.LoginUserAsync(model);
 
-            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
+            var userDataJson = JsonSerializer.Serialize(new
+            {
+                id = result.Id,
+                userName = result.UserName,
+                email = result.Email,
+                phoneNumber = result.PhoneNumber,
+                accessToken = result.AccessToken,
+            });
+
+            Response.Cookies.Append("userData", userDataJson, new CookieOptions
             {
                 HttpOnly = false,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
+
+            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
+            {
+                HttpOnly = true,
                 Secure = false,
                 SameSite = SameSiteMode.Lax
             });
@@ -262,8 +328,9 @@ public class AuthenticationController : Controller
                 HttpOnly = true,
                 Secure = false,
                 SameSite = SameSiteMode.Lax
-            }); 
-            
+            });
+
+
             return Ok(new{
                 Id = result.Id,
                 UserName = result.UserName,
@@ -295,12 +362,23 @@ public class AuthenticationController : Controller
     [Authorize]
     public async Task<IActionResult> Logout()
     {
-        string refreshToken = Request.Cookies["refreshToken"];
-        string accessToken = Request.Cookies["accessToken"];
+        string? refreshToken = Request.Cookies["refreshToken"];
+        string? accessToken = Request.Cookies["accessToken"] ;
+        string? userData = Request.Cookies["userData"] ;
 
         try
         {
+            if (refreshToken == null || accessToken == null || userData == null)
+            {
+                throw new Exception();
+            }
             await _authenticationData.LogoutAsync(refreshToken, accessToken);
+            Response.Cookies.Delete("userData", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
             Response.Cookies.Delete("accessToken", new CookieOptions
                 {
                     HttpOnly = true,
@@ -317,19 +395,25 @@ public class AuthenticationController : Controller
         }
         catch (Exception)
         {
+            Response.Cookies.Delete("userData", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
             Response.Cookies.Delete("accessToken", new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = false,
-                    SameSite = SameSiteMode.Lax
-                });
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
             Response.Cookies.Delete("refreshToken", new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = false,
-                    SameSite = SameSiteMode.Lax
-                });
-            return BadRequest( new Response("Invalid client request"));
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            });
+            return BadRequest(new Response("Invalid client request"));
         }
     }
 
