@@ -16,7 +16,7 @@ using api.Attributes;
 
 namespace api.Controllers;
 
-[AuthorizeRoles(Roles.Client)]
+[Authorize]
 [Route("/api/[controller]")]
 public class ReservationController : ControllerBase
 {

@@ -49,14 +49,14 @@ namespace api.Middlewares
                                 context.Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
                                 {
                                     HttpOnly = true,
-                                    Secure = false,
+                                    Secure = true,
                                     SameSite = SameSiteMode.Lax
                                 });
 
                                 context.Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
                                 {
                                     HttpOnly = true,
-                                    Secure = false,
+                                    Secure = true,
                                     SameSite = SameSiteMode.Lax
                                 });
                             }

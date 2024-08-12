@@ -78,21 +78,21 @@ public class AuthenticationController : Controller
             Response.Cookies.Append("userData", userDataJson, new CookieOptions
             {
                 HttpOnly = false,
-                Secure = false,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             });
 
             Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             });
 
             Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             });
 
@@ -147,21 +147,21 @@ public class AuthenticationController : Controller
             Response.Cookies.Append("userData", userDataJson, new CookieOptions
             {
                 HttpOnly = false,
-                Secure = false,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             });
 
             Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             });
 
             Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             });
 
@@ -213,21 +213,21 @@ public class AuthenticationController : Controller
             Response.Cookies.Append("userData", userDataJson, new CookieOptions
             {
                 HttpOnly = false,
-                Secure = false,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             });
 
             Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             });
 
             Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             });
 
@@ -308,21 +308,21 @@ public class AuthenticationController : Controller
             Response.Cookies.Append("userData", userDataJson, new CookieOptions
             {
                 HttpOnly = false,
-                Secure = false,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             });
 
             Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             });
 
             Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             });
 
@@ -372,19 +372,19 @@ public class AuthenticationController : Controller
             Response.Cookies.Delete("userData", new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             });
             Response.Cookies.Delete("accessToken", new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = false,
+                    Secure = true,
                     SameSite = SameSiteMode.Lax
                 });
             Response.Cookies.Delete("refreshToken", new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = false,
+                    Secure = true,
                     SameSite = SameSiteMode.Lax
                 });
             return Ok(new Response("Log out Successfully"));
@@ -394,19 +394,19 @@ public class AuthenticationController : Controller
             Response.Cookies.Delete("userData", new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             });
             Response.Cookies.Delete("accessToken", new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             });
             Response.Cookies.Delete("refreshToken", new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             });
             return BadRequest(new Response("Invalid client request"));

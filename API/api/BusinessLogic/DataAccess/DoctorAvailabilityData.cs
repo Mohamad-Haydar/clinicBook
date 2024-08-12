@@ -1,4 +1,4 @@
-using api.BusinessLogic.DataAccess.IDataAccess;
+﻿using api.BusinessLogic.DataAccess.IDataAccess;
 using api.Data;
 using api.Exceptions;
 using api.Models;
@@ -13,12 +13,23 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
 {
     private readonly UserManager<UserModel> _userManager;
     private readonly ApplicationDbContext _appDbContext;
+    private readonly Dictionary<string, string> Days;
 
     public DoctorAvailabilityData(UserManager<UserModel> userManager,
                               ApplicationDbContext appDbContext)
     {
         _userManager = userManager;
         _appDbContext = appDbContext;
+        Days = new()
+        {
+             { "Monday", "الاثنين" },
+             { "Tuesday", "الثلاثاء" },
+             { "Wednesday", "الاربعاء" },
+             { "Thursday", "الخميس" },
+             { "Friday", "الجمعة" },
+             { "Saturday", "السبت" },
+             { "Sunday", "الاحد" }
+        };
     }
 
     public async Task<IEnumerable<DoctorAvailabilityResponse>> GetAvailableDatesAsync(string id)
@@ -49,7 +60,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
         DoctorAvailabilityModel available = new()
         {
             AvailableDate = model.AvailableDate,
-            DayName = model.AvailableDate.DayOfWeek.ToString(),
+            DayName = Days[model.AvailableDate.DayOfWeek.ToString()],
             StartHour = model.StartHour,
             EndHour = model.EndHour,
             MaxClient = model.MaxClient,

@@ -15,6 +15,8 @@ using api.BusinessLogic.DataAccess.IDataAccess;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
 using api.Middlewares;
+using Microsoft.AspNetCore.Server.Kestrel.Https;
+using System.Security.Cryptography.X509Certificates;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -69,7 +71,7 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-            .WithOrigins("https://localhost:3000", "http://localhost:3000")
+            .WithOrigins("https://localhost:3000", "http://localhost:3000", "https://192.168.1.17:3000", "http://192.168.1.17:3000")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -144,6 +146,8 @@ if (app.Environment.IsDevelopment())
         app.UseSwagger();
         app.UseSwaggerUI();
 }
+
+app.UseHttpsRedirection();
 
 app.UseHttpsRedirection();
 app.UseCors("AllowLocalhost");

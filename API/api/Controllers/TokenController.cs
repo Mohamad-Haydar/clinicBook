@@ -38,14 +38,14 @@ public class TokenController : Controller
             Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             });
 
             Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
+                Secure = true,
                 SameSite = SameSiteMode.Lax
             });
             return Ok(new
@@ -62,13 +62,13 @@ public class TokenController : Controller
             Response.Cookies.Delete("accessToken", new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = false,
+                    Secure = true,
                     SameSite = SameSiteMode.Lax
                 });
             Response.Cookies.Delete("refreshToken", new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = false,
+                    Secure = true,
                     SameSite = SameSiteMode.Lax
                 });
             return BadRequest(new {message = "please login in"});
