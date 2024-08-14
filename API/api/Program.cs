@@ -6,17 +6,12 @@ using api.Internal.DataAccess;
 using api.Models;
 using api.Services;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using api.BusinessLogic.DataAccess.IDataAccess;
-using Microsoft.AspNetCore.Localization;
-using System.Globalization;
 using api.Middlewares;
-using Microsoft.AspNetCore.Server.Kestrel.Https;
-using System.Security.Cryptography.X509Certificates;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -91,6 +86,7 @@ builder.Services.AddScoped<ICategoryData, CategoryData>();
 builder.Services.AddScoped<IBackupService, BackupService>();
 builder.Services.AddScoped<IServiceData, ServiceData>();
 
+builder.Services.AddHostedService<BookingCleanupWorker>();
 
 
 builder.Services.AddSwaggerGen(c =>
@@ -138,7 +134,9 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 
+
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
