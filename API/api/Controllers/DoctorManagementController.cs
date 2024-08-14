@@ -157,11 +157,12 @@ public class DoctorManagementController : ControllerBase
     [HttpPatch]
     [Route("updateDoctorInfo")]
     [AuthorizeRoles(Roles.Doctor,Roles.Admin, Roles.Secretary)]
-    public async Task<IActionResult> UpdateDoctorInfo([FromBody] CreateDoctorRequest model)
+    public async Task<IActionResult> UpdateDoctorInfo([FromBody] UpdateDoctorRequest model)
     {
         if(!ModelState.IsValid)
         {
-            return BadRequest("Please enter valid input");
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+            return BadRequest(new { message = "Please enter a valid input", errors });
         }
         try
         {

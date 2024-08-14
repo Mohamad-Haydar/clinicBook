@@ -14,7 +14,7 @@ namespace api.BusinessLogic.DataAccess.IDataAccess
         Task<IEnumerable<DoctorInfoResponse>> GetAllDoctorsAsync();
         Task<IEnumerable<DoctorInfoResponse>> GetDoctorsByCategoryAsync(int CategoryId);
         Task RemoveDoctorAsync(string id);
-        Task UpdateDoctorInfoAsync(CreateDoctorRequest model);
+        Task UpdateDoctorInfoAsync(UpdateDoctorRequest model);
         Task UpdateDoctorServiceDurationAsync(int id, int duration);
     }
 }

@@ -136,7 +136,7 @@ public class DoctorManagementData : IDoctorManagementData
         }
     }
 
-    public async Task UpdateDoctorInfoAsync(CreateDoctorRequest model)
+    public async Task UpdateDoctorInfoAsync(UpdateDoctorRequest model)
     {
         var user = await _userManager.FindByEmailAsync(model.Email);
         var doctor = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.Email == model.Email);
@@ -162,6 +162,7 @@ public class DoctorManagementData : IDoctorManagementData
                 doctor.PhoneNumber = model.PhoneNumber ?? doctor.PhoneNumber;
                 doctor.Description = model.Description ?? doctor.Description;
                 doctor.CategoryId = model.CategoryId > 0 ? model.CategoryId : doctor.CategoryId;
+                doctor.Image = model.Image  ?? doctor.Image;
 
                 await _appDbContext.SaveChangesAsync();
                 await _identityContext.SaveChangesAsync();
