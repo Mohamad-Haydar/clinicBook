@@ -44,7 +44,7 @@ public class AuthenticationData : IAuthenticationData
         {
             try
             {
-                var user = new UserModel { UserName = model.Email, Email = model.Email, PhoneNumber = model.PhoneNumber };
+                var user = new UserModel { UserName = model.FirstName + " " + model.LastName, Email = model.Email, PhoneNumber = model.PhoneNumber };
                 var result = await _userManager.CreateAsync(user, model.Password);
                 await _userManager.AddToRoleAsync(user, Roles.Client.ToString());
                 ClientModel client = new()
@@ -84,7 +84,7 @@ public class AuthenticationData : IAuthenticationData
         {
             try
             {
-                var user = new UserModel { UserName = model.Email, Email = model.Email, PhoneNumber = model.PhoneNumber };
+                var user = new UserModel { UserName = model.FirstName + " " + model.LastName, Email = model.Email, PhoneNumber = model.PhoneNumber };
                 var result = await _userManager.CreateAsync(user, model.Password);
                 await _userManager.AddToRoleAsync(user, Roles.Secretary.ToString());
                 SecretaryModel secretary = new()
@@ -95,11 +95,20 @@ public class AuthenticationData : IAuthenticationData
                     Email = model.Email,
                     PhoneNumber = model.PhoneNumber,
                 };
+                ClientModel client = new()
+                {
+                    Id = user.Id,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    Email = model.Email,
+                    PhoneNumber = model.PhoneNumber,
+                };
                 await _appContext.Secretaries.AddAsync(secretary);
+                await _appContext.Clients.AddAsync(client);
                 await _appContext.SaveChangesAsync();
                 await _identityContext.SaveChangesAsync();
                 await identityTransaction.CommitAsync();
-                await appTransaction.RollbackAsync();
+                await appTransaction.CommitAsync();
                 return await LoginUserAsync(new LoginRequest { Email = model.Email, Password = model.Password });
             }
             catch (Exception)

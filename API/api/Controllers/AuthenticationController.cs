@@ -102,7 +102,6 @@ public class AuthenticationController : Controller
                 UserName = result.UserName,
                 Email = result.Email,
                 PhoneNumber = result.PhoneNumber,
-                AccessToken = result.AccessToken,
             });
         }
         catch (UserExistsException ex)
@@ -172,7 +171,6 @@ public class AuthenticationController : Controller
                 UserName = result.UserName,
                 Email = result.Email,
                 PhoneNumber = result.PhoneNumber,
-                AccessToken = result.AccessToken,
             });
         }
         catch (UserExistsException ex)
@@ -238,7 +236,6 @@ public class AuthenticationController : Controller
                 UserName = result.UserName,
                 Email = result.Email,
                 PhoneNumber = result.PhoneNumber,
-                AccessToken = result.AccessToken,
             });
         }
         catch (UserExistsException ex)
@@ -332,7 +329,6 @@ public class AuthenticationController : Controller
                 UserName = result.UserName,
                 Email = result.Email,
                 PhoneNumber = result.PhoneNumber,
-                AccessToken = result.AccessToken,
             });
         }
         catch (UserExistsException ex)
