@@ -93,7 +93,7 @@ namespace API.Tests.BusinessLogic
             var exception = await Record.ExceptionAsync(() => _sut.MarkCompleteReservationAsync(clientReservationId));
 
             // Assert
-            Assert.IsType<NotFoundException>(exception);
+            Assert.IsType<UserNotFoundException>(exception);
             Assert.Equal("This client reservation was not found", exception.Message);
         }
 

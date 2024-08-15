@@ -71,7 +71,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
             var doc = await _userManager.FindByIdAsync(model.DoctorId);
             if (doc == null)
             {
-                throw new NotFoundException("Doctor Not Found please enter a valid doctor");
+                throw new UserNotFoundException("Doctor Not Found please enter a valid doctor");
             }
             var res = await _appDbContext.DoctorAvailabilities.AddAsync(available);
             if (res == null)
@@ -92,7 +92,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
         var existedAvailability = await _appDbContext.DoctorAvailabilities.FirstOrDefaultAsync(x => x.Id == model.Id);
         if (existedAvailability == null)
         {
-            throw new NotFoundException("their is no available date to update");
+            throw new UserNotFoundException("their is no available date to update");
         }
         if (model.StartHour > model.EndHour)
         {
@@ -121,7 +121,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
 
     public async Task DeleteAvailableDateAsync(int id)
     {
-        var availableDate = await _appDbContext.DoctorAvailabilities.FirstOrDefaultAsync(x => x.Id == id) ?? throw new NotFoundException("Not Found, Enter a valid input");
+        var availableDate = await _appDbContext.DoctorAvailabilities.FirstOrDefaultAsync(x => x.Id == id) ?? throw new UserNotFoundException("Not Found, Enter a valid input");
         try
         {
             var available = _appDbContext.Remove(availableDate);

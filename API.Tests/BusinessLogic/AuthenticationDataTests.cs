@@ -53,7 +53,7 @@ namespace API.Tests.BusinessLogic
             _userManager.FindByEmailAsync("someemail").Returns(new UserModel());
 
             // Act 
-            UserExistsException exception = await Assert.ThrowsAsync<UserExistsException>(() => _sut.RegisterClientAsync(model));
+            UserAlreadyExistsException exception = await Assert.ThrowsAsync<UserAlreadyExistsException>(() => _sut.RegisterClientAsync(model));
 
             // Assert
             Assert.Equal("This email already exists", exception.Message);

@@ -151,7 +151,7 @@ namespace API.Tests.BusinessLogic
         }
 
         [Fact]
-        public async Task OpenAvailableDateAsync_DoctorNotFound_ThrowNotFoundException()
+        public async Task OpenAvailableDateAsync_DoctorNotFound_ThrowUserNotFoundException()
         {
             // Arrange
             OpenAvailableDateRequest model = new()
@@ -165,7 +165,7 @@ namespace API.Tests.BusinessLogic
             _userManager.FindByIdAsync(model.DoctorId).ReturnsNull();
 
             // Act
-            NotFoundException exception = await Assert.ThrowsAsync<NotFoundException>(() => _sut.OpenAvailableDateAsync(model));
+            UserNotFoundException exception = await Assert.ThrowsAsync<UserNotFoundException>(() => _sut.OpenAvailableDateAsync(model));
 
             // Assert
             Assert.Equal("Doctor Not Found please enter a valid doctor", exception.Message);
@@ -210,7 +210,7 @@ namespace API.Tests.BusinessLogic
             var exception = await Record.ExceptionAsync(() => _sut.UpdateAvailableDateAsync(model));
 
             // Assert
-            Assert.IsType<NotFoundException>(exception);
+            Assert.IsType<UserNotFoundException>(exception);
             Assert.Equal("their is no available date to update",exception.Message);
         }
 
@@ -382,7 +382,7 @@ namespace API.Tests.BusinessLogic
             var exception = await Record.ExceptionAsync(() => _sut.DeleteAvailableDateAsync(availabilityId));
 
             // Assert
-            Assert.IsType<NotFoundException>(exception);
+            Assert.IsType<UserNotFoundException>(exception);
             Assert.Equal("Not Found, Enter a valid input", exception.Message);
         }
 

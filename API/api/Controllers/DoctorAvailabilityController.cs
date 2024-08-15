@@ -28,7 +28,7 @@ public class DoctorAvailabilityController : Controller
     [Route("availableDates")]
     public async Task<IActionResult> GetAvailableDates([Required] string id)
     {
-        if(!ModelState.IsValid)
+        if (!ModelState.IsValid)
             return BadRequest(new Response("doctor not found"));
         
         try
@@ -60,7 +60,7 @@ public class DoctorAvailabilityController : Controller
             await _doctorAvailabilityData.OpenAvailableDateAsync(model);   
             return Ok(new Response( "Available date added successfully"));
         }
-         catch(NotFoundException ex)
+         catch(UserNotFoundException ex)
         {
             return BadRequest(new Response(ex.Message));
         }
@@ -89,7 +89,7 @@ public class DoctorAvailabilityController : Controller
             await _doctorAvailabilityData.UpdateAvailableDateAsync(model);
             return Ok(new Response ( "Available date added successfully"));
         }
-        catch (NotFoundException ex)
+        catch (UserNotFoundException ex)
         {
             return BadRequest(new Response (ex.Message));
         }
@@ -119,7 +119,7 @@ public class DoctorAvailabilityController : Controller
             await _doctorAvailabilityData.DeleteAvailableDateAsync(id);
             return Ok(new Response("availabel date removed successfully"));
         }
-        catch (NotFoundException ex)
+        catch (UserNotFoundException ex)
         {
             return BadRequest(new Response(ex.Message));
         }

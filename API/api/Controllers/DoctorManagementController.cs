@@ -86,7 +86,7 @@ public class DoctorManagementController : ControllerBase
             await _doctorManagementData.UpdateDoctorServiceDurationAsync(id, duration);
             return Ok(new Response("Service Duration updated successfully"));
         }
-        catch (NotFoundException ex)
+        catch (UserNotFoundException ex)
         {
             return BadRequest(new Response(ex.Message));
         }
@@ -113,7 +113,7 @@ public class DoctorManagementController : ControllerBase
             await _doctorManagementData.DeleteDoctorServiceAsync(id);
             return Ok(new Response("Service Deleted successfully"));
         }
-        catch (NotFoundException ex)
+        catch (UserNotFoundException ex)
         {
             return BadRequest(new Response(ex.Message));
         }
@@ -140,7 +140,7 @@ public class DoctorManagementController : ControllerBase
             await _doctorManagementData.RemoveDoctorAsync(id);
             return Ok(new Response("doctor removed successfully"));
         }
-        catch (NotFoundException ex)
+        catch (UserNotFoundException ex)
         {
             return BadRequest(new Response(ex.Message));
         }
@@ -169,7 +169,7 @@ public class DoctorManagementController : ControllerBase
             await _doctorManagementData.UpdateDoctorInfoAsync(model);
             return Ok(new Response("Doctor Data updated successfully." ));
         }
-        catch (NotFoundException ex)
+        catch (UserNotFoundException ex)
         {
             return BadRequest(new Response(ex.Message));
         }
@@ -197,7 +197,7 @@ public class DoctorManagementController : ControllerBase
             var doctor = await _doctorManagementData.GetDoctorByEmailAsync(email);
             return Ok(doctor);
         }
-        catch (NotFoundException ex)
+        catch (UserNotFoundException ex)
         {
             return BadRequest(new Response(ex.Message));
         }

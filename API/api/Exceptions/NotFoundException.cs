@@ -1,6 +1,10 @@
 namespace api.Exceptions;
 
-public class NotFoundException : Exception
+public class UserNotFoundException : Exception
 {
-    public NotFoundException(string message) : base(message) { }
+    public UserNotFoundException()
+    {
+    }
+
+    public UserNotFoundException(string message) : base(message) { }
 }

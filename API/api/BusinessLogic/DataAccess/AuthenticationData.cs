@@ -36,7 +36,7 @@ public class AuthenticationData : IAuthenticationData
         var userExists = await _userManager.FindByEmailAsync(model.Email);
         if (userExists != null)
         {
-            throw new UserExistsException("This email already exists");
+            throw new UserAlreadyExistsException("This email already exists");
         }
 
         using (var identityTransaction = await _identityContext.Database.BeginTransactionAsync())
@@ -85,7 +85,7 @@ public class AuthenticationData : IAuthenticationData
         var userExists = await _userManager.FindByEmailAsync(model.Email);
         if (userExists != null)
         {
-            throw new UserExistsException("This email already exists");
+            throw new UserAlreadyExistsException("This email already exists");
         }
 
         using (var identityTransaction = await _identityContext.Database.BeginTransactionAsync())
@@ -133,7 +133,7 @@ public class AuthenticationData : IAuthenticationData
         var userExists = await _userManager.FindByEmailAsync(model.Email);
         if (userExists != null)
         {
-            throw new UserExistsException("This email already exists");
+            throw new UserAlreadyExistsException("This email already exists");
         }
 
         using (var identityTransaction = await _identityContext.Database.BeginTransactionAsync())
@@ -183,7 +183,7 @@ public class AuthenticationData : IAuthenticationData
         var userExists = await _userManager.FindByEmailAsync(email);
         if (userExists != null)
         {
-            throw new UserExistsException("This email already exists");
+            throw new UserAlreadyExistsException("This email already exists");
         }
         try
         {
@@ -201,7 +201,7 @@ public class AuthenticationData : IAuthenticationData
 
     public async Task<AuthenticationResponse> LoginUserAsync(LoginRequest model)
     {
-        var user = await _userManager.FindByEmailAsync(model.Email) ?? throw new UserExistsException("User Not found Please enter a valid input.");
+        var user = await _userManager.FindByEmailAsync(model.Email) ?? throw new UserUserNotFoundException();
         try
         {
             if (await _userManager.CheckPasswordAsync(user, model.Password))
@@ -245,7 +245,7 @@ public class AuthenticationData : IAuthenticationData
             var user = await _userManager.FindByIdAsync(userId);
             if(user.RefreshToken != refreshToken)
             {
-                throw new NotFoundException("Invalid client request");
+                throw new UserNotFoundException("Invalid client request");
             }
 
             user.RefreshToken = null;

@@ -1,6 +1,6 @@
-namespace api.Exceptions;
+﻿namespace api.Exceptions;
 
-public class UserExistsException : Exception
+public class UserAlreadyExistsException : Exception
 {
-    public UserExistsException(string message) : base(message) { }
+    public UserAlreadyExistsException(string message = " هذا الحساب موجود مسبقا, الرجاء ادخال بريد جديد او تسجيل الدخول الى القديم.") { }
 }

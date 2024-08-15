@@ -71,12 +71,12 @@ public class DoctorManagementData : IDoctorManagementData
             var service = await _appDbContext.DoctorServices.FirstOrDefaultAsync(x => x.Id == id);
             if (service == null)
             {
-                throw new NotFoundException("something whent wrong please check your input data");
+                throw new UserNotFoundException("something whent wrong please check your input data");
             }
             service.Duration = duration;
             await _appDbContext.SaveChangesAsync();
         }
-        catch (NotFoundException)
+        catch (UserNotFoundException)
         {
             throw;
         }
@@ -90,13 +90,13 @@ public class DoctorManagementData : IDoctorManagementData
     // and check if i want to delete the client reservation
     public async Task DeleteDoctorServiceAsync(int id)
     {
-        var service = await _appDbContext.DoctorServices.FirstOrDefaultAsync(x => x.Id == id) ?? throw new NotFoundException("Service not found");
+        var service = await _appDbContext.DoctorServices.FirstOrDefaultAsync(x => x.Id == id) ?? throw new UserNotFoundException("Service not found");
         try
         {
             var res = _appDbContext.DoctorServices.Remove(service);
             await _appDbContext.SaveChangesAsync();
         }
-        catch (NotFoundException)
+        catch (UserNotFoundException)
         {
             throw;
         }
@@ -112,11 +112,11 @@ public class DoctorManagementData : IDoctorManagementData
         var user = await _userManager.FindByIdAsync(id);
         if (doctor == null)
         {
-            throw new NotFoundException("Doctor not found");
+            throw new UserNotFoundException("Doctor not found");
         }
         if (user == null)
         {
-            throw new NotFoundException("User not found");
+            throw new UserNotFoundException("User not found");
         }
         using (var transaction = _identityContext.Database.BeginTransaction())
         {
@@ -142,11 +142,11 @@ public class DoctorManagementData : IDoctorManagementData
         var doctor = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.Email == model.Email);
         if (doctor == null)
         {
-            throw new NotFoundException("Doctor not found");
+            throw new UserNotFoundException();
         }
         if (user == null)
         {
-            throw new NotFoundException("User not found");
+            throw new UserNotFoundException();
         }
 
         using (var transaction = _identityContext.Database.BeginTransaction())
@@ -186,13 +186,13 @@ public class DoctorManagementData : IDoctorManagementData
                                                     select new DoctorInfoResponse { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
             if (!doctor.Any())
             {
-                throw new NotFoundException("doctor not found");
+                throw new UserNotFoundException("doctor not found");
             }
             return await doctor.FirstAsync();
         }
-        catch (NotFoundException)
+        catch (UserNotFoundException)
         {
-            throw new NotFoundException("doctor not found");
+            throw new UserNotFoundException("doctor not found");
         }
         catch (Exception)
         {
@@ -229,13 +229,13 @@ public class DoctorManagementData : IDoctorManagementData
                         };
             if (!doctor.Any())
             {
-                throw new NotFoundException("doctor not found");
+                throw new UserNotFoundException("doctor not found");
             }
             return await doctor.FirstAsync();
         }
-        catch (NotFoundException)
+        catch (UserNotFoundException)
         {
-            throw new NotFoundException("doctor not found");
+            throw new UserNotFoundException("doctor not found");
         }
         catch (Exception)
         {

@@ -28,7 +28,7 @@ public class SecretaryController : Controller
             var secretarie = await _secretaryData.GetSecretariebyEmailAsync(email);
             return Ok(secretarie);
         }
-        catch(NotFoundException ex)
+        catch(UserNotFoundException ex)
         {
             return BadRequest(new {message=ex.Message});
         }

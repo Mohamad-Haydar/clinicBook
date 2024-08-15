@@ -82,7 +82,7 @@ namespace API.Tests.BusinessLogic
         }
 
         [Fact]
-        public async Task UpdateDoctorServiceDurationAsync_ServiceNotFound_ThrowNotFoundException()
+        public async Task UpdateDoctorServiceDurationAsync_ServiceNotFound_ThrowUserNotFoundException()
         {
             // Arrange
             int id = 1;
@@ -95,7 +95,7 @@ namespace API.Tests.BusinessLogic
             var exception = await Record.ExceptionAsync(() => _sut.UpdateDoctorServiceDurationAsync(id, duration));
 
             // Assert
-            Assert.IsType<NotFoundException>(exception);
+            Assert.IsType<UserNotFoundException>(exception);
             Assert.Equal("something whent wrong please check your input data", exception.Message);
 
         }
@@ -147,7 +147,7 @@ namespace API.Tests.BusinessLogic
         }
 
         [Fact]
-        public async Task DeleteDoctorServiceAsync_ServiceNotFound_ThrowNotFoundException()
+        public async Task DeleteDoctorServiceAsync_ServiceNotFound_ThrowUserNotFoundException()
         {
             // Arrange
             int id = 1;
@@ -156,7 +156,7 @@ namespace API.Tests.BusinessLogic
             var exception = await Record.ExceptionAsync(() => _sut.DeleteDoctorServiceAsync(id));
 
             // Assert
-            Assert.IsType<NotFoundException>(exception);
+            Assert.IsType<UserNotFoundException>(exception);
             Assert.Equal("Service not found", exception.Message);
         }
 
@@ -263,7 +263,7 @@ namespace API.Tests.BusinessLogic
             var exception = await Record.ExceptionAsync(() => _sut.GetDoctorByEmailAsync(email));
 
             // Assert
-            Assert.IsType<NotFoundException>(exception);
+            Assert.IsType<UserNotFoundException>(exception);
             Assert.Equal("doctor not found", exception.Message);
 
         }
@@ -393,7 +393,7 @@ namespace API.Tests.BusinessLogic
             var exception = await Record.ExceptionAsync(() => _sut.GetDoctorByIdAsync(ID));
 
             // Assert
-            Assert.IsType<NotFoundException>(exception);
+            Assert.IsType<UserNotFoundException>(exception);
             Assert.Equal("doctor not found", exception.Message);
 
         }

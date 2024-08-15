@@ -106,7 +106,7 @@ public class AuthenticationController : Controller
                 Roles = result.Roles,
             });
         }
-        catch (UserExistsException ex)
+        catch (UserAlreadyExistsException ex)
         {
             return BadRequest(new Response(ex.Message));
         }
@@ -170,7 +170,7 @@ public class AuthenticationController : Controller
 
             return Ok(new Response("لقد تم انشاء حساب سكرتيرة جديد بنجاح."));
         }
-        catch (UserExistsException ex)
+        catch (UserAlreadyExistsException ex)
         {
             return BadRequest(new Response(ex.Message));
         }
@@ -230,7 +230,7 @@ public class AuthenticationController : Controller
 
             return Ok(new Response("لقد تم انشاء حساب دكتور جديد بنجاح"));
         }
-        catch (UserExistsException ex)
+        catch (UserAlreadyExistsException ex)
         {
             return BadRequest(new Response (ex.Message ));
         }
@@ -258,7 +258,7 @@ public class AuthenticationController : Controller
             await _authenticationData.RegisterAdminAsync(email, password);
             return Ok(new { message = "Admin created successfully. You can login to your account." });
         }
-        catch (UserExistsException ex)
+        catch (UserAlreadyExistsException ex)
         {
             return BadRequest(new { message = ex.Message });
         }
@@ -325,21 +325,25 @@ public class AuthenticationController : Controller
                 Roles = result.Roles,
             });
         }
-        catch (UserExistsException ex)
+        catch (UserUserNotFoundException ex)
         {
-            return BadRequest(new Response(ex.Message ));
+            return BadRequest(new Response(ex.Message));
         }
-         catch (WrongPasswordException ex)
+        catch (UserAlreadyExistsException ex)
         {
-            return BadRequest(new Response(ex.Message ));
+            return BadRequest(new Response(ex.Message));
+        }
+        catch (WrongPasswordException ex)
+        {
+            return BadRequest(new Response(ex.Message));
         }
         catch (BusinessException ex)
         {
-            return BadRequest(new Response(ex.Message ));
+            return BadRequest(new Response(ex.Message));
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return BadRequest(new Response("Something went wrong. Please try again." ));
+            return BadRequest(new Response(ex.Message));
         }   
     }
 
