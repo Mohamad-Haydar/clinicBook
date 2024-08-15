@@ -1,6 +1,6 @@
-namespace api.Exceptions;
+﻿namespace api.Exceptions;
 
 public class InvalidRequestException : Exception
 {
-    public InvalidRequestException(string message) : base(message){ }
+    public InvalidRequestException(string message = "الرجاء التأكد من المعلومات قبل الارسال") : base(message){ }
 }

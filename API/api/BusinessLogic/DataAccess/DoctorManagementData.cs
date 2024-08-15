@@ -171,7 +171,7 @@ public class DoctorManagementData : IDoctorManagementData
             catch (Exception)
             {
                 transaction.Rollback();
-                throw new BusinessException("Something went wrong. Please try again.");
+                throw new BusinessException();
             }
         }
     }
@@ -186,17 +186,17 @@ public class DoctorManagementData : IDoctorManagementData
                                                     select new DoctorInfoResponse { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
             if (!doctor.Any())
             {
-                throw new UserNotFoundException("doctor not found");
+                throw new UserNotFoundException();
             }
             return await doctor.FirstAsync();
         }
         catch (UserNotFoundException)
         {
-            throw new UserNotFoundException("doctor not found");
+            throw new UserNotFoundException();
         }
         catch (Exception)
         {
-            throw new BusinessException("Something went wrong. Please try again.");
+            throw new BusinessException();
         }
     }
 
@@ -229,13 +229,13 @@ public class DoctorManagementData : IDoctorManagementData
                         };
             if (!doctor.Any())
             {
-                throw new UserNotFoundException("doctor not found");
+                throw new UserNotFoundException();
             }
             return await doctor.FirstAsync();
         }
         catch (UserNotFoundException)
         {
-            throw new UserNotFoundException("doctor not found");
+            throw new UserNotFoundException();
         }
         catch (Exception)
         {

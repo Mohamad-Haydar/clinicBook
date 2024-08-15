@@ -1,6 +1,6 @@
-namespace api.Exceptions;
+﻿namespace api.Exceptions;
 
 public class BusinessException : Exception
 {
-    public BusinessException(string message) : base(message) { }
+    public BusinessException(string message = "حدث خطأ, الرجاء المحاولة مجددا") : base(message) { }
 }

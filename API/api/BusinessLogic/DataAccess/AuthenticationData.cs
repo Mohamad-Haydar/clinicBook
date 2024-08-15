@@ -36,7 +36,7 @@ public class AuthenticationData : IAuthenticationData
         var userExists = await _userManager.FindByEmailAsync(model.Email);
         if (userExists != null)
         {
-            throw new UserAlreadyExistsException("This email already exists");
+            throw new UserAlreadyExistsException();
         }
 
         using (var identityTransaction = await _identityContext.Database.BeginTransactionAsync())
@@ -71,11 +71,11 @@ public class AuthenticationData : IAuthenticationData
                     Roles = [Roles.Client.ToString()]
                 };
             }
-            catch
+            catch (Exception)
             {
                 identityTransaction.Rollback();
                 appTransaction.Rollback();
-                throw new BusinessException("An error occurred while registering, please try again.");
+                throw new BusinessException();
             }
         }
     }
@@ -85,7 +85,7 @@ public class AuthenticationData : IAuthenticationData
         var userExists = await _userManager.FindByEmailAsync(model.Email);
         if (userExists != null)
         {
-            throw new UserAlreadyExistsException("This email already exists");
+            throw new UserAlreadyExistsException();
         }
 
         using (var identityTransaction = await _identityContext.Database.BeginTransactionAsync())
@@ -123,7 +123,7 @@ public class AuthenticationData : IAuthenticationData
             {
                 identityTransaction.Rollback();
                 appTransaction.Rollback();
-                throw new BusinessException("An error occurred while registering the client");
+                throw new BusinessException();
             }
         }
     }
@@ -133,7 +133,7 @@ public class AuthenticationData : IAuthenticationData
         var userExists = await _userManager.FindByEmailAsync(model.Email);
         if (userExists != null)
         {
-            throw new UserAlreadyExistsException("This email already exists");
+            throw new UserAlreadyExistsException();
         }
 
         using (var identityTransaction = await _identityContext.Database.BeginTransactionAsync())
@@ -169,11 +169,11 @@ public class AuthenticationData : IAuthenticationData
                 await appTransaction.CommitAsync();
                 await identityTransaction.CommitAsync();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 await appTransaction.RollbackAsync();
                 await identityTransaction.RollbackAsync();
-                throw new BusinessException("An error occurred while registering the client");
+                throw new BusinessException();
             }
         }
     }
@@ -201,7 +201,7 @@ public class AuthenticationData : IAuthenticationData
 
     public async Task<AuthenticationResponse> LoginUserAsync(LoginRequest model)
     {
-        var user = await _userManager.FindByEmailAsync(model.Email) ?? throw new UserUserNotFoundException();
+        var user = await _userManager.FindByEmailAsync(model.Email) ?? throw new UserNotFoundException();
         try
         {
             if (await _userManager.CheckPasswordAsync(user, model.Password))
@@ -226,12 +226,16 @@ public class AuthenticationData : IAuthenticationData
             }
             else
             {
-                throw new WrongPasswordException("Wrong password, please enter a valid password.");
+                throw new WrongPasswordException();
             }
+        }
+        catch (WrongPasswordException)
+        {
+            throw;
         }
         catch (Exception)
         {
-            throw new BusinessException("Something whent wrong while loging in, Please try again.");
+            throw new BusinessException();
         }
     }
 

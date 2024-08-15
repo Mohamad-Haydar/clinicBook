@@ -62,7 +62,7 @@ public class AuthenticationController : Controller
         if (!ModelState.IsValid) 
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new Response("Please enter a valid input"));
+            return BadRequest(new BadRequestResponse());
         }
         try
         {
@@ -106,21 +106,9 @@ public class AuthenticationController : Controller
                 Roles = result.Roles,
             });
         }
-        catch (UserAlreadyExistsException ex)
+        catch (Exception ex)
         {
             return BadRequest(new Response(ex.Message));
-        }
-        catch (BusinessException ex)
-        {
-            return BadRequest(new Response(ex.Message));
-        }
-        catch (WrongPasswordException ex)
-        {
-            return BadRequest(new Response(ex.Message));
-        }
-        catch (Exception)
-        {
-            return BadRequest(new Response("Something went wrong. Please try again." ));
         }
 
     }
@@ -132,55 +120,16 @@ public class AuthenticationController : Controller
         if (!ModelState.IsValid) 
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new Response("Please enter a valid input"));
+            return BadRequest(new BadRequestResponse());
         }
         try
         {
             await _authenticationData.RegisterSecretaryAsync(model);
-            /* var userDataJson = JsonSerializer.Serialize(new
-             {
-                 id = result.Id,
-                 userName = result.UserName,
-                 email = result.Email,
-                 phoneNumber = result.PhoneNumber,
-                 roles = result.Roles,
-             });
-
-             Response.Cookies.Append("userData", userDataJson, new CookieOptions
-             {
-                 HttpOnly = false,
-                 Secure = true,
-                 SameSite = SameSiteMode.Lax
-             });
-
-             Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
-             {
-                 HttpOnly = true,
-                 Secure = true,
-                 SameSite = SameSiteMode.Lax
-             });
-
-             Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
-             {
-                 HttpOnly = true,
-                 Secure = true,
-                 SameSite = SameSiteMode.Lax
-             });
-            */
-
             return Ok(new Response("لقد تم انشاء حساب سكرتيرة جديد بنجاح."));
         }
-        catch (UserAlreadyExistsException ex)
+        catch (Exception ex)
         {
             return BadRequest(new Response(ex.Message));
-        }
-        catch (BusinessException ex)
-        {
-            return BadRequest(new Response(ex.Message));
-        }
-        catch (Exception)
-        {
-            return BadRequest(new Response("Something went wrong. Please try again."));
         }
     }
 
@@ -192,55 +141,17 @@ public class AuthenticationController : Controller
         if (!ModelState.IsValid) 
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new Response("Please enter a valid input"));
+            return BadRequest(new BadRequestResponse());
         }
         try
         {
             await _authenticationData.RegisterDoctorAsync(model);
-           /* var userDataJson = JsonSerializer.Serialize(new
-            {
-                id = result.Id,
-                userName = result.UserName,
-                email = result.Email,
-                phoneNumber = result.PhoneNumber,
-                roles = result.Roles,
-            });
-
-            Response.Cookies.Append("userData", userDataJson, new CookieOptions
-            {
-                HttpOnly = false,
-                Secure = true,
-                SameSite = SameSiteMode.Lax
-            });
-
-            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Lax
-            });
-
-            Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Lax
-            });
-           */
-
+          
             return Ok(new Response("لقد تم انشاء حساب دكتور جديد بنجاح"));
         }
-        catch (UserAlreadyExistsException ex)
+        catch (Exception ex)
         {
-            return BadRequest(new Response (ex.Message ));
-        }
-        catch (BusinessException ex)
-        {
-            return BadRequest(new Response (ex.Message ));
-        }
-        catch (Exception)
-        {
-            return BadRequest(new Response ("Something went wrong. Please try again." ));
+            return BadRequest(new Response (ex.Message));
         }
     }
 
@@ -280,7 +191,7 @@ public class AuthenticationController : Controller
         if (!ModelState.IsValid)
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new Response("Please enter a valid input"));
+            return BadRequest(new BadRequestResponse());
         }
         try
         {
@@ -325,22 +236,6 @@ public class AuthenticationController : Controller
                 Roles = result.Roles,
             });
         }
-        catch (UserUserNotFoundException ex)
-        {
-            return BadRequest(new Response(ex.Message));
-        }
-        catch (UserAlreadyExistsException ex)
-        {
-            return BadRequest(new Response(ex.Message));
-        }
-        catch (WrongPasswordException ex)
-        {
-            return BadRequest(new Response(ex.Message));
-        }
-        catch (BusinessException ex)
-        {
-            return BadRequest(new Response(ex.Message));
-        }
         catch (Exception ex)
         {
             return BadRequest(new Response(ex.Message));
@@ -358,11 +253,11 @@ public class AuthenticationController : Controller
 
         try
         {
-            if (refreshToken == null || accessToken == null || userData == null)
-            {
-                throw new Exception();
-            }
-            await _authenticationData.LogoutAsync(refreshToken, accessToken);
+            //if (refreshToken == null || accessToken == null || userData == null)
+            //{
+            //    throw new BusinessException();
+            //}
+            //await _authenticationData.LogoutAsync(refreshToken, accessToken);
             Response.Cookies.Delete("userData", new CookieOptions
             {
                 HttpOnly = true,
@@ -381,9 +276,9 @@ public class AuthenticationController : Controller
                     Secure = true,
                     SameSite = SameSiteMode.Lax
                 });
-            return Ok(new Response("Log out Successfully"));
+            return Ok(new Response("لقد تم تسجيل خروجك بنجاح"));
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             Response.Cookies.Delete("userData", new CookieOptions
             {
@@ -403,7 +298,7 @@ public class AuthenticationController : Controller
                 Secure = true,
                 SameSite = SameSiteMode.Lax
             });
-            return BadRequest(new Response("Invalid client request"));
+            return BadRequest(new Response(ex.Message));
         }
     }
 
