@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using api.Attributes;
 using api.Data;
@@ -73,7 +73,8 @@ public class AuthenticationController : Controller
                 userName= result.UserName,
                 email= result.Email,
                 phoneNumber= result.PhoneNumber,
-        });
+                roles = result.Roles,
+            });
 
             Response.Cookies.Append("userData", userDataJson, new CookieOptions
             {
@@ -102,6 +103,7 @@ public class AuthenticationController : Controller
                 UserName = result.UserName,
                 Email = result.Email,
                 PhoneNumber = result.PhoneNumber,
+                Roles = result.Roles,
             });
         }
         catch (UserExistsException ex)
@@ -134,44 +136,39 @@ public class AuthenticationController : Controller
         }
         try
         {
-            var result = await _authenticationData.RegisterSecretaryAsync(model);
-            var userDataJson = JsonSerializer.Serialize(new
-            {
-                id = result.Id,
-                userName = result.UserName,
-                email = result.Email,
-                phoneNumber = result.PhoneNumber,
-            });
+            await _authenticationData.RegisterSecretaryAsync(model);
+            /* var userDataJson = JsonSerializer.Serialize(new
+             {
+                 id = result.Id,
+                 userName = result.UserName,
+                 email = result.Email,
+                 phoneNumber = result.PhoneNumber,
+                 roles = result.Roles,
+             });
 
-            Response.Cookies.Append("userData", userDataJson, new CookieOptions
-            {
-                HttpOnly = false,
-                Secure = true,
-                SameSite = SameSiteMode.Lax
-            });
+             Response.Cookies.Append("userData", userDataJson, new CookieOptions
+             {
+                 HttpOnly = false,
+                 Secure = true,
+                 SameSite = SameSiteMode.Lax
+             });
 
-            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Lax
-            });
+             Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
+             {
+                 HttpOnly = true,
+                 Secure = true,
+                 SameSite = SameSiteMode.Lax
+             });
 
-            Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Lax
-            });
+             Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+             {
+                 HttpOnly = true,
+                 Secure = true,
+                 SameSite = SameSiteMode.Lax
+             });
+            */
 
-
-            return Ok(new
-            {
-                Id = result.Id,
-                UserName = result.UserName,
-                Email = result.Email,
-                PhoneNumber = result.PhoneNumber,
-            });
+            return Ok(new Response("لقد تم انشاء حساب سكرتيرة جديد بنجاح."));
         }
         catch (UserExistsException ex)
         {
@@ -199,13 +196,14 @@ public class AuthenticationController : Controller
         }
         try
         {
-            var result = await _authenticationData.RegisterDoctorAsync(model);
-            var userDataJson = JsonSerializer.Serialize(new
+            await _authenticationData.RegisterDoctorAsync(model);
+           /* var userDataJson = JsonSerializer.Serialize(new
             {
                 id = result.Id,
                 userName = result.UserName,
                 email = result.Email,
                 phoneNumber = result.PhoneNumber,
+                roles = result.Roles,
             });
 
             Response.Cookies.Append("userData", userDataJson, new CookieOptions
@@ -228,15 +226,9 @@ public class AuthenticationController : Controller
                 Secure = true,
                 SameSite = SameSiteMode.Lax
             });
+           */
 
-
-            return Ok(new
-            {
-                Id = result.Id,
-                UserName = result.UserName,
-                Email = result.Email,
-                PhoneNumber = result.PhoneNumber,
-            });
+            return Ok(new Response("لقد تم انشاء حساب دكتور جديد بنجاح"));
         }
         catch (UserExistsException ex)
         {
@@ -300,6 +292,7 @@ public class AuthenticationController : Controller
                 userName = result.UserName,
                 email = result.Email,
                 phoneNumber = result.PhoneNumber,
+                roles = result.Roles,
             });
 
             Response.Cookies.Append("userData", userDataJson, new CookieOptions
@@ -329,6 +322,7 @@ public class AuthenticationController : Controller
                 UserName = result.UserName,
                 Email = result.Email,
                 PhoneNumber = result.PhoneNumber,
+                Roles = result.Roles,
             });
         }
         catch (UserExistsException ex)

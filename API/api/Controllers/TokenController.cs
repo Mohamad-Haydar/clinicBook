@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using api.BusinessLogic.DataAccess;
+using System.Text.Json;
 using api.BusinessLogic.DataAccess.IDataAccess;
 using api.Data;
 using api.Exceptions;
@@ -35,6 +37,22 @@ public class TokenController : Controller
         try
         {
             var result = await _tokenData.RefreshAsync(tokenApiModel);
+            
+            var userDataJson = JsonSerializer.Serialize(new
+            {
+                id = result.Id,
+                userName = result.UserName,
+                email = result.Email,
+                phoneNumber = result.PhoneNumber,
+                roles = result.Roles,
+            });
+
+            Response.Cookies.Append("userData", userDataJson, new CookieOptions
+            {
+                HttpOnly = false,
+                Secure = true,
+                SameSite = SameSiteMode.Lax
+            });
             Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
@@ -54,7 +72,6 @@ public class TokenController : Controller
                 UserName = result.UserName,
                 Email = result.Email,
                 PhoneNumber = result.PhoneNumber,
-                AccessToken = result.AccessToken,
             });
         }
         catch (InvalidRequestException)

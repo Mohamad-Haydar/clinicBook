@@ -60,7 +60,16 @@ public class AuthenticationData : IAuthenticationData
                 await _identityContext.SaveChangesAsync();
                 await identityTransaction.CommitAsync();
                 await appTransaction.CommitAsync();
-                return await LoginUserAsync(new LoginRequest { Email = model.Email, Password = model.Password });
+                return new AuthenticationResponse()
+                {
+                    Id = user.Id,
+                    UserName = model.FirstName + " " + model.LastName,
+                    Email = model.Email,
+                    PhoneNumber = model.PhoneNumber,
+                    AccessToken = await _tokenService.GenerateAccessTokenAsync(model.Email),
+                    RefreshToken = _tokenService.GenerateRefreshToken(),
+                    Roles = [Roles.Client.ToString()]
+                };
             }
             catch
             {
@@ -71,7 +80,7 @@ public class AuthenticationData : IAuthenticationData
         }
     }
 
-    public async Task<AuthenticationResponse> RegisterSecretaryAsync(CreateSecretaryRequest model)
+    public async Task RegisterSecretaryAsync(CreateSecretaryRequest model)
     {
         var userExists = await _userManager.FindByEmailAsync(model.Email);
         if (userExists != null)
@@ -109,7 +118,6 @@ public class AuthenticationData : IAuthenticationData
                 await _identityContext.SaveChangesAsync();
                 await identityTransaction.CommitAsync();
                 await appTransaction.CommitAsync();
-                return await LoginUserAsync(new LoginRequest { Email = model.Email, Password = model.Password });
             }
             catch (Exception)
             {
@@ -120,7 +128,7 @@ public class AuthenticationData : IAuthenticationData
         }
     }
 
-    public async Task<AuthenticationResponse> RegisterDoctorAsync(CreateDoctorRequest model)
+    public async Task RegisterDoctorAsync(CreateDoctorRequest model)
     {
         var userExists = await _userManager.FindByEmailAsync(model.Email);
         if (userExists != null)
@@ -160,7 +168,6 @@ public class AuthenticationData : IAuthenticationData
 
                 await appTransaction.CommitAsync();
                 await identityTransaction.CommitAsync();
-                return await LoginUserAsync(new LoginRequest { Email = model.Email, Password = model.Password });
             }
             catch (Exception ex)
             {
@@ -199,6 +206,7 @@ public class AuthenticationData : IAuthenticationData
         {
             if (await _userManager.CheckPasswordAsync(user, model.Password))
             {
+                var roles = await _userManager.GetRolesAsync(user);
                 var accessToken = await _tokenService.GenerateAccessTokenAsync(model.Email);
                 var refreshToken = _tokenService.GenerateRefreshToken();
                 user.RefreshToken = refreshToken;
@@ -212,7 +220,8 @@ public class AuthenticationData : IAuthenticationData
                     Email = model.Email,
                     PhoneNumber = user.PhoneNumber,
                     AccessToken = accessToken,
-                    RefreshToken = refreshToken
+                    RefreshToken = refreshToken,
+                    Roles = roles
                 };
             }
             else

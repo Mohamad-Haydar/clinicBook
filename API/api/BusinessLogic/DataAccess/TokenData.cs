@@ -36,6 +36,7 @@ public class TokenData : ITokenData
             var principal = _tokenService.GetPrincipalFromExpiredToken(accessToken);
             var email = principal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email)?.Value;
             var userId = principal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier)?.Value;
+            var roles = principal.Claims.Where(claim => claim.Type == ClaimTypes.Role).Select(claim => claim.Value);
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
@@ -56,7 +57,8 @@ public class TokenData : ITokenData
                 Email = email,
                 PhoneNumber = user.PhoneNumber,
                 AccessToken = newAccessToken,
-                RefreshToken = newRefreshToken
+                RefreshToken = newRefreshToken,
+                Roles = roles
             };
         }
         catch(DbUpdateConcurrencyException)
