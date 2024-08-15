@@ -41,7 +41,7 @@ public class DoctorManagementData : IDoctorManagementData
         }
         catch (Exception)
         {
-            throw new BusinessException("Something when wrong please try again");
+            throw new BusinessException();
         }
     }
     public async Task AddMultipleServiceAsync(List<DoctorServiceRequest> doctorServices)
@@ -59,7 +59,7 @@ public class DoctorManagementData : IDoctorManagementData
             catch (Exception)
             {
                 transaction.Rollback();
-                throw new BusinessException("Something when wrong, please try again");
+                throw new BusinessException();
             }
         }
     }
@@ -68,11 +68,7 @@ public class DoctorManagementData : IDoctorManagementData
     {
         try
         {
-            var service = await _appDbContext.DoctorServices.FirstOrDefaultAsync(x => x.Id == id);
-            if (service == null)
-            {
-                throw new UserNotFoundException("something whent wrong please check your input data");
-            }
+            var service = await _appDbContext.DoctorServices.FirstOrDefaultAsync(x => x.Id == id) ?? throw new UserNotFoundException();
             service.Duration = duration;
             await _appDbContext.SaveChangesAsync();
         }
@@ -82,7 +78,7 @@ public class DoctorManagementData : IDoctorManagementData
         }
         catch (Exception)
         {
-            throw new BusinessException("Something when wrong, please try again");
+            throw new BusinessException();
         }
     }
 
@@ -90,7 +86,7 @@ public class DoctorManagementData : IDoctorManagementData
     // and check if i want to delete the client reservation
     public async Task DeleteDoctorServiceAsync(int id)
     {
-        var service = await _appDbContext.DoctorServices.FirstOrDefaultAsync(x => x.Id == id) ?? throw new UserNotFoundException("Service not found");
+        var service = await _appDbContext.DoctorServices.FirstOrDefaultAsync(x => x.Id == id) ?? throw new UserNotFoundException();
         try
         {
             var res = _appDbContext.DoctorServices.Remove(service);
@@ -102,22 +98,14 @@ public class DoctorManagementData : IDoctorManagementData
         }
         catch (Exception)
         {
-            throw new BusinessException("Something when wrong, please try again");
+            throw new BusinessException();
         }
     }
 
     public async Task RemoveDoctorAsync(string id)
     {
-        var doctor = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.Id == id);
-        var user = await _userManager.FindByIdAsync(id);
-        if (doctor == null)
-        {
-            throw new UserNotFoundException("Doctor not found");
-        }
-        if (user == null)
-        {
-            throw new UserNotFoundException("User not found");
-        }
+        var doctor = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.Id == id) ?? throw new UserNotFoundException();
+        var user = await _userManager.FindByIdAsync(id) ?? throw new UserNotFoundException();
         using (var transaction = _identityContext.Database.BeginTransaction())
         {
             try
@@ -128,26 +116,22 @@ public class DoctorManagementData : IDoctorManagementData
                 await _appDbContext.SaveChangesAsync();
                 transaction.Commit();
             }
+            catch (UserNotFoundException)
+            {
+                throw;
+            }
             catch (Exception)
             {
-                transaction.Rollback();
-                throw new BusinessException("Something went wrong. Please try again.");
+                throw new BusinessException();
             }
+            finally { transaction.Rollback(); }
         }
     }
 
     public async Task UpdateDoctorInfoAsync(UpdateDoctorRequest model)
     {
-        var user = await _userManager.FindByEmailAsync(model.Email);
-        var doctor = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.Email == model.Email);
-        if (doctor == null)
-        {
-            throw new UserNotFoundException();
-        }
-        if (user == null)
-        {
-            throw new UserNotFoundException();
-        }
+        var user = await _userManager.FindByEmailAsync(model.Email) ?? throw new UserNotFoundException();
+        var doctor = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.Email == model.Email) ?? throw new UserNotFoundException();
 
         using (var transaction = _identityContext.Database.BeginTransaction())
         {
@@ -168,11 +152,14 @@ public class DoctorManagementData : IDoctorManagementData
                 await _identityContext.SaveChangesAsync();
                 transaction.Commit();
             }
+            catch (UserNotFoundException)
+            {
+                throw;
+            }
             catch (Exception)
             {
-                transaction.Rollback();
                 throw new BusinessException();
-            }
+            }finally { transaction.Rollback(); }
         }
     }
 
@@ -192,7 +179,7 @@ public class DoctorManagementData : IDoctorManagementData
         }
         catch (UserNotFoundException)
         {
-            throw new UserNotFoundException();
+            throw;
         }
         catch (Exception)
         {
@@ -235,11 +222,11 @@ public class DoctorManagementData : IDoctorManagementData
         }
         catch (UserNotFoundException)
         {
-            throw new UserNotFoundException();
+            throw;
         }
         catch (Exception)
         {
-            throw;
+            throw new BusinessException();
         }
     }
 

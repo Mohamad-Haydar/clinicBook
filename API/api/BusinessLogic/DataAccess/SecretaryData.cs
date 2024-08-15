@@ -23,12 +23,16 @@ public class SecretaryData
     {
         try
         {
-            var secretarie = await _appDbContext.Secretaries.FirstOrDefaultAsync(x => x.Email == email) ?? throw new UserNotFoundException("Secretary not found, please enter a correct email");
+            var secretarie = await _appDbContext.Secretaries.FirstOrDefaultAsync(x => x.Email == email) ?? throw new UserNotFoundException();
             return secretarie;
+        }
+        catch (UserNotFoundException)
+        {
+            throw;
         }
         catch (Exception)
         {   
-            throw;
+            throw new BusinessException();
         }
     }
 }

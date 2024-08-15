@@ -41,7 +41,7 @@ public class TokenData : ITokenData
 
             if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
             {
-                throw new InvalidRequestException("Invalid client request");
+                throw new InvalidRequestException();
             }
 
             var newAccessToken = await _tokenService.GenerateAccessTokenAsync(email);
@@ -61,13 +61,9 @@ public class TokenData : ITokenData
                 Roles = roles
             };
         }
-        catch(DbUpdateConcurrencyException)
-        {
-            throw;
-        }
         catch (Exception)
         {
-            throw new BusinessException("Something went wrong. Please try again.");
+            throw new BusinessException();
         }
         finally
         {

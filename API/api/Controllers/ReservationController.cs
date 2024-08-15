@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using api.Data;
 using api.BusinessLogic.DataAccess.IDataAccess;
 using api.Helper;
@@ -35,13 +35,13 @@ public class ReservationController : ControllerBase
         if (!ModelState.IsValid)
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new Response("Please enter a valid input"));
+            return BadRequest(new BadRequestResponse());
         }
 
         try
         {
             await _reservationData.CreateQueueReservationAsync(model);
-            return Ok(new Response("Reservation added successfully"));
+            return Ok(new Response("لقد تم حجز الموعد بنجاح"));
         }
         catch (Exception ex)
         {
@@ -55,7 +55,7 @@ public class ReservationController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new Response("please enter a valid input" ));
+            return BadRequest(new BadRequestResponse());
         }
         try
         {
@@ -64,7 +64,7 @@ public class ReservationController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response("Something whent wrong please try again."));
+            return BadRequest(new Response(ex.Message));
         }
     }
 
@@ -74,16 +74,16 @@ public class ReservationController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new { message = "please enter a valid input" });
+            return BadRequest(new BadRequestResponse());
         }
         try
         {
             var res = await _reservationData.GetAllPersonalReservationsAsync(ClientId);
             return Ok(res);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return BadRequest(new Response("something when wrong please check you input and try again"));
+            return BadRequest(new Response(ex.Message));
         }
     }
 
@@ -93,16 +93,16 @@ public class ReservationController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new Response("please enter valid input"));
+            return BadRequest(new BadRequestResponse());
         }
         try
         {
             var result = await _reservationData.GetConcurrentBookingsAsync(id);
             return Ok(result);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return BadRequest(new Response("something when wrong please check you input and try again"));
+            return BadRequest(new Response(ex.Message));
         }
     }
 
@@ -112,16 +112,16 @@ public class ReservationController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new Response("please enter valid input"));
+            return BadRequest(new BadRequestResponse());
         }
         try
         {
             var result = await _reservationData.GetPreviousBookingsAsync(id);
             return Ok(result);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return BadRequest(new Response("something when wrong please check you input and try again"));
+            return BadRequest(new Response(ex.Message));
         }
 
     }
@@ -131,16 +131,16 @@ public class ReservationController : ControllerBase
     public async Task<IActionResult> DeleteSpecificReservation([Required] int clientReservationId)
     {
         if (!ModelState.IsValid)
-            return BadRequest(new Response("Please enter a valid input"));
+            return BadRequest(new BadRequestResponse());
 
         try
         {
             await _reservationData.DeleteSpecificReservationAsync(clientReservationId);
-            return Ok(new Response("your reservation is removed successfully"));
+            return Ok(new Response("لقد تم ازالة موعدك بنجاح"));
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return BadRequest(new Response("something when wrong please check you input and try again"));
+            return BadRequest(new Response(ex.Message));
             }
 
 
@@ -152,16 +152,16 @@ public class ReservationController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new Response("please enter valid data"));
+            return BadRequest(new BadRequestResponse());
         }
         try
         {
             await _reservationData.UpdateSpecificReservationAsync(model);
-            return Ok(new Response("your reservation is Updated successfully"));
+            return Ok(new Response("لقد تم تحديث الحجز بنجاح"));
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return BadRequest(new Response("Please check your input and try again"));
+            return BadRequest(new Response(ex.Message));
         }
     }
 
@@ -171,16 +171,16 @@ public class ReservationController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new Response("please enter valid input"));
+            return BadRequest(new BadRequestResponse());
         }
         try
         {
             var result = await _reservationData.GetAllReservationForTheDayAsync(DoctorAvailabilityId);
             return Ok(result);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return BadRequest(new Response("something when wrong please check you input and try again"));
+            return BadRequest(new Response(ex.Message));
         }
     }
 
@@ -190,16 +190,16 @@ public class ReservationController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new Response("please enter valid input"));
+            return BadRequest(new BadRequestResponse());
         }
         try
         {
             await _reservationData.MarkCompleteReservationAsync(ClientReservationId);
-            return Ok(new { message = "reservation marked as finished" });
+            return Ok(new Response("تم انهاء الزيارة"));
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return BadRequest(new Response("something when wrong please check you input and try again"));
+            return BadRequest(new Response(ex.Message));
         }
     }
 }

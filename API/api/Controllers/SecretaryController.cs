@@ -5,6 +5,7 @@ using api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using api.Exceptions;
+using api.Models.Responce;
 
 namespace api.Controllers;
 
@@ -28,13 +29,9 @@ public class SecretaryController : Controller
             var secretarie = await _secretaryData.GetSecretariebyEmailAsync(email);
             return Ok(secretarie);
         }
-        catch(UserNotFoundException ex)
+        catch (Exception ex)
         {
-            return BadRequest(new {message=ex.Message});
-        }
-        catch (Exception)
-        {
-            return BadRequest(new {message = "something went wrong please try again"});
+            return BadRequest(new Response(ex.Message));
         }
     }
 }

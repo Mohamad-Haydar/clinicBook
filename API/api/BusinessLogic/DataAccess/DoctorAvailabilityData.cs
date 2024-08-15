@@ -51,7 +51,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
         }
         catch (Exception)
         {
-            throw new BusinessException("An error occurred while registering the client");
+            throw new BusinessException();
         }
     }
 
@@ -68,16 +68,8 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
         };
         try
         {
-            var doc = await _userManager.FindByIdAsync(model.DoctorId);
-            if (doc == null)
-            {
-                throw new UserNotFoundException("Doctor Not Found please enter a valid doctor");
-            }
-            var res = await _appDbContext.DoctorAvailabilities.AddAsync(available);
-            if (res == null)
-            {
-                throw new FailedToAddException("failed to create a date, please try again");
-            }
+            var doc = await _userManager.FindByIdAsync(model.DoctorId) ?? throw new UserNotFoundException();
+            var res = await _appDbContext.DoctorAvailabilities.AddAsync(available) ?? throw new FailedToAddException();
             await _appDbContext.SaveChangesAsync();
         }
         catch (Exception)
@@ -89,18 +81,14 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
 
     public async Task UpdateAvailableDateAsync(UpdateAvailableDateRequest model)
     {
-        var existedAvailability = await _appDbContext.DoctorAvailabilities.FirstOrDefaultAsync(x => x.Id == model.Id);
-        if (existedAvailability == null)
-        {
-            throw new UserNotFoundException("their is no available date to update");
-        }
+        var existedAvailability = await _appDbContext.DoctorAvailabilities.FirstOrDefaultAsync(x => x.Id == model.Id) ?? throw new UserNotFoundException();
         if (model.StartHour > model.EndHour)
         {
-            throw new InvalidDataException("check your dates start date should be less that end date");
+            throw new InvalidDataException("انتبه, يجب ان تكون ساعة البدء قبل ساعة الانتهاء");
         }
         if (model.AvailableDate < DateOnly.FromDateTime(DateTime.Now))
         {
-            throw new InvalidDataException("check availability date should not be previouse today");
+            throw new InvalidDataException("انتبه, يجب ان يكون التاريخ في المستقبل ");
         }
 
         existedAvailability.AvailableDate = model?.AvailableDate != null ? model.AvailableDate : existedAvailability.AvailableDate;
@@ -121,7 +109,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
 
     public async Task DeleteAvailableDateAsync(int id)
     {
-        var availableDate = await _appDbContext.DoctorAvailabilities.FirstOrDefaultAsync(x => x.Id == id) ?? throw new UserNotFoundException("Not Found, Enter a valid input");
+        var availableDate = await _appDbContext.DoctorAvailabilities.FirstOrDefaultAsync(x => x.Id == id) ?? throw new UserNotFoundException();
         try
         {
             var available = _appDbContext.Remove(availableDate);
@@ -129,7 +117,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
         }
         catch (Exception)
         {
-            throw;
+            throw new BusinessException();
         }
     }
 }

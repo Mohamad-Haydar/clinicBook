@@ -32,7 +32,7 @@ public class ReservationData : IReservationData
         }
         catch (Exception)
         {
-            throw;
+            throw new BusinessException();
         }
     }
 
@@ -49,7 +49,7 @@ public class ReservationData : IReservationData
         }
         catch (Exception)
         {
-            throw;
+            throw new BusinessException();
         }
     }
 
@@ -66,7 +66,7 @@ public class ReservationData : IReservationData
         }
         catch (Exception)
         {
-            throw;
+            throw new BusinessException();
         }
     }
 
@@ -81,9 +81,9 @@ public class ReservationData : IReservationData
 
             return result;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return null;
+            throw new BusinessException();
         }
     }
 
@@ -98,9 +98,9 @@ public class ReservationData : IReservationData
 
             return result;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return null;
+            throw new BusinessException();
         }
     }
 
@@ -112,7 +112,7 @@ public class ReservationData : IReservationData
         }
         catch (Exception)
         {
-            throw;
+            throw new BusinessException();
         }
     }
 
@@ -124,7 +124,7 @@ public class ReservationData : IReservationData
         }
         catch (Exception)
         {
-            throw;
+            throw new BusinessException();
         }
     }
 
@@ -141,7 +141,7 @@ public class ReservationData : IReservationData
         }
         catch (Exception)
         {
-            throw;
+            throw new BusinessException();
         }
     }
 
@@ -152,14 +152,18 @@ public class ReservationData : IReservationData
             var ClientReservation = await _appDbContext.ClientReservations.FirstOrDefaultAsync(x => x.Id == ClientReservationId);
             if (ClientReservation == null)
             {
-                throw new UserNotFoundException("This client reservation was not found");
+                throw new UserNotFoundException();
             }
             ClientReservation.IsDone = true;
             await _appDbContext.SaveChangesAsync();
         }
-        catch (Exception)
+        catch (UserNotFoundException)
         {
             throw;
+        }
+        catch (Exception)
+        {
+            throw new BusinessException();
         }
     }
 

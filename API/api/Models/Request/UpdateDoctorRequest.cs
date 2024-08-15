@@ -12,7 +12,7 @@ namespace api.Models.Request
 
         [EmailAddress(ErrorMessage = "Invalid email address")]
         [StringLength(50, MinimumLength = 2, ErrorMessage = "email address must be between 2 and 50 characters long")]
-        public string? Email { get; set; }
+        public string Email { get; set; }
 
         [Phone(ErrorMessage = "Invalid phone number")]
         public string? PhoneNumber { get; set; }

@@ -1,13 +1,6 @@
-using System.ComponentModel.DataAnnotations;
-using api.Attributes;
-using api.Data;
-using api.Helper;
+﻿using System.ComponentModel.DataAnnotations;
 using api.Models.Request;
-using api.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using api.Exceptions;
 using api.BusinessLogic.DataAccess.IDataAccess;
 using api.Models.Responce;
 
@@ -29,20 +22,16 @@ public class DoctorAvailabilityController : Controller
     public async Task<IActionResult> GetAvailableDates([Required] string id)
     {
         if (!ModelState.IsValid)
-            return BadRequest(new Response("doctor not found"));
+            return BadRequest(new BadRequestResponse());
         
         try
         {
             var result = await _doctorAvailabilityData.GetAvailableDatesAsync(id);
             return Ok(result);
         }
-        catch (BusinessException ex)
+        catch (Exception ex)
         {
             return BadRequest(new Response(ex.Message));
-        }
-        catch (Exception)
-        {
-            return BadRequest(new Response("Something went wrong. Please try again."));
         }
     }
 
@@ -53,24 +42,16 @@ public class DoctorAvailabilityController : Controller
         if (!ModelState.IsValid)
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new { message = "Please enter a valid input", errors });
+            return BadRequest(new BadRequestResponse());
         }
         try
         {
             await _doctorAvailabilityData.OpenAvailableDateAsync(model);   
-            return Ok(new Response( "Available date added successfully"));
+            return Ok(new Response("تم انشاء تاريخ بنجاح"));
         }
-         catch(UserNotFoundException ex)
+        catch (Exception ex)
         {
             return BadRequest(new Response(ex.Message));
-        }
-        catch(BusinessException ex)
-        {
-            return BadRequest(new Response(ex.Message));
-        }
-        catch (Exception)
-        {
-            return BadRequest(new Response("something when wrong please try again"));
         }
         
     }
@@ -82,28 +63,16 @@ public class DoctorAvailabilityController : Controller
         if (!ModelState.IsValid)
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new { message = "Please enter a valid input", errors });
+            return BadRequest(new BadRequestResponse());
         }
         try
         {
             await _doctorAvailabilityData.UpdateAvailableDateAsync(model);
-            return Ok(new Response ( "Available date added successfully"));
+            return Ok(new Response ("لقد تم تحديث التاؤيخ بنجاح"));
         }
-        catch (UserNotFoundException ex)
+        catch (Exception ex)
         {
             return BadRequest(new Response (ex.Message));
-        }
-        catch (InvalidDataException ex)
-        {
-            return BadRequest(new Response (ex.Message));
-        }
-        catch (BusinessException ex)
-        {
-            return BadRequest(new Response (ex.Message));
-        }
-        catch (Exception)
-        {
-            return BadRequest(new Response ("Something when wrong, please try again"));
         }
     }
 
@@ -112,24 +81,16 @@ public class DoctorAvailabilityController : Controller
     public async Task<IActionResult> DeleteAvailableDate([Required] int id)
     {
         if(!ModelState.IsValid)
-            return BadRequest(new { message = "Please select valid date to remove" });
+            return BadRequest(new BadRequestResponse());
 
         try
         {
             await _doctorAvailabilityData.DeleteAvailableDateAsync(id);
-            return Ok(new Response("availabel date removed successfully"));
+            return Ok(new BadRequestResponse());
         }
-        catch (UserNotFoundException ex)
+        catch (Exception ex)
         {
             return BadRequest(new Response(ex.Message));
-        }
-         catch (BusinessException ex)
-        {
-            return BadRequest(new Response(ex.Message));
-        }
-        catch (Exception)
-        {
-            return BadRequest(new Response("something when wrong please try again"));
         }
     }
 

@@ -1,4 +1,4 @@
-using api.Attributes;
+﻿using api.Attributes;
 using api.Data;
 using api.Models.Request;
 using api.Models.Responce;
@@ -31,20 +31,16 @@ public class DoctorManagementController : ControllerBase
         if(!ModelState.IsValid)
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new { message = "Please enter a valid input", errors });
+            return BadRequest(new BadRequestResponse());
         }
         try
         {
             await _doctorManagementData.AddDoctorServiceAsync(doctorService);
-            return Ok(new Response("Service Added Successfully to the doctor"));
+            return Ok(new Response("تم اضافة خدمة بنجاح"));
         }
-        catch (BusinessException ex)
+        catch (Exception ex)
         {
             return BadRequest(new Response(ex.Message));
-        }
-        catch (Exception)
-        {
-            return BadRequest(new Response("check your dates start date should be less that end date, and check availability date should not be previouse today"));
         }
     }
 
@@ -55,20 +51,16 @@ public class DoctorManagementController : ControllerBase
          if(!ModelState.IsValid)
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new { message = "Please enter a valid input", errors });
+            return BadRequest(new BadRequestResponse());
         }
         try
         {
             await _doctorManagementData.AddMultipleServiceAsync(doctorServices);
-            return Ok(new Response("All Services added successfully"));
+            return Ok(new Response("تم اضافة خدمات بنجاح"));
         }
-        catch (BusinessException ex)
+        catch (Exception ex)
         {
             return BadRequest(new Response(ex.Message));
-        }
-        catch (Exception)
-        {
-            return BadRequest(new Response("check your dates start date should be less that end date, and check availability date should not be previouse today"));
         }
         
     }
@@ -79,24 +71,16 @@ public class DoctorManagementController : ControllerBase
     {
         if(!ModelState.IsValid)
         {
-            return BadRequest(new {message = "please enter valid data"});
+            return BadRequest(new BadRequestResponse());
         }
         try
         {
             await _doctorManagementData.UpdateDoctorServiceDurationAsync(id, duration);
-            return Ok(new Response("Service Duration updated successfully"));
+            return Ok(new Response("تم تحديث التوقيت بنجاح"));
         }
-        catch (UserNotFoundException ex)
+        catch (Exception ex)
         {
             return BadRequest(new Response(ex.Message));
-        }
-        catch (BusinessException ex)
-        {
-            return BadRequest(new Response(ex.Message));
-        }
-        catch (Exception)
-        {
-            return BadRequest(new Response("Something whent wrong, please try again."));
         }
     }
 
@@ -106,24 +90,16 @@ public class DoctorManagementController : ControllerBase
     {
         if(!ModelState.IsValid)
         {
-            return BadRequest(new {message = "Please enter a valid input"});
+            return BadRequest(new BadRequestResponse());
         }
         try
         {
             await _doctorManagementData.DeleteDoctorServiceAsync(id);
-            return Ok(new Response("Service Deleted successfully"));
+            return Ok(new Response("تم ازالة الخدمة بنجاح"));
         }
-        catch (UserNotFoundException ex)
+        catch (Exception ex)
         {
             return BadRequest(new Response(ex.Message));
-        }
-        catch (BusinessException ex)
-        {
-            return BadRequest(new Response(ex.Message));
-        }
-        catch (Exception)
-        {
-            return BadRequest(new Response("Something whent wrong, please try again."));
         }
     }
 
@@ -133,24 +109,16 @@ public class DoctorManagementController : ControllerBase
     {
         if(!ModelState.IsValid)
         {
-            return BadRequest(new {message = "Please enter valid input"});
+            return BadRequest(new BadRequestResponse());
         }
         try
         {
             await _doctorManagementData.RemoveDoctorAsync(id);
-            return Ok(new Response("doctor removed successfully"));
+            return Ok(new Response("تم ازالة الدكتور بنجاح"));
         }
-        catch (UserNotFoundException ex)
+        catch (Exception ex)
         {
             return BadRequest(new Response(ex.Message));
-        }
-        catch (BusinessException ex)
-        {
-            return BadRequest(new Response(ex.Message));
-        }
-        catch (Exception)
-        {
-            return BadRequest(new Response("Something whent wrong, please try again."));
         }
     }
 
@@ -162,24 +130,16 @@ public class DoctorManagementController : ControllerBase
         if(!ModelState.IsValid)
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new { message = "Please enter a valid input", errors });
+            return BadRequest(new BadRequestResponse());
         }
         try
         {
             await _doctorManagementData.UpdateDoctorInfoAsync(model);
-            return Ok(new Response("Doctor Data updated successfully." ));
+            return Ok(new Response("تم تحديث معلومات الدكتور بنجاح" ));
         }
-        catch (UserNotFoundException ex)
+        catch (Exception ex)
         {
             return BadRequest(new Response(ex.Message));
-        }
-        catch (BusinessException ex)
-        {
-            return BadRequest(new Response(ex.Message));
-        }
-        catch (Exception)
-        {
-            return BadRequest(new Response("Something whent wrong, please try again."));
         }
     }
 
@@ -190,24 +150,16 @@ public class DoctorManagementController : ControllerBase
     {
         if(!ModelState.IsValid)
         {
-            return BadRequest(new {message="please enter the email"});
+            return BadRequest(new BadRequestResponse());
         }
         try
         {
             var doctor = await _doctorManagementData.GetDoctorByEmailAsync(email);
             return Ok(doctor);
         }
-        catch (UserNotFoundException ex)
+        catch (Exception ex)
         {
             return BadRequest(new Response(ex.Message));
-        }
-        catch (BusinessException ex)
-        {
-            return BadRequest(new Response(ex.Message));
-        }
-        catch (Exception)
-        {
-            return BadRequest(new Response("Something whent wrong, please try again."));
         }
     }
 
@@ -218,7 +170,7 @@ public class DoctorManagementController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new Response("Please enter valid input"));
+            return BadRequest(new BadRequestResponse());
         }
 
         try
@@ -226,9 +178,9 @@ public class DoctorManagementController : ControllerBase
             var doctor = await _doctorManagementData.GetDoctorByIdAsync(id);
             return Ok(doctor);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return BadRequest(new Response("Something whent wrong, please try again"));
+            return BadRequest(new Response(ex.Message));
         }
     }
 
@@ -240,11 +192,11 @@ public class DoctorManagementController : ControllerBase
         try
         {
             var doctors = await _doctorManagementData.GetAllDoctorsAsync();
-            return doctors.Count() > 0 ? Ok(doctors) : NoContent();
+            return doctors.Any() ? Ok(doctors) : NoContent();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return BadRequest(new Response("Something whent wrong, please try again"));
+            return BadRequest(new Response(ex.Message));
         }
     }
 
@@ -256,11 +208,11 @@ public class DoctorManagementController : ControllerBase
         try
         {
             var doctors = await _doctorManagementData.GetDoctorsByCategoryAsync(CategoryId);
-            return doctors.Count() > 0 ? Ok(doctors) : NoContent();
+            return doctors.Any() ? Ok(doctors) : NoContent();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return BadRequest(new Response("Something whent wrong, please try again"));
+            return BadRequest(new Response(ex.Message));
         }
     }
 }

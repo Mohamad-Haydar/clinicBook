@@ -1,5 +1,6 @@
 using api.BusinessLogic.DataAccess.IDataAccess;
 using api.Data;
+using api.Exceptions;
 using api.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,7 +24,7 @@ namespace api.BusinessLogic.DataAccess
             }
             catch (Exception)
             {
-                throw;
+                throw new BusinessException();
             }
         }
     }

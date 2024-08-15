@@ -1,4 +1,6 @@
-﻿using api.Services;
+﻿using api.Exceptions;
+using api.Models.Responce;
+using api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers
@@ -20,11 +22,11 @@ namespace api.Controllers
             try
             {
                 _backupService.CreateBackupAsync();
-                return Ok(new { message = "Backup successfully" });
+                return Ok(new Response("لقد تم انشاء نسخة احتياط بنجاح"));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, new { message = "Failed to initiate backup", error = ex.Message });
+                return BadRequest( new BusinessException());
             }
         }
 
@@ -35,11 +37,11 @@ namespace api.Controllers
             try
             {
                 await _backupService.CreateRestoreAsync();
-                return Ok(new { message = "Restored successfully" });
+                return Ok(new Response("لقد تم استعادة المعلومات بنجاح"));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, new { message = "Failed to initiate backup", error = ex.Message });
+                return BadRequest(new BusinessException());
             }
         }
     }

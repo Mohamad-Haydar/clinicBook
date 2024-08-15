@@ -92,11 +92,11 @@ public class TokenController : Controller
         }
         catch (BusinessException ex)
         {
-            return BadRequest(new {message=ex.Message});
+            return BadRequest(new Response(ex.Message));
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return BadRequest(new {message="Something when wrong please try again."});
+            return BadRequest(new Response(ex.Message));
         }
         
     }

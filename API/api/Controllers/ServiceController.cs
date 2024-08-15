@@ -23,9 +23,9 @@ namespace api.Controllers
                 var services = await _serviceData.GetAllServicesAsync();
                 return Ok(services);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return BadRequest(new Response("Something whent wrong, please try again"));
+                return BadRequest(new Response(ex.Message));
             }
         }
     }
