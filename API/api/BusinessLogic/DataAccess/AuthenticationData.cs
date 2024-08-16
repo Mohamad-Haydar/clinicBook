@@ -141,17 +141,15 @@ public class AuthenticationData : IAuthenticationData
         {
             try
             {
-                string userName = model.FirstName + model.LastName;
+                string userName = model.FirstName + " " + model.LastName;
                 var user = new UserModel
                 {
                     UserName = userName,
                     Email = model.Email,
                     PhoneNumber = model.PhoneNumber,
-                    RefreshToken = "",
-                    RefreshTokenExpiryTime = DateTime.MinValue
                 };
                 var result = await _userManager.CreateAsync(user, model.Password);
-                var added = await _userManager.AddToRoleAsync(user, Roles.Doctor.ToString());
+                await _userManager.AddToRoleAsync(user, Roles.Doctor.ToString());
                 DoctorModel doctor = new()
                 {
                     Id = user.Id,

@@ -1,4 +1,4 @@
-using api.BusinessLogic.DataAccess.IDataAccess;
+﻿using api.BusinessLogic.DataAccess.IDataAccess;
 using api.Data;
 using api.Exceptions;
 using api.Helper;
@@ -118,13 +118,14 @@ public class DoctorManagementData : IDoctorManagementData
             }
             catch (UserNotFoundException)
             {
+                transaction.Rollback();
                 throw;
             }
             catch (Exception)
             {
+                transaction.Rollback();
                 throw new BusinessException();
             }
-            finally { transaction.Rollback(); }
         }
     }
 
@@ -154,12 +155,14 @@ public class DoctorManagementData : IDoctorManagementData
             }
             catch (UserNotFoundException)
             {
+                transaction.Rollback();
                 throw;
             }
             catch (Exception)
             {
+                transaction.Rollback();
                 throw new BusinessException();
-            }finally { transaction.Rollback(); }
+            }
         }
     }
 
@@ -216,7 +219,7 @@ public class DoctorManagementData : IDoctorManagementData
                         };
             if (!doctor.Any())
             {
-                throw new UserNotFoundException();
+                throw new UserNotFoundException("هذا الطبيب غير موجود!");
             }
             return await doctor.FirstAsync();
         }
