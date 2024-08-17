@@ -263,5 +263,4 @@ public class DoctorManagementData : IDoctorManagementData
             throw;
         }
     }
-
 }

@@ -120,4 +120,24 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
             throw new BusinessException();
         }
     }
+
+     public async Task<IEnumerable<DoctorAvailabilityModel>> GetDoctorAvailabilitiesOfDayAsync(DateOnly date){
+        try
+        {
+             if(date == DateOnly.MinValue)
+            {
+                var res = await _appDbContext.DoctorAvailabilities.Where(x => x.AvailableDate == DateOnly.FromDateTime(DateTime.Now)).ToListAsync();
+                return res;
+            }else{
+               var res = await _appDbContext.DoctorAvailabilities.Where(x => x.AvailableDate == date).ToListAsync();
+                return res;
+            }
+
+            return [];
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
 }
