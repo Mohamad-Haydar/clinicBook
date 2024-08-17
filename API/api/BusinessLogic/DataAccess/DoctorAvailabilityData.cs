@@ -137,7 +137,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
         }
         catch (Exception)
         {
-            throw;
+            throw new BusinessException();
         }
     }
 }
