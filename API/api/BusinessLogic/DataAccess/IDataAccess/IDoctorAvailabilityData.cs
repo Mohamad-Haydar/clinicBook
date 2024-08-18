@@ -11,5 +11,6 @@ namespace api.BusinessLogic.DataAccess.IDataAccess
         Task OpenAvailableDateAsync(OpenAvailableDateRequest model);
         Task UpdateAvailableDateAsync(UpdateAvailableDateRequest model);
         Task<IEnumerable<DoctorAvailabilityModel>> GetDoctorAvailabilitiesOfDayAsync(DateOnly date);
+        Task<IEnumerable<DoctorAvailabilityModel>> GetAllDoctorAvailabilitiesAsync(string doctorId);
     }
 }

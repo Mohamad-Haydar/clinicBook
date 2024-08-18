@@ -121,7 +121,20 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
         }
     }
 
-     public async Task<IEnumerable<DoctorAvailabilityModel>> GetDoctorAvailabilitiesOfDayAsync(DateOnly date){
+    public async Task<IEnumerable<DoctorAvailabilityModel>> GetAllDoctorAvailabilitiesAsync(string doctorId)
+    {
+        try
+        {
+            var res = await _appDbContext.DoctorAvailabilities.Where(x => x.DoctorId == doctorId).ToListAsync();
+            return res;
+        }
+        catch (Exception)
+        {
+            throw new BusinessException();
+        }
+    }
+
+    public async Task<IEnumerable<DoctorAvailabilityModel>> GetDoctorAvailabilitiesOfDayAsync(DateOnly date){
         try
         {
              if(date == DateOnly.MinValue)

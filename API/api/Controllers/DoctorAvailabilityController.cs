@@ -95,6 +95,21 @@ public class DoctorAvailabilityController : Controller
     }
 
     [HttpGet]
+    [Route("GetAllDoctorAvailabilities")]
+    public async Task<IActionResult> GetAllDoctorAvailabilities([Required] string doctorId)
+    {
+        try
+        {
+            var res = await _doctorAvailabilityData.GetAllDoctorAvailabilitiesAsync(doctorId);
+            return Ok(res);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new Response(ex.Message));
+        }
+    }
+
+    [HttpGet]
     [Route("GetDoctorAvailabilitiesOfDay")]
     public async Task<IActionResult> GetDoctorAvailabilitiesOfDay(DateOnly date)
     {
