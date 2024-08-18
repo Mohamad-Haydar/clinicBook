@@ -203,4 +203,23 @@ public class ReservationController : ControllerBase
         }
     }
 
+    [HttpGet]
+    [Route("GetAllReservationOfAvailability")]
+    public async Task<IActionResult> GetAllReservationOfAvailability([Required] int availabilityId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new BadRequestResponse());
+        }
+        try
+        {
+            var res = await _reservationData.GetAllReservationOfAvailabilityAsync(availabilityId);
+            return Ok(res);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new Response(ex.Message));
+        }
+    }
+
 }

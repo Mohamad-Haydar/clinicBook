@@ -9,6 +9,7 @@ using api.Data;
 using Microsoft.EntityFrameworkCore;
 using api.Exceptions;
 using api.BusinessLogic.DataAccess.IDataAccess;
+using api.Models;
 
 namespace api.BusinessLogic.DataAccess;
 
@@ -160,6 +161,22 @@ public class ReservationData : IReservationData
         catch (UserNotFoundException)
         {
             throw;
+        }
+        catch (Exception)
+        {
+            throw new BusinessException();
+        }
+    }
+
+    public async Task<IEnumerable<ReservationDetailResponce>> GetAllReservationOfAvailabilityAsync(int availabilityId)
+    {
+        try
+        {
+            var res = from cr in _appDbContext.ClientReservations
+                      where cr.DoctorAvailabilityId == availabilityId
+                      join c in _appDbContext.Clients on cr.ClientId equals c.Id
+                      select new ReservationDetailResponce { id = cr.Id, startTime = cr.StartTime, endTime = cr.EndTime, isDone = cr.IsDone , clientName = c.FirstName + " " + c.LastName };
+            return res;
         }
         catch (Exception)
         {

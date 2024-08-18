@@ -11,4 +11,5 @@ public class CreateDoctorRequest : CreateUserRequest
     [Required(ErrorMessage = "CategoryId is required")]
     [Range(1, int.MaxValue, ErrorMessage = "category id must be greater than 1")]
     public int CategoryId { get; set; }
+    public string? Image { get; set; }
 }

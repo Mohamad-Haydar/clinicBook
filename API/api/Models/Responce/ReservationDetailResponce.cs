@@ -4,10 +4,10 @@ public class ReservationDetailResponce
 {
     #pragma warning disable IDE1006, CS8618 // Naming Styles
     public int id { get; set; }
-    public TimeSpan start_time { get; set; }
-    public TimeSpan end_time { get; set; }
-    public int doctor_availability_id { get; set; }
-    public string[] service_names { get; set; }
-    public string doctor_id { get; set; }
-    #pragma warning restore IDE1006, CS8618 // Naming Styles
+    public TimeSpan startTime { get; set; }
+    public TimeSpan endTime { get; set; }
+    public string[] serviceNames { get; set; }
+    public string clientName { get; set; }
+    public bool isDone { get; set; }
+#pragma warning restore IDE1006, CS8618 // Naming Styles
 }

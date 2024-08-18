@@ -158,7 +158,8 @@ public class AuthenticationData : IAuthenticationData
                     Email = model.Email,
                     PhoneNumber = model.PhoneNumber,
                     Description = model.Description,
-                    CategoryId = model.CategoryId
+                    CategoryId = model.CategoryId,
+                    Image = model.Image,
                 };
                 await _appContext.Doctors.AddAsync(doctor);
                 await _appContext.SaveChangesAsync();

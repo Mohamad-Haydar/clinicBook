@@ -1,4 +1,5 @@
-﻿using api.Models.Request;
+﻿using api.Models;
+using api.Models.Request;
 using api.Models.Responce;
 
 namespace api.BusinessLogic.DataAccess.IDataAccess
@@ -14,5 +15,6 @@ namespace api.BusinessLogic.DataAccess.IDataAccess
         Task<Dictionary<string, object>> GetReservationDetailsAsync(int id);
         Task MarkCompleteReservationAsync(int ClientReservationId);
         Task UpdateSpecificReservationAsync(UpdateReservationRequest model);
+        Task<IEnumerable<ReservationDetailResponce>> GetAllReservationOfAvailabilityAsync(int availabilityId);
     }
 }
