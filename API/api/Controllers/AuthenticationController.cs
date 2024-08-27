@@ -80,21 +80,24 @@ public class AuthenticationController : Controller
             {
                 HttpOnly = false,
                 Secure = true,
-                SameSite = SameSiteMode.Lax
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddYears(1)
             });
 
             Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Lax
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddYears(1)
             });
 
             Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Lax
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddYears(1)
             });
 
             return Ok(new
@@ -210,21 +213,24 @@ public class AuthenticationController : Controller
             {
                 HttpOnly = false,
                 Secure = true,
-                SameSite = SameSiteMode.Lax
+                SameSite = SameSiteMode.Lax,
+                Expires  = DateTime.UtcNow.AddYears(1)
             });
 
             Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Lax
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddYears(1)
             });
 
             Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Lax
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddYears(1)
             });
 
 
