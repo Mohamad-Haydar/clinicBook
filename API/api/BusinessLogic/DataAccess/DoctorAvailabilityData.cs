@@ -64,7 +64,8 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
             StartHour = model.StartHour,
             EndHour = model.EndHour,
             MaxClient = model.MaxClient,
-            DoctorId = model.DoctorId
+            DoctorId = model.DoctorId,
+            RepetitionDelay = model.RepetitionDelay
         };
         try
         {
@@ -78,6 +79,45 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
         }
 
     }
+
+    public async Task OpenRepeatedAvailableDateAsync(IEnumerable<OpenAvailableDateRequest> model)
+    {
+        string doctorId = "";
+        List<DoctorAvailabilityModel> availables = [];
+        foreach (var item in model)
+        {
+            doctorId = item.DoctorId;
+            availables.Add(
+                new()
+                {
+                    AvailableDate = item.AvailableDate,
+                    DayName = Days[item.AvailableDate.DayOfWeek.ToString()],
+                    StartHour = item.StartHour,
+                    EndHour = item.EndHour,
+                    MaxClient = item.MaxClient,
+                    DoctorId = item.DoctorId,
+                    RepetitionDelay = item.RepetitionDelay,
+                }
+            );
+        }
+        
+        try
+        {
+            var doc = await _userManager.FindByIdAsync(doctorId) ?? throw new UserNotFoundException();
+            if(availables == null)
+            {
+                throw new FailedToAddException();
+            }
+            await _appDbContext.DoctorAvailabilities.AddRangeAsync(availables);
+            await _appDbContext.SaveChangesAsync();
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+
+    }
+
 
     public async Task UpdateAvailableDateAsync(UpdateAvailableDateRequest model)
     {

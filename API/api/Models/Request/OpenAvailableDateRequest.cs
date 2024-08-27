@@ -27,5 +27,6 @@ namespace api.Models.Request
 
         [Required(ErrorMessage = "DoctorId is required")]
         public string DoctorId { get; set; }
+        public int? RepetitionDelay { get; set; }
     }
 }

@@ -86,7 +86,7 @@ builder.Services.AddScoped<ICategoryData, CategoryData>();
 builder.Services.AddScoped<IBackupService, BackupService>();
 builder.Services.AddScoped<IServiceData, ServiceData>();
 
-builder.Services.AddHostedService<BookingCleanupWorker>();
+builder.Services.AddHostedService<DailyWorker>();
 
 
 builder.Services.AddSwaggerGen(c =>

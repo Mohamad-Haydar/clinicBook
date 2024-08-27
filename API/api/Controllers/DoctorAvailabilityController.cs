@@ -3,6 +3,7 @@ using api.Models.Request;
 using Microsoft.AspNetCore.Mvc;
 using api.BusinessLogic.DataAccess.IDataAccess;
 using api.Models.Responce;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace api.Controllers;
 
@@ -53,7 +54,6 @@ public class DoctorAvailabilityController : Controller
         {
             return BadRequest(new Response(ex.Message));
         }
-        
     }
 
     [HttpPatch]
@@ -124,4 +124,23 @@ public class DoctorAvailabilityController : Controller
         }
     }
 
+    [HttpPost]
+    [Route("CreateRepeatedAvailability")]
+    public async Task<IActionResult> CreateRepeatedAvailability([FromBody] IEnumerable<OpenAvailableDateRequest> model)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+            return BadRequest(new BadRequestResponse());
+        }
+        try
+        {
+            await _doctorAvailabilityData.OpenRepeatedAvailableDateAsync(model);
+            return Ok(new Response("تم انشاء تاريخ بنجاح"));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new Response(ex.Message));
+        }
+    }
 }

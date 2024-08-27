@@ -22,4 +22,6 @@ public class DoctorAvailabilityModel
     public int CurrentReservations { get; set; }
     [Column("doctorid")]
     public string DoctorId { get; set; }
+    [Column("repetitiondelay")]
+    public int? RepetitionDelay { get; set; }
 }

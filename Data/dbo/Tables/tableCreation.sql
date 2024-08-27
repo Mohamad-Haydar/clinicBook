@@ -48,6 +48,7 @@ Create Table DoctorAvailability(
   MaxClient int NOT NULL,
   CurrentReservations int NOT NULL DEFAULT 0,
   DoctorId varchar(128) NOT NULL,
+  RepetitionDelay int,
   CONSTRAINT fk_doctor FOREIGN KEY(DoctorId) REFERENCES Doctor(Id) ON DELETE CASCADE,
   CONSTRAINT check_start_end_hours CHECK (starthour < endhour),
   CONSTRAINT check_available_date CHECK (availabledate >= current_date)
