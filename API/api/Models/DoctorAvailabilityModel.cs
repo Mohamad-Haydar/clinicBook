@@ -24,4 +24,6 @@ public class DoctorAvailabilityModel
     public string DoctorId { get; set; }
     [Column("repetitiondelay")]
     public int? RepetitionDelay { get; set; }
+    [Column("nbofopenavailability")]
+    public int NbOfOpenAvailability { get; set; } = 1;
 }

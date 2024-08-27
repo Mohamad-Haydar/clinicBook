@@ -57,20 +57,31 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
 
     public async Task OpenAvailableDateAsync(OpenAvailableDateRequest model)
     {
-        DoctorAvailabilityModel available = new()
+        List<DoctorAvailabilityModel> availables = [];
+        for (int i = 0; i < model.NbOfOpenAvailability; i++)
         {
-            AvailableDate = model.AvailableDate,
-            DayName = Days[model.AvailableDate.DayOfWeek.ToString()],
-            StartHour = model.StartHour,
-            EndHour = model.EndHour,
-            MaxClient = model.MaxClient,
-            DoctorId = model.DoctorId,
-            RepetitionDelay = model.RepetitionDelay
-        };
+            availables.Add(
+                new()
+                {
+                    AvailableDate = model.AvailableDate.AddDays(7*i) ,
+                    DayName = Days[model.AvailableDate.DayOfWeek.ToString()],
+                    StartHour = model.StartHour,
+                    EndHour = model.EndHour,
+                    MaxClient = model.MaxClient,
+                    DoctorId = model.DoctorId,
+                    RepetitionDelay = model.RepetitionDelay,
+                    NbOfOpenAvailability = model.NbOfOpenAvailability,
+                }
+            );
+        }
         try
         {
             var doc = await _userManager.FindByIdAsync(model.DoctorId) ?? throw new UserNotFoundException();
-            var res = await _appDbContext.DoctorAvailabilities.AddAsync(available) ?? throw new FailedToAddException();
+            if (availables == null)
+            {
+                throw new FailedToAddException();
+            }
+            await _appDbContext.DoctorAvailabilities.AddRangeAsync(availables);
             await _appDbContext.SaveChangesAsync();
         }
         catch (Exception)

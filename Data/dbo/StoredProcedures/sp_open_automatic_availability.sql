@@ -4,32 +4,36 @@ AS $$
 -- Step 1: Define variables
 DECLARE
 	current_date DATE := CURRENT_DATE;
-    repetition_record RECORD;
+    doctor_availability_row RECORD;
     new_available_date DATE;
-    existing_availability_count INT;
+    nb_of_open_availability INT;
 BEGIN
     
     -- Step 2: Loop through availabilities for today
-    FOR repetition_record IN
+    FOR doctor_availability_row IN
         SELECT * FROM doctoravailability
         WHERE availabledate = current_date
           AND repetitiondelay IS NOT NULL
     LOOP
-        -- Calculate the next start date based on the repetition delay
-        new_available_date := current_date + (repetition_record.repetitiondelay * 7);
+        -- Get the number of open availability
+        nb_of_open_availability := doctor_availability_row.nbofopenavailability;
 
-        -- Check if there is already an availability on the new start date
-        SELECT COUNT(*) INTO existing_availability_count
-        FROM doctoravailability
-        WHERE doctorid = repetition_record.doctorid
-          AND availabledate = new_available_date;
+        -- loop over the number of needed open availability
+        FOR i IN 1..nb_of_open_availability LOOP
+             new_available_date := current_date + (doctor_availability_row.repetitiondelay * i * 7);
 
-        -- If no availability exists for the new start date, create one
-        IF existing_availability_count = 0 THEN
-            INSERT INTO doctoravailability (availabledate, dayname, starthour, endhour, maxclient, currentreservations, doctorid, repetitiondelay)
-            VALUES (new_available_date, repetition_record.dayname, repetition_record.starthour, repetition_record.endhour, 
-                    repetition_record.maxclient, 0, repetition_record.doctorid, repetition_record.repetitiondelay);
-        END IF;
+            -- If no availability exists for the new date, create one
+            IF NOT EXISTS (
+                SELECT 1
+                FROM doctoravailability
+                WHERE doctorid = doctor_availability_row.doctorid
+                AND availabledate = new_available_date
+            ) THEN
+                INSERT INTO doctoravailability (availabledate, dayname, starthour, endhour, maxclient, currentreservations, doctorid, repetitiondelay, nbofopenavailability)
+                VALUES (new_available_date, doctor_availability_row.dayname, doctor_availability_row.starthour, doctor_availability_row.endhour, 
+                        doctor_availability_row.maxclient, 0, doctor_availability_row.doctorid, doctor_availability_row.repetitiondelay, doctor_availability_row.nbofopenavailability);
+            END IF;
+        END LOOP;
     END LOOP;
     
 END;
