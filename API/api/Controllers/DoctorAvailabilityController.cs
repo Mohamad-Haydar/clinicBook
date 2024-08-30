@@ -86,11 +86,15 @@ public class DoctorAvailabilityController : Controller
         try
         {
             await _doctorAvailabilityData.DeleteAvailableDateAsync(id);
-            return Ok(new BadRequestResponse());
+            return Ok(new Response("لقد تم حذف الموعد و اعادة ترتيب الحجوزات بنجاح"));
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            if (ex.Message.StartsWith("MYERROR:"))
+            {
+                return BadRequest(new Response(ex.Message[8..]));
+            }
+            return BadRequest(new BadRequestResponse());
         }
     }
 

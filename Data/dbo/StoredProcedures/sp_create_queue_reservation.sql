@@ -1,7 +1,8 @@
 CREATE OR REPLACE PROCEDURE sp_create_queue_reservation(
     IN client_id character varying, 
     IN doctor_availability_id int,
-    IN doctor_service_ids int[]
+    IN doctor_service_ids int[],
+    IN reorder boolean
 )
 LANGUAGE plpgsql
 AS $$
@@ -14,12 +15,19 @@ DECLARE
     _current_reservations int;
     _service_duration int;
 BEGIN
+     -- Check if the array is empty or has no elements
+    IF array_length(doctor_service_ids, 1) IS NULL THEN
+        RAISE EXCEPTION 'doctor_service_ids array is empty or has no elements';
+    END IF;
 
     --check if the user want to book in the same availability
     PERFORM 1
     FROM clientreservation AS cr
     WHERE cr.clientid = client_id AND cr.doctoravailabilityid = doctor_availability_id;
     IF FOUND THEN
+        IF reorder THEN
+            RETURN;
+        END IF;
         RAISE EXCEPTION 'You already book for this availability, to update your reservation go to the update place';
     END IF;
 

@@ -1,22 +1,30 @@
 ﻿using api.BusinessLogic.DataAccess.IDataAccess;
 using api.Data;
 using api.Exceptions;
+using api.Helper;
+using api.Internal.DataAccess;
 using api.Models;
 using api.Models.Request;
 using api.Models.Responce;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace api.BusinessLogic.DataAccess;
 
 public class DoctorAvailabilityData : IDoctorAvailabilityData
 {
     private readonly UserManager<UserModel> _userManager;
+    private readonly IOptions<ConnectionStrings> _connectionStrings;
     private readonly ApplicationDbContext _appDbContext;
     private readonly Dictionary<string, string> Days;
+    private readonly ISqlDataAccess _sql;
 
     public DoctorAvailabilityData(UserManager<UserModel> userManager,
-                              ApplicationDbContext appDbContext)
+                              ApplicationDbContext appDbContext,
+                              ISqlDataAccess sql,
+                              IOptions<ConnectionStrings> connectionStrings)
     {
         _userManager = userManager;
         _appDbContext = appDbContext;
@@ -30,6 +38,8 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
              { "Saturday", "السبت" },
              { "Sunday", "الاحد" }
         };
+        _sql = sql;
+        _connectionStrings = connectionStrings;
     }
 
     public async Task<IEnumerable<DoctorAvailabilityResponse>> GetAvailableDatesAsync(string id)
@@ -160,15 +170,16 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
 
     public async Task DeleteAvailableDateAsync(int id)
     {
-        var availableDate = await _appDbContext.DoctorAvailabilities.FirstOrDefaultAsync(x => x.Id == id) ?? throw new UserNotFoundException();
+        // var availableDate = await _appDbContext.DoctorAvailabilities.FirstOrDefaultAsync(x => x.Id == id) ?? throw new UserNotFoundException();
         try
         {
-            var available = _appDbContext.Remove(availableDate);
-            await _appDbContext.SaveChangesAsync();
+            //var available = _appDbContext.Remove(availableDate);
+            //await _appDbContext.SaveChangesAsync();
+            await _sql.SaveDataAsync<dynamic>("sp_remove_doctor_availability", new { id }, _connectionStrings.Value.AppDbConnection);
         }
         catch (Exception)
         {
-            throw new BusinessException();
+            throw;
         }
     }
 
