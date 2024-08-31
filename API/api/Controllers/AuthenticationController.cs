@@ -67,7 +67,7 @@ public class AuthenticationController : Controller
         try
         {
             var result = await _authenticationData.RegisterClientAsync(model);
-            var userDataJson = JsonSerializer.Serialize(new
+            var userDataJson = JsonSerializer.Serialize(new CookieUserModel
             {
                 id= result.Id,
                 userName= result.UserName,
@@ -200,7 +200,7 @@ public class AuthenticationController : Controller
         {
             var result = await _authenticationData.LoginUserAsync(model);
 
-            var userDataJson = JsonSerializer.Serialize(new
+            var userDataJson = JsonSerializer.Serialize(new CookieUserModel
             {
                 id = result.Id,
                 userName = result.UserName,

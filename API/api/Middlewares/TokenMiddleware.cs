@@ -50,14 +50,16 @@ namespace api.Middlewares
                                 {
                                     HttpOnly = true,
                                     Secure = true,
-                                    SameSite = SameSiteMode.Lax
+                                    SameSite = SameSiteMode.Lax,
+                                    Expires = DateTime.UtcNow.AddYears(1)
                                 });
 
                                 context.Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
                                 {
                                     HttpOnly = true,
                                     Secure = true,
-                                    SameSite = SameSiteMode.Lax
+                                    SameSite = SameSiteMode.Lax,
+                                    Expires = DateTime.UtcNow.AddYears(1)
                                 });
                             }
                             context.Request.Headers.Authorization = $"bearer {result.AccessToken}";

@@ -13,6 +13,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Net;
 using api.Attributes;
+using System.Text.Json;
 
 namespace api.Controllers;
 
@@ -21,7 +22,6 @@ namespace api.Controllers;
 public class ReservationController : ControllerBase
 {
     private readonly IReservationData _reservationData;
-
     public ReservationController(IReservationData reservationData)
     {
         _reservationData = reservationData;
@@ -135,7 +135,13 @@ public class ReservationController : ControllerBase
 
         try
         {
-            await _reservationData.DeleteSpecificReservationAsync(clientReservationId);
+            var userData = Request.Cookies["userData"];
+            var accessToken = Request.Cookies["accessToken"];
+            if(userData == null || accessToken == null)
+            {
+                return BadRequest(new Response("Please login"));
+            }
+            await _reservationData.DeleteSpecificReservationAsync(clientReservationId, userData, accessToken);
             return Ok(new Response("لقد تم ازالة موعدك بنجاح"));
         }
         catch (Exception ex)

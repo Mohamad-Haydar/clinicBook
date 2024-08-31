@@ -10,6 +10,9 @@ using Microsoft.EntityFrameworkCore;
 using api.Exceptions;
 using api.BusinessLogic.DataAccess.IDataAccess;
 using api.Models;
+using System.Text.Json;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace api.BusinessLogic.DataAccess;
 
@@ -105,8 +108,17 @@ public class ReservationData : IReservationData
         }
     }
 
-    public async Task DeleteSpecificReservationAsync(int ClientReservationId)
+    public async Task DeleteSpecificReservationAsync(int ClientReservationId, string userData, string accessToken)
     {
+        // new Claim(ClaimTypes.NameIdentifier, user.Id),
+        var user = JsonSerializer.Deserialize<CookieUserModel>(userData);
+        var handler = new JwtSecurityTokenHandler();
+        var jwtToken = handler.ReadJwtToken(accessToken);
+        var userId = jwtToken.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier)?.Value;
+        if(userId != user.id)
+        {
+            throw new BusinessException();
+        }
         try
         {
             await _sql.SaveDataAsync("sp_delete_specific_reservation", new { client_reservation_id = ClientReservationId }, _connectionStrings.Value.AppDbConnection);

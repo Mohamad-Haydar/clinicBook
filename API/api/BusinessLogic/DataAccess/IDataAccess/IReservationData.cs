@@ -7,7 +7,7 @@ namespace api.BusinessLogic.DataAccess.IDataAccess
     public interface IReservationData
     {
         Task CreateQueueReservationAsync(CreateQueueReservationRequest data);
-        Task DeleteSpecificReservationAsync(int ClientReservationId);
+        Task DeleteSpecificReservationAsync(int ClientReservationId, string userdata, string accessToken);
         Task<IQueryable<Dictionary<string, object>>> GetAllPersonalReservationsAsync(string ClientId);
         Task<IQueryable<Dictionary<string, object>>> GetAllReservationForTheDayAsync(int DoctorAvailabilityId);
         Task<IQueryable<Dictionary<string, object>>> GetConcurrentBookingsAsync(int id);
