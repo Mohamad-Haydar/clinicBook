@@ -147,7 +147,7 @@ public class ReservationController : ControllerBase
         catch (Exception ex)
         {
             return BadRequest(new Response(ex.Message));
-            }
+        }
 
 
     }

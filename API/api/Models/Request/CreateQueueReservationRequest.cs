@@ -14,5 +14,6 @@ public class CreateQueueReservationRequest
     
     [Required(ErrorMessage = "doctor_service_ids is required")]
     public IList<int> doctor_service_ids { get; set; }
+    public bool reorder { get; set; }
     #pragma warning restore IDE1006
 }

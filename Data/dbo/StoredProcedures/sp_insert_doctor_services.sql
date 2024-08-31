@@ -11,7 +11,7 @@ BEGIN
 	Select servicename INTO service_name  FROM service WHERE service.id = serviceid;
   
 	IF service_name IS NULL THEN
-		RAISE EXCEPTION 'Invalid service ID';
+		RAISE EXCEPTION 'هذه الخدمة غير متوفرة الرجاء التكأكّد من المعلومات او التواصل مع الدعم الفني.' USING ERRCODE = 'P0001';
 	END IF;
   
   -- Insert data into doctorservice table

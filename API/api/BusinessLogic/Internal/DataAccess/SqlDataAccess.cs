@@ -1,7 +1,9 @@
 using System.Data;
 using api.BusinessLogic.DataAccess;
+using api.Exceptions;
 using Dapper;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 
 namespace api.Internal.DataAccess;
@@ -45,9 +47,15 @@ public class SqlDataAccess :ISqlDataAccess,  IDisposable
             }
             return results.AsQueryable();
          }
+        
         catch (Exception ex)
         {
-          throw new Exception(ex.Message[37..]);
+            if(ex.InnerException?.Message.StartsWith("P0001:") == true)
+            {
+                throw new BusinessException(ex.InnerException.Message[6..]);
+            }
+          //throw new Exception(ex.Message[37..]);
+          throw new BusinessException();
         }
     }
 
@@ -62,7 +70,12 @@ public class SqlDataAccess :ISqlDataAccess,  IDisposable
         }
         catch (Exception ex)
         {
-            throw new Exception(ex.Message[7..]);
+            if (ex.Message.StartsWith("P0001:") == true)
+            {
+                throw new BusinessException(ex.Message[6..]);
+            }
+            //throw new Exception(ex.Message[37..]);
+            throw new BusinessException();
         }
     }
 

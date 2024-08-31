@@ -28,7 +28,7 @@ BEGIN
     ORDER BY availabledate LIMIT 1;
 
     IF NOT FOUND THEN
-        RAISE EXCEPTION 'MYERROR:لا يوجد مواعيد متاحة كافية, الرجاء اتاحة موعد جديد لنقل الحجوزات بنجاح';
+        RAISE EXCEPTION 'لا يوجد مواعيد متاحة كافية, الرجاء اتاحة موعد جديد لنقل الحجوزات بنجاح' USING ERRCODE = 'P0001';
         ROLLBACK;
         RETURN;
     END IF;
@@ -75,10 +75,6 @@ BEGIN
     FOR i IN 1 .. array_length(old_reservations, 1) LOOP
             reservation_row := old_reservations[i];
             reservation_services := all_services[i].reservation_services;
-        
-            IF array_length(reservation_services, 1) IS NULL THEN
-                RAISE NOTICE 'thier is no services'; 
-            END IF;
 
             IF future_availability.maxclient = future_availability.currentreservations THEN
                 SELECT * INTO future_availability 
@@ -88,7 +84,7 @@ BEGIN
                 ORDER BY availabledate LIMIT 1;
 
                 IF NOT FOUND THEN
-                    RAISE EXCEPTION 'MYERROR:لا يوجد مواعيد متاحة كافية, الرجاء اتاحة موعد جديد لنقل الحجوزات بنجاح';
+                    RAISE EXCEPTION 'لا يوجد مواعيد متاحة كافية, الرجاء اتاحة موعد جديد لنقل الحجوزات بنجاح' USING ERRCODE = 'P0001';
                     ROLLBACK;
                     RETURN;
                 END IF;

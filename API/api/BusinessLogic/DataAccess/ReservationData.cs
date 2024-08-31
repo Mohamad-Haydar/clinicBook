@@ -13,6 +13,7 @@ using api.Models;
 using System.Text.Json;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 namespace api.BusinessLogic.DataAccess;
 
@@ -36,7 +37,7 @@ public class ReservationData : IReservationData
         }
         catch (Exception)
         {
-            throw new BusinessException();
+            throw;
         }
     }
 
@@ -53,7 +54,7 @@ public class ReservationData : IReservationData
         }
         catch (Exception)
         {
-            throw new BusinessException();
+            throw;
         }
     }
 
@@ -70,7 +71,7 @@ public class ReservationData : IReservationData
         }
         catch (Exception)
         {
-            throw new BusinessException();
+            throw;
         }
     }
 

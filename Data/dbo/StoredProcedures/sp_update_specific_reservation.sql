@@ -19,7 +19,7 @@ BEGIN
 	FROM clientreservation AS cr
 	WHERE cr.id = client_reservation_id;
 	IF NOT FOUND THEN
-	    RAISE EXCEPTION 'You do not have a reservation, please go to book a reservation';
+	    RAISE EXCEPTION 'ليس لديك حجز, الرجاء حجز موعد.' USING ERRCODE = 'P0001';
 	END IF;
 
      -- to calculate the estimated duration for the services that the user wants
@@ -30,14 +30,14 @@ BEGIN
         WHERE doctorservice.id = _id;
 
         IF NOT FOUND THEN
-            RAISE EXCEPTION 'You Selected Service That is Not Found Please check your selection';
+            RAISE EXCEPTION 'لقد اخترت خدمة غير موجودة, الرجاء التأكد من الاختيار.' USING ERRCODE = 'P0001';
         END IF;
 
         _duration := _duration + _service_duration;
     END LOOP;
 
     IF _duration = 0 THEN
-        RAISE EXCEPTION 'You Need to select at least one service';
+        RAISE EXCEPTION 'يجب ان تختار خدمة واحدة على الاقل.' USING ERRCODE = 'P0001';
     END IF;
 
     -- Delete the row from client reservation table
