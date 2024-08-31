@@ -25,6 +25,7 @@ BEGIN
         JOIN client AS c ON c.id = cr.clientid
         WHERE c.id = client_id
     )
-    GROUP BY cr.id, cr.starttime, cr.endtime, cr.doctoravailabilityid, ds.doctorid, da.availabledate;
+    GROUP BY cr.id, cr.starttime, cr.endtime, cr.doctoravailabilityid, ds.doctorid, da.availabledate
+    ORDER BY da.availabledate;
 END;
 $$;

@@ -17,7 +17,7 @@ DECLARE
 BEGIN
      -- Check if the array is empty or has no elements
     IF array_length(doctor_service_ids, 1) IS NULL THEN
-        RAISE EXCEPTION 'doctor_service_ids array is empty or has no elements';
+        RAISE EXCEPTION 'MYERROR:الرجاء اختيار خدمة, ان لم تجد الرجاء ارسال المشكلة لمعالجتها.';
     END IF;
 
     --check if the user want to book in the same availability
@@ -28,7 +28,7 @@ BEGIN
         IF reorder THEN
             RETURN;
         END IF;
-        RAISE EXCEPTION 'You already book for this availability, to update your reservation go to the update place';
+        RAISE EXCEPTION 'MYERROR:لا يمكنك الحجز مرتين, لديك حجز مسبق عند نفس الموعد.';
     END IF;
 
     -- Check to see if we can afford one more reservation

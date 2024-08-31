@@ -13,6 +13,7 @@ BEGIN
     )
     SELECT cr.*
     FROM clientreservation cr
-    JOIN target_doctoravailability tda ON cr.doctoravailabilityid = tda.doctoravailabilityid;
+    JOIN target_doctoravailability tda ON cr.doctoravailabilityid = tda.doctoravailabilityid
+    ORDER BY cr.starttime;
 END;
 $$;

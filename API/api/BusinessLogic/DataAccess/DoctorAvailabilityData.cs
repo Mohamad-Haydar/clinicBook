@@ -56,7 +56,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
                                        startHour = x.StartHour,
                                        endHour = x.EndHour,
                                        maxClient = x.MaxClient
-                                   }).ToListAsync();
+                                   }).OrderBy(x => x.day).ToListAsync();
             return doctoravailabilities;
         }
         catch (Exception)
@@ -187,7 +187,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
     {
         try
         {
-            var res = await _appDbContext.DoctorAvailabilities.Where(x => x.DoctorId == doctorId).ToListAsync();
+            var res = await _appDbContext.DoctorAvailabilities.Where(x => x.DoctorId == doctorId).OrderBy(x => x.AvailableDate).ToListAsync();
             return res;
         }
         catch (Exception)
