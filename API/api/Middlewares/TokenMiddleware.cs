@@ -1,10 +1,12 @@
 ﻿using api.BusinessLogic.DataAccess;
 using api.BusinessLogic.DataAccess.IDataAccess;
+using api.Exceptions;
 using api.Models.Request;
 using api.Models.Responce;
 using Microsoft.AspNetCore.Authentication;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
+using System.Threading;
 
 namespace api.Middlewares
 {
@@ -12,6 +14,7 @@ namespace api.Middlewares
     {
         private readonly RequestDelegate _next;
         private readonly IServiceScopeFactory _serviceScopeFactory;
+        private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
         public TokenMiddleware(RequestDelegate next, IServiceScopeFactory serviceScopeFactory)
         {
@@ -33,42 +36,52 @@ namespace api.Middlewares
 
                     if (!string.IsNullOrEmpty(token) && !string.IsNullOrEmpty(refreshToken) && !string.IsNullOrEmpty(userData))
                     {
-                        var jwtHandler = new JwtSecurityTokenHandler();
-                        if (jwtHandler.CanReadToken(token))
+                        try
                         {
-                            var jwtToken = jwtHandler.ReadJwtToken(token);
-                            var expirationDate = jwtToken.ValidTo;
-                            var result = new AuthenticationResponse()
+                            var jwtHandler = new JwtSecurityTokenHandler();
+                            if (jwtHandler.CanReadToken(token))
                             {
-                                AccessToken = accessToken,
-                                RefreshToken = refreshToken,
-                            };
-                            if (expirationDate < DateTime.UtcNow)
-                            {
-                                result = await _tokenData.RefreshAsync(new RefreshRequest { AccessToken = accessToken, RefreshToken = refreshToken });
-                                context.Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
+                                var jwtToken = jwtHandler.ReadJwtToken(token);
+                                var expirationDate = jwtToken.ValidTo;
+                                var result = new AuthenticationResponse()
                                 {
-                                    HttpOnly = true,
-                                    Secure = true,
-                                    SameSite = SameSiteMode.Lax,
-                                    Expires = DateTime.UtcNow.AddYears(1)
-                                });
+                                    AccessToken = accessToken,
+                                    RefreshToken = refreshToken,
+                                };
+                                if (expirationDate < DateTime.UtcNow)
+                                {
+                                    result = await _tokenData.RefreshAsync(new RefreshRequest { AccessToken = accessToken, RefreshToken = refreshToken });
+                                    context.Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
+                                    {
+                                        HttpOnly = true,
+                                        Secure = true,
+                                        SameSite = SameSiteMode.Lax,
+                                        Expires = DateTime.UtcNow.AddYears(1)
+                                    });
 
-                                context.Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
-                                {
-                                    HttpOnly = true,
-                                    Secure = true,
-                                    SameSite = SameSiteMode.Lax,
-                                    Expires = DateTime.UtcNow.AddYears(1)
-                                });
+                                    context.Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+                                    {
+                                        HttpOnly = true,
+                                        Secure = true,
+                                        SameSite = SameSiteMode.Lax,
+                                        Expires = DateTime.UtcNow.AddYears(1)
+                                    });
+                                }
+                                context.Request.Headers.Authorization = $"bearer {result.AccessToken}";
                             }
-                            context.Request.Headers.Authorization = $"bearer {result.AccessToken}";
+                        }
+                        catch (InvalidRequestException)
+                        {
+
+                        }
+                        catch (Exception)
+                        {
+                            throw;
                         }
                     }
 
                 }
             }
-
             await _next(context);
         }
     }

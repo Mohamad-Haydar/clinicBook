@@ -50,14 +50,15 @@ builder.Services.AddAuthentication(options =>
         options.DefaultChallengeScheme = "JwtBearer";
 }).AddJwtBearer("JwtBearer", jwtBearerOptions =>
 {
-        jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
-        {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("loreamipsumissomesecreatekeytobeused")),
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = true,
-        };
+    jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("loreamipsumissomesecreatekeytobeused")),
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.FromSeconds(0)
+    };
 });
 
 builder.Services.AddCors(options =>

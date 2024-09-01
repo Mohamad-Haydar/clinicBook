@@ -28,7 +28,7 @@ public class TokenData : ITokenData
     }
     public async Task<AuthenticationResponse> RefreshAsync(RefreshRequest tokenApiModel)
     {
-        await _semaphore.WaitAsync();
+        //await _semaphore.WaitAsync();
         string? accessToken = tokenApiModel.AccessToken;
         string? refreshToken = tokenApiModel.RefreshToken;
         try
@@ -38,6 +38,7 @@ public class TokenData : ITokenData
             var userId = principal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier)?.Value;
             var roles = principal.Claims.Where(claim => claim.Type == ClaimTypes.Role).Select(claim => claim.Value);
             var user = await _userManager.FindByIdAsync(userId);
+
 
             if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
             {
@@ -61,13 +62,17 @@ public class TokenData : ITokenData
                 Roles = roles
             };
         }
+        catch (InvalidRequestException)
+        {
+            throw;
+        }
         catch (Exception)
         {
             throw new BusinessException();
         }
         finally
         {
-            _semaphore.Release();
+            //_semaphore.Release();
         }
 
     }
