@@ -28,7 +28,6 @@ public class TokenData : ITokenData
     }
     public async Task<AuthenticationResponse> RefreshAsync(RefreshRequest tokenApiModel)
     {
-        //await _semaphore.WaitAsync();
         string? accessToken = tokenApiModel.AccessToken;
         string? refreshToken = tokenApiModel.RefreshToken;
         try
@@ -70,10 +69,5 @@ public class TokenData : ITokenData
         {
             throw new BusinessException();
         }
-        finally
-        {
-            //_semaphore.Release();
-        }
-
     }
 }

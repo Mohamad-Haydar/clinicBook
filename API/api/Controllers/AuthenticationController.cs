@@ -250,7 +250,7 @@ public class AuthenticationController : Controller
 
     [Route("logout")]
     [HttpPost]
-    [Authorize]
+    [AllowAnonymous]
     public async Task<IActionResult> Logout()
     {
         string? refreshToken = Request.Cookies["refreshToken"];
