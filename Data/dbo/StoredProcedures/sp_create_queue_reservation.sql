@@ -17,7 +17,7 @@ DECLARE
 BEGIN
      -- Check if the array is empty or has no elements
     IF array_length(doctor_service_ids, 1) IS NULL THEN
-        RAISE EXCEPTION 'الرجاء اختيار خدمة, ان لم تجد الرجاء ارسال المشكلة لمعالجتها.'  USING ERRCODE = 'P0001';
+        RAISE EXCEPTION 'الرجاء اختيار خدمة, ان لم تجد الرجاء ارسال المشكلة لمعالجتها.'  USING ERRCODE = 'M3GA0';
     END IF;
 
     --check if the user want to book in the same availability
@@ -28,7 +28,7 @@ BEGIN
         IF reorder THEN
             RETURN;
         END IF;
-        RAISE EXCEPTION 'لا يمكنك الحجز مرتين, لديك حجز مسبق عند نفس الموعد.' USING ERRCODE = 'P0001';
+        RAISE EXCEPTION 'لا يمكنك الحجز مرتين, لديك حجز مسبق عند نفس الموعد.' USING ERRCODE = 'M3GA0';
     END IF;
 
     -- Check to see if we can afford one more reservation
@@ -38,7 +38,7 @@ BEGIN
     WHERE doctoravailability.id = doctor_availability_id;
 
     IF _current_reservations >= _max_client THEN
-        RAISE EXCEPTION 'عذرا, امتلأت الحجوزات لهذا اليوم. الرجاء اختيار موعد اخر.' USING ERRCODE = 'P0001';
+        RAISE EXCEPTION 'عذرا, امتلأت الحجوزات لهذا اليوم. الرجاء الاختيار في موعد اخر.' USING ERRCODE = 'M3GA0';
     END IF;
 
     -- to calculate the estimated duration for the services that the user wants
@@ -49,7 +49,7 @@ BEGIN
         WHERE doctorservice.id = _id;
 
         IF NOT FOUND THEN
-            RAISE EXCEPTION 'الرجاء اختيار خدمات, اذا واجهت مشكلة الرجاء رفع مشكلة.' USING ERRCODE = 'P0001';
+            RAISE EXCEPTION 'الرجاء اختيار خدمات, اذا واجهت مشكلة الرجاء رفع مشكلة.' USING ERRCODE = 'M3GA0';
         END IF;
 
         _duration := _duration + _service_duration;

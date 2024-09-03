@@ -14,6 +14,9 @@ DECLARE
     doctor_service_id INT;
     reservation_services INT[];
 BEGIN
+    -- Start transaction with SERIALIZABLE isolation level
+    SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+    
     -- STEP 2: Get the doctor id and other details
     SELECT *
     INTO doctor_availability_row
@@ -28,7 +31,7 @@ BEGIN
     ORDER BY availabledate LIMIT 1;
 
     IF NOT FOUND THEN
-        RAISE EXCEPTION 'لا يوجد مواعيد متاحة كافية, الرجاء اتاحة موعد جديد لنقل الحجوزات بنجاح' USING ERRCODE = 'P0001';
+        RAISE EXCEPTION 'لا يوجد مواعيد متاحة كافية, الرجاء اتاحة موعد جديد لنقل الحجوزات بنجاح' USING ERRCODE = 'M3GA0';
         ROLLBACK;
         RETURN;
     END IF;
@@ -84,7 +87,7 @@ BEGIN
                 ORDER BY availabledate LIMIT 1;
 
                 IF NOT FOUND THEN
-                    RAISE EXCEPTION 'لا يوجد مواعيد متاحة كافية, الرجاء اتاحة موعد جديد لنقل الحجوزات بنجاح' USING ERRCODE = 'P0001';
+                    RAISE EXCEPTION 'لا يوجد مواعيد متاحة كافية, الرجاء اتاحة موعد جديد لنقل الحجوزات بنجاح' USING ERRCODE = 'M3GA0';
                     ROLLBACK;
                     RETURN;
                 END IF;

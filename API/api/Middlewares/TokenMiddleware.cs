@@ -57,19 +57,19 @@ namespace api.Middlewares
                                         AccessToken = accessToken,
                                         RefreshToken = refreshToken,
                                     };
-                                    await _semaphore.WaitAsync();
-                                    if (_tokenCache.TryGetValue(cacheKey, out AuthenticationResponse cachedToken))
+                                    //await _semaphore.WaitAsync();
+                                    //if (_tokenCache.TryGetValue(cacheKey, out AuthenticationResponse cachedToken))
+                                    //{
+                                    if (expirationDate > DateTime.UtcNow)
                                     {
-                                        if (cachedToken != null && expirationDate < DateTime.UtcNow)
-                                        {
-                                            // Use cached token if it exists and is valid
-                                            context.Request.Headers.Authorization = $"bearer {cachedToken.AccessToken}";
-                                            _semaphore.Release();
-                                            await _next(context);
-                                        }
+                                        // Use cached token if it exists and is valid
+                                        context.Request.Headers.Authorization = $"bearer {result.AccessToken}";
                                     }
-                                    else if (!_tokenCache.TryGetValue(cacheKey, out cachedToken) || cachedToken == null || expirationDate < DateTime.UtcNow)
-                                    {
+                                    //}
+                                    else
+                                    { 
+                                        //if (!_tokenCache.TryGetValue(cacheKey, out cachedToken) || cachedToken == null || expirationDate < DateTime.UtcNow)
+                                        //{
                                         result = await _tokenData.RefreshAsync(new RefreshRequest { AccessToken = accessToken, RefreshToken = refreshToken });
                                         context.Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
                                         {
@@ -88,30 +88,12 @@ namespace api.Middlewares
                                         });
                                         context.Request.Headers.Authorization = $"bearer {result.AccessToken}";
                                     }
-                                    _tokenCache.Set(cacheKey, result, TimeSpan.FromMinutes(30));
-                                    _semaphore.Release();
+                                //_tokenCache.Set(cacheKey, result.RefreshToken, TimeSpan.FromMinutes(30));
+                                //_semaphore.Release();
                                 }
                             }
                             catch (Exception)
                             {
-                                context.Response.Cookies.Delete("userData", new CookieOptions
-                                {
-                                    HttpOnly = true,
-                                    Secure = true,
-                                    SameSite = SameSiteMode.Lax
-                                });
-                                context.Response.Cookies.Delete("accessToken", new CookieOptions
-                                {
-                                    HttpOnly = true,
-                                    Secure = true,
-                                    SameSite = SameSiteMode.Lax
-                                });
-                                context.Response.Cookies.Delete("refreshToken", new CookieOptions
-                                {
-                                    HttpOnly = true,
-                                    Secure = true,
-                                    SameSite = SameSiteMode.Lax
-                                });
                                 context.Response.ContentType = "application/json";
                                 context.Response.StatusCode = 400;
                                 var responseResult = new
@@ -128,6 +110,7 @@ namespace api.Middlewares
 
                                 // Write the buffer to the response body
                                 await context.Response.Body.WriteAsync(buffer);
+                                return;
                             }
                         }
                     }

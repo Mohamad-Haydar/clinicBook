@@ -8,7 +8,6 @@ DECLARE
     removed_end_time time;
     gap time;
 BEGIN 
-
     -- Delete the row from client reservation table
     DELETE FROM clientreservation
     WHERE id = client_reservation_id

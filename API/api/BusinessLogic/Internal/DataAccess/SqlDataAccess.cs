@@ -50,9 +50,9 @@ public class SqlDataAccess :ISqlDataAccess,  IDisposable
         
         catch (Exception ex)
         {
-            if(ex.InnerException?.Message.StartsWith("P0001:") == true)
+            if(ex.InnerException?.Message.StartsWith("M3GA0:") == true)
             {
-                throw new BusinessException(ex.InnerException.Message[6..]);
+                throw new BusinessException(ex.InnerException.Message[8..]);
             }
           //throw new Exception(ex.Message[37..]);
           throw new BusinessException();
@@ -70,9 +70,9 @@ public class SqlDataAccess :ISqlDataAccess,  IDisposable
         }
         catch (Exception ex)
         {
-            if (ex.Message.StartsWith("P0001:") == true)
+            if (ex.Message.StartsWith("M3GA0:") == true)
             {
-                throw new BusinessException(ex.Message[6..]);
+                throw new BusinessException(ex.Message[8..]);
             }
             //throw new Exception(ex.Message[37..]);
             throw new BusinessException();

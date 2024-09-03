@@ -13,13 +13,14 @@ DECLARE
     _service_duration int;
     _gap time;
 BEGIN 
+
     --check if the reservation exists or the user should create new one
     SELECT extract(epoch from ( endtime - starttime )) / 60 AS minutes_difference, doctoravailabilityid
 	INTO old_duration, doctor_availability_id
 	FROM clientreservation AS cr
 	WHERE cr.id = client_reservation_id;
 	IF NOT FOUND THEN
-	    RAISE EXCEPTION 'ليس لديك حجز, الرجاء حجز موعد.' USING ERRCODE = 'P0001';
+	    RAISE EXCEPTION 'ليس لديك حجز, الرجاء حجز موعد.' USING ERRCODE = 'M3GA0';
 	END IF;
 
      -- to calculate the estimated duration for the services that the user wants
@@ -30,14 +31,14 @@ BEGIN
         WHERE doctorservice.id = _id;
 
         IF NOT FOUND THEN
-            RAISE EXCEPTION 'لقد اخترت خدمة غير موجودة, الرجاء التأكد من الاختيار.' USING ERRCODE = 'P0001';
+            RAISE EXCEPTION 'لقد اخترت خدمة غير موجودة, الرجاء التأكد من الاختيار.' USING ERRCODE = 'M3GA0';
         END IF;
 
         _duration := _duration + _service_duration;
     END LOOP;
 
     IF _duration = 0 THEN
-        RAISE EXCEPTION 'يجب ان تختار خدمة واحدة على الاقل.' USING ERRCODE = 'P0001';
+        RAISE EXCEPTION 'يجب ان تختار خدمة واحدة على الاقل.' USING ERRCODE = 'M3GA0';
     END IF;
 
     -- Delete the row from client reservation table

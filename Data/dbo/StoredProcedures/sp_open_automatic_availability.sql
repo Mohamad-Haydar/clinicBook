@@ -8,7 +8,6 @@ DECLARE
     new_available_date DATE;
     nb_of_open_availability INT;
 BEGIN
-    
     -- Step 2: Loop through availabilities for today
     FOR doctor_availability_row IN
         SELECT * FROM doctoravailability
