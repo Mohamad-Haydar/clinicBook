@@ -1,6 +1,7 @@
 ﻿using api.Models;
 using api.Models.Request;
 using api.Models.Responce;
+using Microsoft.AspNetCore.Mvc;
 
 namespace api.BusinessLogic.DataAccess.IDataAccess
 {
@@ -16,5 +17,6 @@ namespace api.BusinessLogic.DataAccess.IDataAccess
         Task RemoveDoctorAsync(string id);
         Task UpdateDoctorInfoAsync(UpdateDoctorRequest model);
         Task UpdateDoctorServiceDurationAsync(int id, int duration);
+        Task<string> UploadImageAsync(IFormFile file);
     }
 }

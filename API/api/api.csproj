@@ -32,4 +32,8 @@
     <Folder Include="Backup\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\Images\jalal.jpg" />
+  </ItemGroup>
+
 </Project>

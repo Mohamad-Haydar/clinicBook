@@ -215,4 +215,21 @@ public class DoctorManagementController : ControllerBase
             return BadRequest(new Response(ex.Message));
         }
     }
+
+    [HttpPost]
+    [Route("UploadImage")]
+    public async Task<IActionResult> UploadImage(IFormFile file)
+    {
+        try
+        {
+            string path = await _doctorManagementData.UploadImageAsync(file);
+            return Ok(new Response(path));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new Response(ex.Message));
+        }
+    }
+
+    // FIx token when the request failed don't update the database
 }

@@ -7,6 +7,7 @@ using api.Models;
 using api.Models.Request;
 using api.Models.Responce;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Numerics;
@@ -262,5 +263,29 @@ public class DoctorManagementData : IDoctorManagementData
         {
             throw;
         }
+    }
+
+    public async Task<string> UploadImageAsync(IFormFile file)
+    {
+        try
+        {
+            if (file == null || file.Length == 0)
+                throw new Exception("الرجاء اختيار صورة");
+            string _storagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images");
+
+            var filePath = Path.Combine(_storagePath, file.FileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+            return file.FileName;
+        }
+        catch (Exception)
+        {
+            throw new BusinessException("لقد حدث خطأ اثناء رفع الصورة, الرجاء المحاولة مجددا.");
+        }
+
+      
     }
 }
