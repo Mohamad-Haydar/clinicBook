@@ -1,5 +1,6 @@
 ﻿using api.BusinessLogic.DataAccess.IDataAccess;
 using api.Models.Responce;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers
@@ -16,6 +17,7 @@ namespace api.Controllers
 
         [HttpGet]
         [Route("GetAllCategories")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAllCategories()
         {
             try

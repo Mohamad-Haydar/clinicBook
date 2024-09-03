@@ -10,9 +10,11 @@ using api.Models.Responce;
 using api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace api.Controllers;
 
+[Authorize]
 public class TokenController : Controller
 {
     private readonly ITokenData _tokenData;

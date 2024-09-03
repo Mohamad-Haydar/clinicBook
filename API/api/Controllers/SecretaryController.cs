@@ -9,6 +9,7 @@ using api.Models.Responce;
 
 namespace api.Controllers;
 
+[AuthorizeRoles(Roles.Admin)]
 public class SecretaryController : Controller
 {
 
@@ -19,7 +20,6 @@ public class SecretaryController : Controller
         _secretaryData = secretaryData;
     }
 
-    // [AuthorizeRoles(Roles.Admin)]
     [Route("GetSecretaries")]
     [HttpGet]
     public async Task<IActionResult> GetSecretarieByEmail(string email)

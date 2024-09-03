@@ -15,6 +15,7 @@ using System.Text.Json;
 
 namespace api.Controllers;
 
+[AllowAnonymous]
 public class AuthenticationController : Controller
 {
     private readonly IAuthenticationData _authenticationData;
@@ -26,6 +27,7 @@ public class AuthenticationController : Controller
 
     [Route("GenerateInitialData")]
     [HttpPost]
+    [AuthorizeRoles(Roles.Admin)]
     public async Task GenerateInitialData()
     {
         // var values = Enum.GetValues(typeof(Roles));
@@ -118,6 +120,7 @@ public class AuthenticationController : Controller
 
     [Route("RegisterSecretary")]
     [HttpPost]
+    [AuthorizeRoles(Roles.Admin, Roles.Secretary)]
     public async Task<IActionResult> RegisterSecretary([FromBody] CreateSecretaryRequest model)
     {
         if (!ModelState.IsValid) 
@@ -136,9 +139,9 @@ public class AuthenticationController : Controller
         }
     }
 
-    [AuthorizeRoles(Roles.Secretary, Roles.Admin)]
     [Route("RegisterDoctor")]
     [HttpPost]
+    [AuthorizeRoles(Roles.Secretary, Roles.Admin)]
     public async Task<IActionResult> RegisterDoctor([FromBody] CreateDoctorRequest model)
     {
         if (!ModelState.IsValid) 
@@ -160,6 +163,7 @@ public class AuthenticationController : Controller
 
     [Route("RegisterAdmin")]
     [HttpPost]
+    [AuthorizeRoles(Roles.Admin)]
     public async Task<IActionResult> RegisterAdmin(string email, string password)
     {
         if (!ModelState.IsValid) 
@@ -250,15 +254,14 @@ public class AuthenticationController : Controller
 
     [Route("logout")]
     [HttpPost]
-    [AllowAnonymous]
     public async Task<IActionResult> Logout()
     {
-        string? refreshToken = Request.Cookies["refreshToken"];
-        string? accessToken = Request.Cookies["accessToken"] ;
-        string? userData = Request.Cookies["userData"] ;
+        //string? refreshToken = Request.Cookies["refreshToken"];
+        //string? accessToken = Request.Cookies["accessToken"] ;
+        //string? userData = Request.Cookies["userData"] ;
 
-        try
-        {
+        //try
+        //{
             //if (refreshToken == null || accessToken == null || userData == null)
             //{
             //    throw new BusinessException();
@@ -283,29 +286,29 @@ public class AuthenticationController : Controller
                     SameSite = SameSiteMode.Lax
                 });
             return Ok(new Response("لقد تم تسجيل خروجك بنجاح"));
-        }
-        catch (Exception ex)
-        {
-            Response.Cookies.Delete("userData", new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Lax
-            });
-            Response.Cookies.Delete("accessToken", new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Lax
-            });
-            Response.Cookies.Delete("refreshToken", new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Lax
-            });
-            return BadRequest(new Response(ex.Message));
-        }
+        //}
+        //catch (Exception ex)
+        //{
+        //    Response.Cookies.Delete("userData", new CookieOptions
+        //    {
+        //        HttpOnly = true,
+        //        Secure = true,
+        //        SameSite = SameSiteMode.Lax
+        //    });
+        //    Response.Cookies.Delete("accessToken", new CookieOptions
+        //    {
+        //        HttpOnly = true,
+        //        Secure = true,
+        //        SameSite = SameSiteMode.Lax
+        //    });
+        //    Response.Cookies.Delete("refreshToken", new CookieOptions
+        //    {
+        //        HttpOnly = true,
+        //        Secure = true,
+        //        SameSite = SameSiteMode.Lax
+        //    });
+        //    return BadRequest(new Response(ex.Message));
+        //}
     }
 
 }

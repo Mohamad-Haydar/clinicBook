@@ -1,10 +1,14 @@
+using api.Attributes;
 using api.BusinessLogic.DataAccess.IDataAccess;
+using api.Models;
 using api.Models.Responce;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers
 {
     [Route("/api/[controller]")]
+    [Authorize]
     public class ServiceController : Controller
     {
         private readonly IServiceData _serviceData;
@@ -16,6 +20,7 @@ namespace api.Controllers
 
         [HttpGet]
         [Route("GetAllServices")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAllServices()
         {
             try

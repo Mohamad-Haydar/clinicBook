@@ -4,10 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 using api.BusinessLogic.DataAccess.IDataAccess;
 using api.Models.Responce;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using api.Attributes;
+using api.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace api.Controllers;
 
-// [AuthorizeRoles(Roles.Admin, Roles.Secretary, Roles.Doctor)]
+[AuthorizeRoles(Roles.Admin, Roles.Secretary, Roles.Doctor)]
 [Route("api/[controller]")]
 public class DoctorAvailabilityController : Controller
 {
@@ -20,6 +23,7 @@ public class DoctorAvailabilityController : Controller
 
     [HttpGet]
     [Route("availableDates")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAvailableDates([Required] string id)
     {
         if (!ModelState.IsValid)
@@ -100,6 +104,7 @@ public class DoctorAvailabilityController : Controller
 
     [HttpGet]
     [Route("GetAllDoctorAvailabilities")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAllDoctorAvailabilities([Required] string doctorId)
     {
         try
@@ -115,6 +120,7 @@ public class DoctorAvailabilityController : Controller
 
     [HttpGet]
     [Route("GetDoctorAvailabilitiesOfDay")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetDoctorAvailabilitiesOfDay(DateOnly date)
     {
         try
