@@ -230,6 +230,4 @@ public class DoctorManagementController : ControllerBase
             return BadRequest(new Response(ex.Message));
         }
     }
-
-    // FIx token when the request failed don't update the database
 }
