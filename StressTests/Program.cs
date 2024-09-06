@@ -1,12 +1,13 @@
-﻿using NBench;
+﻿using BenchmarkDotNet.Running;
+using NBench;
 
 namespace StressTests
 {
     public class Program
     {
-        static int Main(string[] args)
+        static void Main(string[] args)
         {
-            return NBenchRunner.Run<Program>();
+            var summary = BenchmarkRunner.Run<DoctorAvailabilityStressTests>(new CustomConfig());
         }
     }
 }

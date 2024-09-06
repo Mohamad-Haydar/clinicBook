@@ -13,6 +13,7 @@ using api.BusinessLogic.DataAccess.IDataAccess;
 using api.BusinessLogic.DataAccess;
 using System.Text.Json;
 using Serilog;
+using System.Text;
 
 namespace api.Controllers;
 
@@ -21,11 +22,13 @@ public class AuthenticationController : Controller
 {
     private readonly IAuthenticationData _authenticationData;
     private readonly ILogger<AuthenticationController> _logger;
+    private readonly UserManager<IdentityUser> _userManager;
 
-    public AuthenticationController(IAuthenticationData authenticationData, ILogger<AuthenticationController> logger)
+    public AuthenticationController(IAuthenticationData authenticationData, ILogger<AuthenticationController> logger, UserManager<IdentityUser> userManager)
     {
         _authenticationData = authenticationData;
         _logger = logger;
+        _userManager = userManager;
     }
 
     [Route("GenerateInitialData")]
@@ -58,6 +61,32 @@ public class AuthenticationController : Controller
         //         } 
         //     }
         // }
+
+        StringBuilder name = new();
+        StringBuilder email = new();
+        string emailtremination = "@gmail.com";
+       
+
+        for(int i = 0; i < 2; i++)
+        { 
+            name.Append("testuser");
+            email.Append("testuser");
+            var userExists = await _userManager.FindByEmailAsync(email);
+            if(userExists == null)
+            {
+                name.Append(i.ToString());
+                email.Append(i.ToString());
+                email.Append(emailtremination.ToString());
+                var user = new IdentityUser{UserName=name.ToString(), Email=email.ToString()};
+                var result = await _userManager.CreateAsync(user, "Pass1234!");
+                if(result.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(user, "Client");
+                } 
+                name.Clear();
+                email.Clear();
+            }
+        }
     }
 
     [Route("RegisterClient")]
