@@ -12,9 +12,24 @@ using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using api.BusinessLogic.DataAccess.IDataAccess;
 using api.Middlewares;
+using Serilog;
+//using Microsoft.AspNetCore.Hosting;
+using Serilog.Events;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+           .MinimumLevel.Override("Microsoft", LogEventLevel.Warning) // Set the minimum log level for the Microsoft namespace
+           .MinimumLevel.Information()
+           .WriteTo.Console()
+           .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+           .CreateLogger();
+
+builder.Host.UseSerilog(Log.Logger);
+
+//Serilog.ILogger logger = new LoggerConfiguration().Enrich.FromLogContext().WriteTo.Console().CreateLogger();
+//builder.Services.AddSingleton(logger);
 
 // TPDO: Create Custom DateOnly and TimeOnly Model Binder
 
@@ -146,6 +161,9 @@ if (app.Environment.IsDevelopment())
         app.UseSwaggerUI();
 }
 app.UseStaticFiles();
+//Add support to logging request with SERILOG
+app.UseSerilogRequestLogging();
+
 app.UseHttpsRedirection();
 
 app.UseHttpsRedirection();

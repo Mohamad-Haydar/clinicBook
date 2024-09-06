@@ -10,16 +10,15 @@ namespace api.Internal.DataAccess;
 
 public class SqlDataAccess :ISqlDataAccess,  IDisposable
 {
-    public async Task<IQueryable<Dictionary<string, object>>> LoadDataAsync(string functionName, string[] paramNames, object[] paramValues, string connectionString)
+    public async Task<List<Dictionary<string, object>>> LoadDataAsync(string functionName, string[] paramNames, object[] paramValues, string connectionString)
     {
         try
         {
             var results = new List<Dictionary<string, object>>();
-            using (var connection = new NpgsqlConnection(connectionString))
+            await using (var connection = new NpgsqlConnection(connectionString))
             {
                 await connection.OpenAsync();
-
-                using (var cmd = new NpgsqlCommand())
+                await using (var cmd = new NpgsqlCommand())
                 {     
                     cmd.Connection = connection;
                     string sql = $"SELECT * FROM {functionName}({string.Join(", ", Array.ConvertAll(paramNames, name => $"@{name}"))})";
@@ -29,32 +28,35 @@ public class SqlDataAccess :ISqlDataAccess,  IDisposable
                     {
                         cmd.Parameters.AddWithValue(paramNames[i], paramValues[i]);
                     }
+                    await cmd.PrepareAsync();
 
-                    var reader = cmd.ExecuteReaderAsync().Result;
-                    while (reader.Read())
+                    var reader = await cmd.ExecuteReaderAsync();
+
+                    while (await reader.ReadAsync())
                     {
                         var row = new Dictionary<string, object>();
                         for (int i = 0; i < reader.FieldCount; i++)
                         {
-                            string columnName = reader.GetName(i);
                             object value = reader[i];
-                            row[columnName] = value;
+                            row[reader.GetName(i)] = value;
                         }
                         results.Add(row);
                     }
                 }
-                await connection.CloseAsync();
             }
-            return results.AsQueryable();
+            return results;
          }
-        
-        catch (Exception ex)
+        catch (NpgsqlException ex)
         {
-            if(ex.InnerException?.Message.StartsWith("M3GA0:") == true)
+            if (ex.InnerException?.Message.StartsWith("M3GA0:") == true)
             {
                 throw new BusinessException(ex.InnerException.Message[8..]);
             }
-          //throw new Exception(ex.Message[37..]);
+            throw new BusinessException();
+        }
+
+        catch (Exception )
+        {
           throw new BusinessException();
         }
     }

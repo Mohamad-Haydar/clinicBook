@@ -58,7 +58,7 @@ public class ReservationData : IReservationData
         }
     }
 
-    public async Task<IQueryable<Dictionary<string, object>>> GetAllPersonalReservationsAsync(string ClientId)
+    public async Task<List<Dictionary<string, object>>> GetAllPersonalReservationsAsync(string ClientId)
     {
         try
         {
@@ -75,7 +75,7 @@ public class ReservationData : IReservationData
         }
     }
 
-    public async Task<IQueryable<Dictionary<string, object>>> GetConcurrentBookingsAsync(int id)
+    public async Task<List<Dictionary<string, object>>> GetConcurrentBookingsAsync(int id)
     {
         try
         {
@@ -92,7 +92,7 @@ public class ReservationData : IReservationData
         }
     }
 
-    public async Task<IQueryable<Dictionary<string, object>>> GetPreviousBookingsAsync(int id)
+    public async Task<List<Dictionary<string, object>>> GetPreviousBookingsAsync(int id)
     {
         try
         {
@@ -142,7 +142,7 @@ public class ReservationData : IReservationData
         }
     }
 
-    public async Task<IQueryable<Dictionary<string, object>>> GetAllReservationForTheDayAsync(int DoctorAvailabilityId)
+    public async Task<List<Dictionary<string, object>>> GetAllReservationForTheDayAsync(int DoctorAvailabilityId)
     {
         try
         {

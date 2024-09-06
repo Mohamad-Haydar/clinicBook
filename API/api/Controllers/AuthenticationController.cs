@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using api.BusinessLogic.DataAccess.IDataAccess;
 using api.BusinessLogic.DataAccess;
 using System.Text.Json;
+using Serilog;
 
 namespace api.Controllers;
 
@@ -19,10 +20,12 @@ namespace api.Controllers;
 public class AuthenticationController : Controller
 {
     private readonly IAuthenticationData _authenticationData;
+    private readonly ILogger<AuthenticationController> _logger;
 
-    public AuthenticationController(IAuthenticationData authenticationData)
+    public AuthenticationController(IAuthenticationData authenticationData, ILogger<AuthenticationController> logger)
     {
         _authenticationData = authenticationData;
+        _logger = logger;
     }
 
     [Route("GenerateInitialData")]
@@ -236,7 +239,6 @@ public class AuthenticationController : Controller
                 SameSite = SameSiteMode.Lax,
                 Expires = DateTime.UtcNow.AddYears(1)
             });
-
 
             return Ok(new{
                 Id = result.Id,
