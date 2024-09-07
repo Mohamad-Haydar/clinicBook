@@ -7,7 +7,7 @@ namespace StressTests
     {
         static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<DoctorAvailabilityStressTests>(new CustomConfig());
+            var summary = BenchmarkRunner.Run<ReservationControllerTests>();
         }
     }
 }

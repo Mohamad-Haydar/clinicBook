@@ -14,6 +14,7 @@ using api.BusinessLogic.DataAccess;
 using System.Text.Json;
 using Serilog;
 using System.Text;
+using System.Security.Cryptography;
 
 namespace api.Controllers;
 
@@ -22,19 +23,20 @@ public class AuthenticationController : Controller
 {
     private readonly IAuthenticationData _authenticationData;
     private readonly ILogger<AuthenticationController> _logger;
-    private readonly UserManager<IdentityUser> _userManager;
+    private readonly UserManager<UserModel> _userManager;
 
-    public AuthenticationController(IAuthenticationData authenticationData, ILogger<AuthenticationController> logger, UserManager<IdentityUser> userManager)
+    public AuthenticationController(IAuthenticationData authenticationData, ILogger<AuthenticationController> logger, UserManager<UserModel> userManager)
     {
         _authenticationData = authenticationData;
         _logger = logger;
         _userManager = userManager;
     }
 
-    [Route("GenerateInitialData")]
+    [Route("GenerateClients")]
     [HttpPost]
-    [AuthorizeRoles(Roles.Admin)]
-    public async Task GenerateInitialData()
+    //[AuthorizeRoles(Roles.Admin)]
+    [AllowAnonymous]
+    public async Task GenerateClients()
     {
         // var values = Enum.GetValues(typeof(Roles));
         // foreach (var val in values)
@@ -62,31 +64,32 @@ public class AuthenticationController : Controller
         //     }
         // }
 
-        StringBuilder name = new();
-        StringBuilder email = new();
-        string emailtremination = "@gmail.com";
-       
+        //StringBuilder name = new();
+        //StringBuilder email = new();
+        //string emailtremination = "@gmail.com";
+        //var rng = RandomNumberGenerator.Create();
 
-        for(int i = 0; i < 2; i++)
-        { 
-            name.Append("testuser");
-            email.Append("testuser");
-            var userExists = await _userManager.FindByEmailAsync(email);
-            if(userExists == null)
-            {
-                name.Append(i.ToString());
-                email.Append(i.ToString());
-                email.Append(emailtremination.ToString());
-                var user = new IdentityUser{UserName=name.ToString(), Email=email.ToString()};
-                var result = await _userManager.CreateAsync(user, "Pass1234!");
-                if(result.Succeeded)
-                {
-                    await _userManager.AddToRoleAsync(user, "Client");
-                } 
-                name.Clear();
-                email.Clear();
-            }
-        }
+        //var randomNumber = new byte[12];
+
+        //for (int i = 0; i < 3000; i++)
+        //{ 
+        //    name.Clear();
+        //    email.Clear();
+        //    rng.GetBytes(randomNumber);
+        //    name.Append(Convert.ToBase64String(randomNumber));
+        //    email.Append(name);
+        //    email.Append(emailtremination);
+
+        //    await _authenticationData.RegisterClientAsync(new()
+        //    {
+        //        FirstName = name.ToString(),
+        //        LastName = name.ToString(),
+        //        Email = email.ToString(),
+        //        Password = "Pass1234!",
+        //        ConfirmPassword = "Pass1234!",
+        //        PhoneNumber = "76121212"
+        //    });
+        //}
     }
 
     [Route("RegisterClient")]
