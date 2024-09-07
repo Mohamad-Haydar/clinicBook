@@ -20,18 +20,15 @@ using Serilog.Events;
 var builder = WebApplication.CreateBuilder(args);
 
 Log.Logger = new LoggerConfiguration()
-           .MinimumLevel.Override("Microsoft", LogEventLevel.Warning) // Set the minimum log level for the Microsoft namespace
-           .MinimumLevel.Information()
-           .WriteTo.Console()
-           .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+            .ReadFrom.Configuration(builder.Configuration)
            .CreateLogger();
 
-builder.Host.UseSerilog(Log.Logger);
+builder.Host.UseSerilog();
 
 //Serilog.ILogger logger = new LoggerConfiguration().Enrich.FromLogContext().WriteTo.Console().CreateLogger();
 //builder.Services.AddSingleton(logger);
 
-// TPDO: Create Custom DateOnly and TimeOnly Model Binder
+// TODO: Create Custom DateOnly and TimeOnly Model Binder
 
 // Add services to the container.
 var appConnectionString = builder.Configuration.GetConnectionString("AppDbConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
