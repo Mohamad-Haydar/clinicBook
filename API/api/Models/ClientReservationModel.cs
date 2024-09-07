@@ -19,5 +19,5 @@ public class ClientReservationModel
     public string ClientId { get; set; }
 
     [Column("details")]
-    public string Details { get; set; }
+    public string? Details { get; set; }
 }

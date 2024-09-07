@@ -9,5 +9,6 @@ public class ReservationDetailResponce
     public string[] serviceNames { get; set; }
     public string clientName { get; set; }
     public bool isDone { get; set; }
+    public string? details { get; set; }
 #pragma warning restore IDE1006, CS8618 // Naming Styles
 }

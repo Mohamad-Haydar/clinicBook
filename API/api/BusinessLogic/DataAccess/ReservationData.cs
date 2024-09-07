@@ -189,7 +189,7 @@ public class ReservationData : IReservationData
                       where cr.DoctorAvailabilityId == availabilityId
                       join c in _appDbContext.Clients on cr.ClientId equals c.Id
                       orderby cr.StartTime
-                      select new ReservationDetailResponce { id = cr.Id, startTime = cr.StartTime, endTime = cr.EndTime, isDone = cr.IsDone , clientName = c.FirstName + " " + c.LastName };
+                      select new ReservationDetailResponce { id = cr.Id, startTime = cr.StartTime, endTime = cr.EndTime, isDone = cr.IsDone , clientName = c.FirstName + " " + c.LastName, details = cr.Details };
             return res;
         }
         catch (Exception)
