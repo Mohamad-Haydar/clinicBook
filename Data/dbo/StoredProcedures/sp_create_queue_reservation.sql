@@ -2,7 +2,8 @@ CREATE OR REPLACE PROCEDURE sp_create_queue_reservation(
     IN client_id character varying, 
     IN doctor_availability_id int,
     IN doctor_service_ids int[],
-    IN reorder boolean
+    IN reorder boolean,
+    IN details character varying
 )
 LANGUAGE plpgsql
 AS $$
@@ -67,8 +68,8 @@ BEGIN
     END IF;
 
     -- to insert data in the client reservation
-    INSERT INTO clientreservation (starttime, endtime, clientid, doctoravailabilityid)
-    VALUES (_last_end_time, _last_end_time + (_duration * INTERVAL '1 minute'), client_id, doctor_availability_id)
+    INSERT INTO clientreservation (starttime, endtime, clientid, doctoravailabilityid, details)
+    VALUES (_last_end_time, _last_end_time + (_duration * INTERVAL '1 minute'), client_id, doctor_availability_id, details)
     RETURNING id INTO _reservation_id;
 
 

@@ -17,4 +17,7 @@ public class ClientReservationModel
     public bool IsDone { get; set; }
     [Column("clientid")]
     public string ClientId { get; set; }
+
+    [Column("details")]
+    public string Details { get; set; }
 }
