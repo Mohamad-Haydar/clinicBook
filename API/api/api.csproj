@@ -12,8 +12,12 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
     <PackageReference Include="NBench" Version="2.0.1" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.2" />
+    <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+    <PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0" />
+    <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.Seq" Version="8.0.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.6" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.6" />
@@ -35,6 +39,7 @@
 
   <ItemGroup>
     <Folder Include="Backup\" />
+    <Folder Include="logs\" />
   </ItemGroup>
 
   <ItemGroup>

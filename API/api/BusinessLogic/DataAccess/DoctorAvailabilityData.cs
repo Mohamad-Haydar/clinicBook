@@ -15,6 +15,7 @@ namespace api.BusinessLogic.DataAccess;
 
 public class DoctorAvailabilityData : IDoctorAvailabilityData
 {
+    private readonly ILogger<DoctorAvailabilityData> _logger;
     private readonly UserManager<UserModel> _userManager;
     private readonly IOptions<ConnectionStrings> _connectionStrings;
     private readonly ApplicationDbContext _appDbContext;
@@ -24,7 +25,8 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
     public DoctorAvailabilityData(UserManager<UserModel> userManager,
                               ApplicationDbContext appDbContext,
                               ISqlDataAccess sql,
-                              IOptions<ConnectionStrings> connectionStrings)
+                              IOptions<ConnectionStrings> connectionStrings,
+                              ILogger<DoctorAvailabilityData> logger)
     {
         _userManager = userManager;
         _appDbContext = appDbContext;
@@ -40,6 +42,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
         };
         _sql = sql;
         _connectionStrings = connectionStrings;
+        _logger = logger;
     }
 
     public async Task<IEnumerable<DoctorAvailabilityResponse>> GetAvailableDatesAsync(string id)
@@ -59,8 +62,9 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
                                    }).OrderBy(x => x.day).ToListAsync();
             return doctoravailabilities;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw new BusinessException();
         }
     }
@@ -94,8 +98,9 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
             await _appDbContext.DoctorAvailabilities.AddRangeAsync(availables);
             await _appDbContext.SaveChangesAsync();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw;
         }
 
@@ -132,13 +137,13 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
             await _appDbContext.DoctorAvailabilities.AddRangeAsync(availables);
             await _appDbContext.SaveChangesAsync();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw;
         }
 
     }
-
 
     public async Task UpdateAvailableDateAsync(UpdateAvailableDateRequest model)
     {
@@ -162,8 +167,9 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
         {
             await _appDbContext.SaveChangesAsync();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw;
         }
     }
@@ -177,8 +183,9 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
             //await _appDbContext.SaveChangesAsync();
             await _sql.SaveDataAsync<dynamic>("sp_remove_doctor_availability", new { id }, _connectionStrings.Value.AppDbConnection);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw;
         }
     }
@@ -190,8 +197,9 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
             var res = await _appDbContext.DoctorAvailabilities.Where(x => x.DoctorId == doctorId).OrderBy(x => x.AvailableDate).ToListAsync();
             return res;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw new BusinessException();
         }
     }
@@ -207,11 +215,10 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
                var res = await _appDbContext.DoctorAvailabilities.Where(x => x.AvailableDate == date).ToListAsync();
                 return res;
             }
-
-            return [];
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw new BusinessException();
         }
     }

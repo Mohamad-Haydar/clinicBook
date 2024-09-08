@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using api.Exceptions;
 using System.ComponentModel.DataAnnotations;
 using api.BusinessLogic.DataAccess.IDataAccess;
+using System.Diagnostics;
 
 namespace api.Controllers;
 
@@ -19,9 +20,12 @@ namespace api.Controllers;
 public class DoctorManagementController : ControllerBase
 {
     private readonly IDoctorManagementData _doctorManagementData;
-    public DoctorManagementController(IDoctorManagementData doctorManagementData)
+    private readonly ILogger<DoctorManagementController> _logger;
+
+    public DoctorManagementController(IDoctorManagementData doctorManagementData, ILogger<DoctorManagementController> logger)
     {
         _doctorManagementData = doctorManagementData;
+        _logger = logger;
     }
 
     [HttpPost]

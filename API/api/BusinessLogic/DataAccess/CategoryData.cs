@@ -8,6 +8,7 @@ namespace api.BusinessLogic.DataAccess
 {
     public class CategoryData : ICategoryData
     {
+        private readonly ILogger<CategoryData> _logger;
         private readonly ApplicationDbContext _appDbContext;
 
         public CategoryData(ApplicationDbContext appDbContext)
@@ -22,8 +23,9 @@ namespace api.BusinessLogic.DataAccess
                 var result = await _appDbContext.Categories.ToListAsync();
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 throw new BusinessException();
             }
         }

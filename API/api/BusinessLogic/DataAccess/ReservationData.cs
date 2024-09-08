@@ -19,14 +19,16 @@ namespace api.BusinessLogic.DataAccess;
 
 public class ReservationData : IReservationData
 {
+    private readonly ILogger<ReservationData> _logger;
     private readonly IOptions<ConnectionStrings> _connectionStrings;
     private readonly ApplicationDbContext _appDbContext;
     private readonly ISqlDataAccess _sql;
-    public ReservationData(ISqlDataAccess sql, IOptions<ConnectionStrings> connectionStrings, ApplicationDbContext appDbContext)
+    public ReservationData(ISqlDataAccess sql, IOptions<ConnectionStrings> connectionStrings, ApplicationDbContext appDbContext, ILogger<ReservationData> logger)
     {
         _sql = sql;
         _connectionStrings = connectionStrings;
         _appDbContext = appDbContext;
+        _logger = logger;
     }
 
     public async Task CreateQueueReservationAsync(CreateQueueReservationRequest data)
@@ -35,8 +37,9 @@ public class ReservationData : IReservationData
         {
             await _sql.SaveDataAsync<CreateQueueReservationRequest>("sp_create_queue_reservation", data, _connectionStrings.Value.AppDbConnection);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw;
         }
     }
@@ -52,8 +55,9 @@ public class ReservationData : IReservationData
 
             return result.First();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw;
         }
     }
@@ -69,8 +73,9 @@ public class ReservationData : IReservationData
 
             return result;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw;
         }
     }
@@ -86,8 +91,9 @@ public class ReservationData : IReservationData
 
             return result;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw new BusinessException();
         }
     }
@@ -103,8 +109,9 @@ public class ReservationData : IReservationData
 
             return result;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw new BusinessException();
         }
     }
@@ -124,8 +131,9 @@ public class ReservationData : IReservationData
         {
             await _sql.SaveDataAsync("sp_delete_specific_reservation", new { client_reservation_id = ClientReservationId }, _connectionStrings.Value.AppDbConnection);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw new BusinessException();
         }
     }
@@ -136,8 +144,9 @@ public class ReservationData : IReservationData
         {
             await _sql.SaveDataAsync("sp_update_specific_reservation", model, _connectionStrings.Value.AppDbConnection);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw new BusinessException();
         }
     }
@@ -153,8 +162,9 @@ public class ReservationData : IReservationData
 
             return result;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw new BusinessException();
         }
     }
@@ -175,8 +185,9 @@ public class ReservationData : IReservationData
         {
             throw;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw new BusinessException();
         }
     }
@@ -192,8 +203,9 @@ public class ReservationData : IReservationData
                       select new ReservationDetailResponce { id = cr.Id, startTime = cr.StartTime, endTime = cr.EndTime, isDone = cr.IsDone , clientName = c.FirstName + " " + c.LastName, details = cr.Details };
             return res;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw new BusinessException();
         }
     }

@@ -13,18 +13,20 @@ namespace api.BusinessLogic.DataAccess;
 
 public class TokenData : ITokenData
 {
+    private readonly ILogger<TokenData> _logger;
     private readonly UserManager<UserModel> _userManager;
     private readonly IdentityAppDbContext _identityContext;
     private readonly ITokenService _tokenService;
     private readonly ApplicationDbContext _appContext;
     private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
-    public TokenData(UserManager<UserModel> userManager, IdentityAppDbContext identityContext, ITokenService tokenService, ApplicationDbContext appContext)
+    public TokenData(UserManager<UserModel> userManager, IdentityAppDbContext identityContext, ITokenService tokenService, ApplicationDbContext appContext, ILogger<TokenData> logger)
     {
         _userManager = userManager;
         _identityContext = identityContext;
         _tokenService = tokenService;
         _appContext = appContext;
+        _logger = logger;
     }
     public async Task<AuthenticationResponse> RefreshAsync(RefreshRequest tokenApiModel)
     {
@@ -83,8 +85,9 @@ public class TokenData : ITokenData
         {
             throw;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw new BusinessException();
         }
     }

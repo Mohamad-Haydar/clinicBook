@@ -1,4 +1,5 @@
 ﻿using api.BusinessLogic.DataAccess.IDataAccess;
+using api.Controllers;
 using api.Data;
 using api.Exceptions;
 using api.Helper;
@@ -17,20 +18,21 @@ namespace api.BusinessLogic.DataAccess;
 
 public class DoctorManagementData : IDoctorManagementData
 {
-
+    private readonly ILogger<DoctorManagementData> _logger;
     private readonly IOptions<ConnectionStrings> _connectionStrings;
     private readonly ISqlDataAccess _sql;
     private readonly ApplicationDbContext _appDbContext;
     private readonly UserManager<UserModel> _userManager;
     private readonly IdentityAppDbContext _identityContext;
 
-    public DoctorManagementData(IOptions<ConnectionStrings> connectionStrings, ISqlDataAccess sql, ApplicationDbContext appDbContext, UserManager<UserModel> userManager, IdentityAppDbContext identityContext)
+    public DoctorManagementData(IOptions<ConnectionStrings> connectionStrings, ISqlDataAccess sql, ApplicationDbContext appDbContext, UserManager<UserModel> userManager, IdentityAppDbContext identityContext, ILogger<DoctorManagementData> logger)
     {
         _connectionStrings = connectionStrings;
         _sql = sql;
         _appDbContext = appDbContext;
         _userManager = userManager;
         _identityContext = identityContext;
+        _logger = logger;
     }
 
 
@@ -40,8 +42,9 @@ public class DoctorManagementData : IDoctorManagementData
         {
             await _sql.SaveDataAsync<DoctorServiceRequest>("sp_insert_doctor_service", data, _connectionStrings.Value.AppDbConnection);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw new BusinessException();
         }
     }
@@ -57,9 +60,10 @@ public class DoctorManagementData : IDoctorManagementData
                 }
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 transaction.Rollback();
+                _logger.LogError(ex.Message);
                 throw new BusinessException();
             }
         }
@@ -77,8 +81,9 @@ public class DoctorManagementData : IDoctorManagementData
         {
             throw;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw new BusinessException();
         }
     }
@@ -97,8 +102,9 @@ public class DoctorManagementData : IDoctorManagementData
         {
             throw;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw new BusinessException();
         }
     }
@@ -122,9 +128,10 @@ public class DoctorManagementData : IDoctorManagementData
                 transaction.Rollback();
                 throw;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 transaction.Rollback();
+                _logger.LogError(ex.Message);
                 throw new BusinessException();
             }
         }
@@ -159,9 +166,10 @@ public class DoctorManagementData : IDoctorManagementData
                 transaction.Rollback();
                 throw;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 transaction.Rollback();
+                _logger.LogError(ex.Message);
                 throw new BusinessException();
             }
         }
@@ -185,8 +193,9 @@ public class DoctorManagementData : IDoctorManagementData
         {
             throw;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw new BusinessException();
         }
     }
@@ -228,8 +237,9 @@ public class DoctorManagementData : IDoctorManagementData
         {
             throw;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw new BusinessException();
         }
     }
@@ -243,8 +253,9 @@ public class DoctorManagementData : IDoctorManagementData
                           select new DoctorInfoResponse { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
             return await doctors.ToListAsync();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw;
         }
     }
@@ -259,8 +270,9 @@ public class DoctorManagementData : IDoctorManagementData
                           select new DoctorInfoResponse { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
             return await doctors.ToListAsync();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw;
         }
     }
@@ -281,8 +293,9 @@ public class DoctorManagementData : IDoctorManagementData
             }
             return file.FileName;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw new BusinessException("لقد حدث خطأ اثناء رفع الصورة, الرجاء المحاولة مجددا.");
         }
 

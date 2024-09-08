@@ -14,9 +14,11 @@ public class SecretaryData
 {
 
     private readonly ApplicationDbContext _appDbContext;
-    public SecretaryData(ApplicationDbContext applicationDbContext)
+    private readonly ILogger<SecretaryData> _logger;
+    public SecretaryData(ApplicationDbContext applicationDbContext, ILogger<SecretaryData> logger)
     {
         _appDbContext = applicationDbContext;
+        _logger = logger;
     }
 
     public async Task<SecretaryModel> GetSecretariebyEmailAsync(string email)
@@ -30,8 +32,9 @@ public class SecretaryData
         {
             throw;
         }
-        catch (Exception)
-        {   
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
             throw new BusinessException();
         }
     }

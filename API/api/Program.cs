@@ -23,12 +23,7 @@ Log.Logger = new LoggerConfiguration()
             .ReadFrom.Configuration(builder.Configuration)
            .CreateLogger();
 
-builder.Host.UseSerilog();
-
-//Serilog.ILogger logger = new LoggerConfiguration().Enrich.FromLogContext().WriteTo.Console().CreateLogger();
-//builder.Services.AddSingleton(logger);
-
-// TODO: Create Custom DateOnly and TimeOnly Model Binder
+builder.Host.UseSerilog(Log.Logger);
 
 // Add services to the container.
 var appConnectionString = builder.Configuration.GetConnectionString("AppDbConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");

@@ -7,12 +7,13 @@ using api.Exceptions;
 using api.BusinessLogic.DataAccess.IDataAccess;
 using System.Security.Claims;
 using System.Transactions;
+using api.Controllers;
 
 namespace api.BusinessLogic.DataAccess;
 
 public class AuthenticationData : IAuthenticationData
 {
-
+    private readonly ILogger<AuthenticationData> _logger;
     private readonly IdentityAppDbContext _identityContext;
     private readonly UserManager<UserModel> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
@@ -23,13 +24,15 @@ public class AuthenticationData : IAuthenticationData
                               UserManager<UserModel> userManager,
                               RoleManager<IdentityRole> roleManager,
                               ApplicationDbContext appContext,
-                              ITokenService tokenService)
+                              ITokenService tokenService,
+                              ILogger<AuthenticationData> logger)
     {
         _identityContext = identityContext;
         _userManager = userManager;
         _roleManager = roleManager;
         _appContext = appContext;
         _tokenService = tokenService;
+        _logger = logger;
     }
     public async Task<AuthenticationResponse> RegisterClientAsync(CreateUserRequest model)
     {
@@ -79,10 +82,11 @@ public class AuthenticationData : IAuthenticationData
                     Roles = [Roles.Client.ToString()]
                 };
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 identityTransaction.Rollback();
                 appTransaction.Rollback();
+                _logger.LogError(ex.Message);
                 throw new BusinessException();
             }
         }
@@ -127,10 +131,11 @@ public class AuthenticationData : IAuthenticationData
                 await identityTransaction.CommitAsync();
                 await appTransaction.CommitAsync();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 identityTransaction.Rollback();
                 appTransaction.Rollback();
+                _logger.LogError(ex.Message);
                 throw new BusinessException();
             }
         }
@@ -176,10 +181,11 @@ public class AuthenticationData : IAuthenticationData
                 await appTransaction.CommitAsync();
                 await identityTransaction.CommitAsync();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 await appTransaction.RollbackAsync();
                 await identityTransaction.RollbackAsync();
+                _logger.LogError(ex.Message);
                 throw new BusinessException();
             }
         }
@@ -200,8 +206,9 @@ public class AuthenticationData : IAuthenticationData
             await _appContext.SaveChangesAsync();
             await _identityContext.SaveChangesAsync();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw new BusinessException("Something went wrong. Please try again.");
         }
     }
@@ -242,8 +249,9 @@ public class AuthenticationData : IAuthenticationData
         {
             throw;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex.Message);
             throw new BusinessException();
         }
     }
@@ -265,8 +273,9 @@ public class AuthenticationData : IAuthenticationData
             user.RefreshTokenExpiryTime = DateTime.MinValue;
             _identityContext.SaveChanges();
         }
-        catch (System.Exception)
-        {   
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
             throw;
         }
 

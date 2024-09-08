@@ -9,10 +9,12 @@ namespace api.BusinessLogic.DataAccess
     public class ServiceData : IServiceData
     {
         private readonly ApplicationDbContext _appDbContext;
+        private readonly ILogger<ServiceData> _logger;
 
-        public ServiceData(ApplicationDbContext appDbContext)
+        public ServiceData(ApplicationDbContext appDbContext, ILogger<ServiceData> logger)
         {
             _appDbContext = appDbContext;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<ServiceModel>> GetAllServicesAsync()
@@ -22,8 +24,9 @@ namespace api.BusinessLogic.DataAccess
                 var result = await _appDbContext.Services.ToListAsync();
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 throw new BusinessException();
             }
         }

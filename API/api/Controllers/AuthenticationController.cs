@@ -22,13 +22,11 @@ namespace api.Controllers;
 public class AuthenticationController : Controller
 {
     private readonly IAuthenticationData _authenticationData;
-    private readonly ILogger<AuthenticationController> _logger;
     private readonly UserManager<UserModel> _userManager;
 
-    public AuthenticationController(IAuthenticationData authenticationData, ILogger<AuthenticationController> logger, UserManager<UserModel> userManager)
+    public AuthenticationController(IAuthenticationData authenticationData, UserManager<UserModel> userManager)
     {
         _authenticationData = authenticationData;
-        _logger = logger;
         _userManager = userManager;
     }
 
