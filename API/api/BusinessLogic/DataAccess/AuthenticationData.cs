@@ -55,6 +55,14 @@ public class AuthenticationData : IAuthenticationData
                     Email = model.Email,
                     PhoneNumber = model.PhoneNumber,
                 };
+
+                var accessToken = await _tokenService.GenerateAccessTokenAsync(model.Email);
+                var refreshToken = _tokenService.GenerateRefreshToken();
+                user.RefreshToken = refreshToken;
+                user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+                user.OldRefreshToken = refreshToken;
+                user.OldRefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+
                 await _appContext.Clients.AddAsync(client);
                 await _appContext.SaveChangesAsync();
                 await _identityContext.SaveChangesAsync();
@@ -210,6 +218,8 @@ public class AuthenticationData : IAuthenticationData
                 var refreshToken = _tokenService.GenerateRefreshToken();
                 user.RefreshToken = refreshToken;
                 user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+                user.OldRefreshToken = refreshToken;
+                user.OldRefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
                 _identityContext.SaveChanges();
 
                 return new AuthenticationResponse

@@ -39,7 +39,25 @@ public class TokenData : ITokenData
             var user = await _userManager.FindByIdAsync(userId);
 
 
-            if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            if (user is null || (user.OldRefreshToken != refreshToken && user.RefreshToken != refreshToken) || (user.OldRefreshTokenExpiryTime <= DateTime.UtcNow && user.RefreshTokenExpiryTime <= DateTime.UtcNow))
+            {
+                throw new InvalidRequestException();
+            }
+
+            if (refreshToken == user.RefreshToken)
+            {
+                if (user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+                {
+                    throw new InvalidCastException();
+                }
+                else
+                {
+                    user.OldRefreshTokenExpiryTime = user.RefreshTokenExpiryTime;
+                    user.OldRefreshToken = user.RefreshToken;
+                }
+
+            }
+            if(refreshToken == user.OldRefreshToken && user.OldRefreshTokenExpiryTime <= DateTime.UtcNow)
             {
                 throw new InvalidRequestException();
             }
