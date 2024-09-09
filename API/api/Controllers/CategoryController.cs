@@ -22,7 +22,7 @@ namespace api.Controllers
         {
             try
             {
-                var categories = await _categoryData.GetAllCategoriesAsync();
+                var categories = await _categoryData.GetAllCategoriesAsync().ConfigureAwait(false);
                 return Ok(categories);
             }
             catch (Exception ex)

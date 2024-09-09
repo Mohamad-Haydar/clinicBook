@@ -20,7 +20,7 @@ namespace api.BusinessLogic.DataAccess
         {
             try
             {
-                var result = await _appDbContext.Categories.ToListAsync();
+                var result = await _appDbContext.Categories.ToListAsync().ConfigureAwait(false);
                 return result;
             }
             catch (Exception ex)

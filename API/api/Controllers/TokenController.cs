@@ -38,7 +38,7 @@ public class TokenController : Controller
 
         try
         {
-            var result = await _tokenData.RefreshAsync(tokenApiModel);
+            var result = await _tokenData.RefreshAsync(tokenApiModel).ConfigureAwait(false);
             
             var userDataJson = JsonSerializer.Serialize(new
             {

@@ -25,7 +25,7 @@ public class SecretaryData
     {
         try
         {
-            var secretarie = await _appDbContext.Secretaries.FirstOrDefaultAsync(x => x.Email == email) ?? throw new UserNotFoundException();
+            var secretarie = await _appDbContext.Secretaries.FirstOrDefaultAsync(x => x.Email == email).ConfigureAwait(false) ?? throw new UserNotFoundException();
             return secretarie;
         }
         catch (UserNotFoundException)

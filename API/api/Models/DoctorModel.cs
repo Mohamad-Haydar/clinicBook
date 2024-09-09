@@ -22,4 +22,6 @@ public class DoctorModel
     [Column("categoryid")]
     public int CategoryId { get; set; }
 
+    // Navigation property to Category
+    public CategoryModel Category { get; set; }
 }

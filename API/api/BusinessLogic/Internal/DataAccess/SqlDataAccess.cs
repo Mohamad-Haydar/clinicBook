@@ -17,7 +17,7 @@ public class SqlDataAccess :ISqlDataAccess,  IDisposable
             var results = new List<Dictionary<string, object>>();
             await using (var connection = new NpgsqlConnection(connectionString))
             {
-                await connection.OpenAsync();
+                await connection.OpenAsync().ConfigureAwait(false);
                 await using (var cmd = new NpgsqlCommand())
                 {     
                     cmd.Connection = connection;
@@ -28,7 +28,7 @@ public class SqlDataAccess :ISqlDataAccess,  IDisposable
                     {
                         cmd.Parameters.AddWithValue(paramNames[i], paramValues[i]);
                     }
-                    await cmd.PrepareAsync();
+                    await cmd.PrepareAsync().ConfigureAwait(false);
 
                     var reader = await cmd.ExecuteReaderAsync();
 
@@ -67,7 +67,7 @@ public class SqlDataAccess :ISqlDataAccess,  IDisposable
         {
             using (IDbConnection connection = new NpgsqlConnection(connectionString))
             {
-                await connection.ExecuteAsync(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
+                await connection.ExecuteAsync(storedProcedure, parameters, commandType: CommandType.StoredProcedure).ConfigureAwait(false);
             }
         }
         catch (Exception ex)
@@ -93,12 +93,12 @@ public class SqlDataAccess :ISqlDataAccess,  IDisposable
     }
     public async Task<IEnumerable<T>> LoadDataInTransactionAsync<T, U>(string storedProcedure, U parameters)
     {
-        IEnumerable<T> rows = await _connection.QueryAsync<T>(storedProcedure, parameters, commandType: CommandType.StoredProcedure, transaction: _transaction);
+        IEnumerable<T> rows = await _connection.QueryAsync<T>(storedProcedure, parameters, commandType: CommandType.StoredProcedure, transaction: _transaction).ConfigureAwait(false);
         return rows;
     }
     public async Task SaveDataInTransactionAsync<T>(string storedProcedure, T parameters)
     {
-        await _connection.ExecuteAsync(storedProcedure, parameters, commandType: CommandType.StoredProcedure, transaction: _transaction);
+        await _connection.ExecuteAsync(storedProcedure, parameters, commandType: CommandType.StoredProcedure, transaction: _transaction).ConfigureAwait(false);
     }
     private bool isCloded = false;
 

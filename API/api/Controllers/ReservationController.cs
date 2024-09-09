@@ -40,7 +40,7 @@ public class ReservationController : ControllerBase
 
         try
         {
-            await _reservationData.CreateQueueReservationAsync(model);
+            await _reservationData.CreateQueueReservationAsync(model).ConfigureAwait(false);
             return Ok(new Response("لقد تم حجز الموعد بنجاح"));
         }
         catch (Exception ex)
@@ -59,7 +59,7 @@ public class ReservationController : ControllerBase
         }
         try
         {
-            var res = await _reservationData.GetReservationDetailsAsync(id);
+            var res = await _reservationData.GetReservationDetailsAsync(id).ConfigureAwait(false);
             return Ok(res);
         }
         catch (Exception ex)
@@ -78,7 +78,7 @@ public class ReservationController : ControllerBase
         }
         try
         {
-            var res = await _reservationData.GetAllPersonalReservationsAsync(ClientId);
+            var res = await _reservationData.GetAllPersonalReservationsAsync(ClientId).ConfigureAwait(false);
             return Ok(res);
         }
         catch (Exception ex)
@@ -97,7 +97,7 @@ public class ReservationController : ControllerBase
         }
         try
         {
-            var result = await _reservationData.GetConcurrentBookingsAsync(id);
+            var result = await _reservationData.GetConcurrentBookingsAsync(id).ConfigureAwait(false);
             return Ok(result);
         }
         catch (Exception ex)
@@ -116,7 +116,7 @@ public class ReservationController : ControllerBase
         }
         try
         {
-            var result = await _reservationData.GetPreviousBookingsAsync(id);
+            var result = await _reservationData.GetPreviousBookingsAsync(id).ConfigureAwait(false);
             return Ok(result);
         }
         catch (Exception ex)
@@ -141,7 +141,7 @@ public class ReservationController : ControllerBase
             {
                 return BadRequest(new Response("Please login"));
             }
-            await _reservationData.DeleteSpecificReservationAsync(clientReservationId, userData, accessToken);
+            await _reservationData.DeleteSpecificReservationAsync(clientReservationId, userData, accessToken).ConfigureAwait(false);
             return Ok(new Response("لقد تم ازالة موعدك بنجاح"));
         }
         catch (Exception ex)
@@ -162,7 +162,7 @@ public class ReservationController : ControllerBase
         }
         try
         {
-            await _reservationData.UpdateSpecificReservationAsync(model);
+            await _reservationData.UpdateSpecificReservationAsync(model).ConfigureAwait(false);
             return Ok(new Response("لقد تم تحديث الحجز بنجاح"));
         }
         catch (Exception ex)
@@ -181,7 +181,7 @@ public class ReservationController : ControllerBase
         }
         try
         {
-            var result = await _reservationData.GetAllReservationForTheDayAsync(DoctorAvailabilityId);
+            var result = await _reservationData.GetAllReservationForTheDayAsync(DoctorAvailabilityId).ConfigureAwait(false);
             return Ok(result);
         }
         catch (Exception ex)
@@ -200,7 +200,7 @@ public class ReservationController : ControllerBase
         }
         try
         {
-            await _reservationData.MarkCompleteReservationAsync(ClientReservationId);
+            await _reservationData.MarkCompleteReservationAsync(ClientReservationId).ConfigureAwait(false);
             return Ok(new Response("تم انهاء الزيارة"));
         }
         catch (Exception ex)
@@ -219,7 +219,7 @@ public class ReservationController : ControllerBase
         }
         try
         {
-            var res = await _reservationData.GetAllReservationOfAvailabilityAsync(availabilityId);
+            var res = await _reservationData.GetAllReservationOfAvailabilityAsync(availabilityId).ConfigureAwait(false);
             return Ok(res);
         }
         catch (Exception ex)

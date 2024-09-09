@@ -39,7 +39,7 @@ public class DoctorManagementController : ControllerBase
         }
         try
         {
-            await _doctorManagementData.AddDoctorServiceAsync(doctorService);
+            await _doctorManagementData.AddDoctorServiceAsync(doctorService).ConfigureAwait(false);
             return Ok(new Response("تم اضافة خدمة بنجاح"));
         }
         catch (Exception ex)
@@ -59,7 +59,7 @@ public class DoctorManagementController : ControllerBase
         }
         try
         {
-            await _doctorManagementData.AddMultipleServiceAsync(doctorServices);
+            await _doctorManagementData.AddMultipleServiceAsync(doctorServices).ConfigureAwait(false);
             return Ok(new Response("تم اضافة خدمات بنجاح"));
         }
         catch (Exception ex)
@@ -79,7 +79,7 @@ public class DoctorManagementController : ControllerBase
         }
         try
         {
-            await _doctorManagementData.UpdateDoctorServiceDurationAsync(id, duration);
+            await _doctorManagementData.UpdateDoctorServiceDurationAsync(id, duration).ConfigureAwait(false);
             return Ok(new Response("تم تحديث التوقيت بنجاح"));
         }
         catch (Exception ex)
@@ -98,7 +98,7 @@ public class DoctorManagementController : ControllerBase
         }
         try
         {
-            await _doctorManagementData.DeleteDoctorServiceAsync(id);
+            await _doctorManagementData.DeleteDoctorServiceAsync(id).ConfigureAwait(false);
             return Ok(new Response("تم ازالة الخدمة بنجاح"));
         }
         catch (Exception ex)
@@ -117,7 +117,7 @@ public class DoctorManagementController : ControllerBase
         }
         try
         {
-            await _doctorManagementData.RemoveDoctorAsync(id);
+            await _doctorManagementData.RemoveDoctorAsync(id).ConfigureAwait(false);
             return Ok(new Response("تم ازالة الدكتور بنجاح"));
         }
         catch (Exception ex)
@@ -138,7 +138,7 @@ public class DoctorManagementController : ControllerBase
         }
         try
         {
-            await _doctorManagementData.UpdateDoctorInfoAsync(model);
+            await _doctorManagementData.UpdateDoctorInfoAsync(model).ConfigureAwait(false);
             return Ok(new Response("تم تحديث معلومات الدكتور بنجاح" ));
         }
         catch (Exception ex)
@@ -158,7 +158,7 @@ public class DoctorManagementController : ControllerBase
         }
         try
         {
-            var doctor = await _doctorManagementData.GetDoctorByEmailAsync(email);
+            var doctor = await _doctorManagementData.GetDoctorByEmailAsync(email).ConfigureAwait(false);
             return Ok(doctor);
         }
         catch (Exception ex)
@@ -179,7 +179,7 @@ public class DoctorManagementController : ControllerBase
 
         try
         {
-            var doctor = await _doctorManagementData.GetDoctorByIdAsync(id);
+            var doctor = await _doctorManagementData.GetDoctorByIdAsync(id).ConfigureAwait(false);
             return Ok(doctor);
         }
         catch (Exception ex)
@@ -195,7 +195,7 @@ public class DoctorManagementController : ControllerBase
     {
         try
         {
-            var doctors = await _doctorManagementData.GetAllDoctorsAsync();
+            var doctors = await _doctorManagementData.GetAllDoctorsAsync().ConfigureAwait(false);
             return doctors.Any() ? Ok(doctors) : NoContent();
         }
         catch (Exception ex)
@@ -211,7 +211,7 @@ public class DoctorManagementController : ControllerBase
     {
         try
         {
-            var doctors = await _doctorManagementData.GetDoctorsByCategoryAsync(CategoryId);
+            var doctors = await _doctorManagementData.GetDoctorsByCategoryAsync(CategoryId).ConfigureAwait(false);
             return doctors.Any() ? Ok(doctors) : NoContent();
         }
         catch (Exception ex)
@@ -226,7 +226,7 @@ public class DoctorManagementController : ControllerBase
     {
         try
         {
-            string path = await _doctorManagementData.UploadImageAsync(file);
+            string path = await _doctorManagementData.UploadImageAsync(file).ConfigureAwait(false);
             return Ok(new Response(path));
         }
         catch (Exception ex)

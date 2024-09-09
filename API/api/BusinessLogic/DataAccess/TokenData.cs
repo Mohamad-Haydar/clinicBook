@@ -38,7 +38,7 @@ public class TokenData : ITokenData
             var email = principal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email)?.Value;
             var userId = principal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier)?.Value;
             var roles = principal.Claims.Where(claim => claim.Type == ClaimTypes.Role).Select(claim => claim.Value);
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.FindByIdAsync(userId).ConfigureAwait(false);
 
 
             if (user is null || (user.OldRefreshToken != refreshToken && user.RefreshToken != refreshToken) || (user.OldRefreshTokenExpiryTime <= DateTime.UtcNow && user.RefreshTokenExpiryTime <= DateTime.UtcNow))
@@ -68,7 +68,7 @@ public class TokenData : ITokenData
             var newRefreshToken = _tokenService.GenerateRefreshToken();
             user.RefreshToken = newRefreshToken;
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-            await _identityContext.SaveChangesAsync();
+            await _identityContext.SaveChangesAsync().ConfigureAwait(false);
 
             return new AuthenticationResponse
             {

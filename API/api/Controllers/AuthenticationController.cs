@@ -101,7 +101,7 @@ public class AuthenticationController : Controller
         }
         try
         {
-            var result = await _authenticationData.RegisterClientAsync(model);
+            var result = await _authenticationData.RegisterClientAsync(model).ConfigureAwait(false);
             var userDataJson = JsonSerializer.Serialize(new CookieUserModel
             {
                 id= result.Id,
@@ -163,7 +163,7 @@ public class AuthenticationController : Controller
         }
         try
         {
-            await _authenticationData.RegisterSecretaryAsync(model);
+            await _authenticationData.RegisterSecretaryAsync(model).ConfigureAwait(false);
             return Ok(new Response("لقد تم انشاء حساب سكرتيرة جديد بنجاح."));
         }
         catch (Exception ex)
@@ -184,7 +184,7 @@ public class AuthenticationController : Controller
         }
         try
         {
-            await _authenticationData.RegisterDoctorAsync(model);
+            await _authenticationData.RegisterDoctorAsync(model).ConfigureAwait(false);
           
             return Ok(new Response("لقد تم انشاء حساب دكتور جديد بنجاح"));
         }
@@ -206,7 +206,7 @@ public class AuthenticationController : Controller
         }
         try
         {
-            await _authenticationData.RegisterAdminAsync(email, password);
+            await _authenticationData.RegisterAdminAsync(email, password).ConfigureAwait(false);
             return Ok(new { message = "Admin created successfully. You can login to your account." });
         }
         catch (UserAlreadyExistsException ex)
@@ -235,7 +235,7 @@ public class AuthenticationController : Controller
         }
         try
         {
-            var result = await _authenticationData.LoginUserAsync(model);
+            var result = await _authenticationData.LoginUserAsync(model).ConfigureAwait(false);
 
             var userDataJson = JsonSerializer.Serialize(new CookieUserModel
             {
@@ -294,12 +294,12 @@ public class AuthenticationController : Controller
 
         //try
         //{
-            //if (refreshToken == null || accessToken == null || userData == null)
-            //{
-            //    throw new BusinessException();
-            //}
-            //await _authenticationData.LogoutAsync(refreshToken, accessToken);
-            Response.Cookies.Delete("userData", new CookieOptions
+        //if (refreshToken == null || accessToken == null || userData == null)
+        //{
+        //    throw new BusinessException();
+        //}
+        //await _authenticationData.LogoutAsync(refreshToken, accessToken).ConfigureAwait(false);
+        Response.Cookies.Delete("userData", new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,

@@ -59,7 +59,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
                                        startHour = x.StartHour,
                                        endHour = x.EndHour,
                                        maxClient = x.MaxClient
-                                   }).OrderBy(x => x.day).ToListAsync();
+                                   }).OrderBy(x => x.day).ToListAsync().ConfigureAwait(false);
             return doctoravailabilities;
         }
         catch (Exception ex)
@@ -90,13 +90,13 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
         }
         try
         {
-            var doc = await _userManager.FindByIdAsync(model.DoctorId) ?? throw new UserNotFoundException();
+            var doc = await _userManager.FindByIdAsync(model.DoctorId).ConfigureAwait(false) ?? throw new UserNotFoundException();
             if (availables == null)
             {
                 throw new FailedToAddException();
             }
-            await _appDbContext.DoctorAvailabilities.AddRangeAsync(availables);
-            await _appDbContext.SaveChangesAsync();
+            await _appDbContext.DoctorAvailabilities.AddRangeAsync(availables).ConfigureAwait(false);
+            await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -134,8 +134,8 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
             {
                 throw new FailedToAddException();
             }
-            await _appDbContext.DoctorAvailabilities.AddRangeAsync(availables);
-            await _appDbContext.SaveChangesAsync();
+            await _appDbContext.DoctorAvailabilities.AddRangeAsync(availables).ConfigureAwait(false);
+            await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -147,7 +147,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
 
     public async Task UpdateAvailableDateAsync(UpdateAvailableDateRequest model)
     {
-        var existedAvailability = await _appDbContext.DoctorAvailabilities.FirstOrDefaultAsync(x => x.Id == model.Id) ?? throw new UserNotFoundException();
+        var existedAvailability = await _appDbContext.DoctorAvailabilities.FirstOrDefaultAsync(x => x.Id == model.Id).ConfigureAwait(false) ?? throw new UserNotFoundException();
         if (model.StartHour > model.EndHour)
         {
             throw new InvalidDataException("انتبه, يجب ان تكون ساعة البدء قبل ساعة الانتهاء");
@@ -165,7 +165,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
 
         try
         {
-            await _appDbContext.SaveChangesAsync();
+            await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -181,7 +181,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
         {
             //var available = _appDbContext.Remove(availableDate);
             //await _appDbContext.SaveChangesAsync();
-            await _sql.SaveDataAsync<dynamic>("sp_remove_doctor_availability", new { id }, _connectionStrings.Value.AppDbConnection);
+            await _sql.SaveDataAsync<dynamic>("sp_remove_doctor_availability", new { id }, _connectionStrings.Value.AppDbConnection).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -194,7 +194,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
     {
         try
         {
-            var res = await _appDbContext.DoctorAvailabilities.Where(x => x.DoctorId == doctorId).OrderBy(x => x.AvailableDate).ToListAsync();
+            var res = await _appDbContext.DoctorAvailabilities.Where(x => x.DoctorId == doctorId).OrderBy(x => x.AvailableDate).ToListAsync().ConfigureAwait(false);
             return res;
         }
         catch (Exception ex)
@@ -209,10 +209,10 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
         {
              if(date == DateOnly.MinValue)
             {
-                var res = await _appDbContext.DoctorAvailabilities.Where(x => x.AvailableDate == DateOnly.FromDateTime(DateTime.Now)).ToListAsync();
+                var res = await _appDbContext.DoctorAvailabilities.Where(x => x.AvailableDate == DateOnly.FromDateTime(DateTime.Now)).ToListAsync().ConfigureAwait(false);
                 return res;
             }else{
-               var res = await _appDbContext.DoctorAvailabilities.Where(x => x.AvailableDate == date).ToListAsync();
+               var res = await _appDbContext.DoctorAvailabilities.Where(x => x.AvailableDate == date).ToListAsync().ConfigureAwait(false);
                 return res;
             }
         }

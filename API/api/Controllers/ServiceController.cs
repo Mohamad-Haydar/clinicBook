@@ -25,7 +25,7 @@ namespace api.Controllers
         {
             try
             {
-                var services = await _serviceData.GetAllServicesAsync();
+                var services = await _serviceData.GetAllServicesAsync().ConfigureAwait(false);
                 return Ok(services);
             }
             catch (Exception ex)

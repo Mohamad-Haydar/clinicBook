@@ -40,7 +40,7 @@ public class DoctorManagementData : IDoctorManagementData
     {
         try
         {
-            await _sql.SaveDataAsync<DoctorServiceRequest>("sp_insert_doctor_service", data, _connectionStrings.Value.AppDbConnection);
+            await _sql.SaveDataAsync<DoctorServiceRequest>("sp_insert_doctor_service", data, _connectionStrings.Value.AppDbConnection).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -56,7 +56,7 @@ public class DoctorManagementData : IDoctorManagementData
             {
                 foreach (var doctorService in doctorServices)
                 {
-                    await AddDoctorServiceAsync(doctorService);
+                    await AddDoctorServiceAsync(doctorService).ConfigureAwait(false);
                 }
 
             }
@@ -73,9 +73,9 @@ public class DoctorManagementData : IDoctorManagementData
     {
         try
         {
-            var service = await _appDbContext.DoctorServices.FirstOrDefaultAsync(x => x.Id == id) ?? throw new UserNotFoundException();
+            var service = await _appDbContext.DoctorServices.FirstOrDefaultAsync(x => x.Id == id).ConfigureAwait(false) ?? throw new UserNotFoundException();
             service.Duration = duration;
-            await _appDbContext.SaveChangesAsync();
+            await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
         }
         catch (UserNotFoundException)
         {
@@ -92,11 +92,11 @@ public class DoctorManagementData : IDoctorManagementData
     // and check if i want to delete the client reservation
     public async Task DeleteDoctorServiceAsync(int id)
     {
-        var service = await _appDbContext.DoctorServices.FirstOrDefaultAsync(x => x.Id == id) ?? throw new UserNotFoundException();
+        var service = await _appDbContext.DoctorServices.FirstOrDefaultAsync(x => x.Id == id).ConfigureAwait(false) ?? throw new UserNotFoundException();
         try
         {
             var res = _appDbContext.DoctorServices.Remove(service);
-            await _appDbContext.SaveChangesAsync();
+            await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
         }
         catch (UserNotFoundException)
         {
@@ -111,16 +111,16 @@ public class DoctorManagementData : IDoctorManagementData
 
     public async Task RemoveDoctorAsync(string id)
     {
-        var doctor = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.Id == id) ?? throw new UserNotFoundException();
-        var user = await _userManager.FindByIdAsync(id) ?? throw new UserNotFoundException();
+        var doctor = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.Id == id).ConfigureAwait(false) ?? throw new UserNotFoundException();
+        var user = await _userManager.FindByIdAsync(id).ConfigureAwait(false) ?? throw new UserNotFoundException();
         using (var transaction = _identityContext.Database.BeginTransaction())
         {
             try
             {
                 _appDbContext.Remove(doctor);
-                await _userManager.DeleteAsync(user);
-                await _identityContext.SaveChangesAsync();
-                await _appDbContext.SaveChangesAsync();
+                await _userManager.DeleteAsync(user).ConfigureAwait(false);
+                await _identityContext.SaveChangesAsync().ConfigureAwait(false);
+                await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
                 transaction.Commit();
             }
             catch (UserNotFoundException)
@@ -139,8 +139,8 @@ public class DoctorManagementData : IDoctorManagementData
 
     public async Task UpdateDoctorInfoAsync(UpdateDoctorRequest model)
     {
-        var user = await _userManager.FindByEmailAsync(model.Email) ?? throw new UserNotFoundException();
-        var doctor = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.Email == model.Email) ?? throw new UserNotFoundException();
+        var user = await _userManager.FindByEmailAsync(model.Email).ConfigureAwait(false) ?? throw new UserNotFoundException();
+        var doctor = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.Email == model.Email).ConfigureAwait(false) ?? throw new UserNotFoundException();
 
         using (var transaction = _identityContext.Database.BeginTransaction())
         {
@@ -157,8 +157,8 @@ public class DoctorManagementData : IDoctorManagementData
                 doctor.CategoryId = model.CategoryId > 0 ? model.CategoryId : doctor.CategoryId;
                 doctor.Image = model.Image  ?? doctor.Image;
 
-                await _appDbContext.SaveChangesAsync();
-                await _identityContext.SaveChangesAsync();
+                await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
+                await _identityContext.SaveChangesAsync().ConfigureAwait(false);
                 transaction.Commit();
             }
             catch (UserNotFoundException)
@@ -187,7 +187,7 @@ public class DoctorManagementData : IDoctorManagementData
             {
                 throw new UserNotFoundException();
             }
-            return await doctor.FirstAsync();
+            return await doctor.FirstAsync().ConfigureAwait(false);
         }
         catch (UserNotFoundException)
         {
@@ -231,7 +231,7 @@ public class DoctorManagementData : IDoctorManagementData
             {
                 throw new UserNotFoundException("هذا الطبيب غير موجود!");
             }
-            return await doctor.FirstAsync();
+            return await doctor.FirstAsync().ConfigureAwait(false);
         }
         catch (UserNotFoundException)
         {
@@ -248,10 +248,20 @@ public class DoctorManagementData : IDoctorManagementData
     {
         try
         {
-            var doctors = from d in _appDbContext.Doctors
-                          join c in _appDbContext.Categories on d.CategoryId equals c.Id
-                          select new DoctorInfoResponse { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
-            return await doctors.ToListAsync();
+            var doctors = await _appDbContext.Doctors.AsNoTracking()
+                            .Include(d => d.Category)
+                            .Select(d => new DoctorInfoResponse
+                            {
+                                Id = d.Id,
+                                FirstName = d.FirstName,
+                                LastName = d.LastName,
+                                Email = d.Email,
+                                PhoneNumber = d.PhoneNumber,
+                                Description = d.Description,
+                                CategoryName = d.Category.CategoryName,
+                                Image = d.Image
+                            }).ToListAsync().ConfigureAwait(false);
+            return doctors;
         }
         catch (Exception ex)
         {
@@ -266,9 +276,9 @@ public class DoctorManagementData : IDoctorManagementData
         {
             var doctors = from c in _appDbContext.Categories
                           where c.Id == CategoryId
-                          join d in _appDbContext.Doctors on c.Id equals  d.CategoryId 
+                          join d in _appDbContext.Doctors on c.Id equals d.CategoryId
                           select new DoctorInfoResponse { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
-            return await doctors.ToListAsync();
+            return await  doctors.ToListAsync().ConfigureAwait(false);
         }
         catch (Exception ex)
         {

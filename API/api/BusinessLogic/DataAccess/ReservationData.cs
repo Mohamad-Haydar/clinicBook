@@ -35,7 +35,7 @@ public class ReservationData : IReservationData
     {
         try
         {
-            await _sql.SaveDataAsync<CreateQueueReservationRequest>("sp_create_queue_reservation", data, _connectionStrings.Value.AppDbConnection);
+            await _sql.SaveDataAsync<CreateQueueReservationRequest>("sp_create_queue_reservation", data, _connectionStrings.Value.AppDbConnection).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -51,7 +51,7 @@ public class ReservationData : IReservationData
             string[] paramsName = ["_id"];
             object[] paramsValue = [id];
 
-            var result = await _sql.LoadDataAsync("f_get_reservation_detail", paramsName, paramsValue, _connectionStrings.Value.AppDbConnection);
+            var result = await _sql.LoadDataAsync("f_get_reservation_detail", paramsName, paramsValue, _connectionStrings.Value.AppDbConnection).ConfigureAwait(false);
 
             return result.First();
         }
@@ -69,7 +69,7 @@ public class ReservationData : IReservationData
             string[] paramsName = ["client_id"];
             object[] paramsValue = [ClientId];
 
-            var result = await _sql.LoadDataAsync("f_get_all_personal_reservations", paramsName, paramsValue, _connectionStrings.Value.AppDbConnection);
+            var result = await _sql.LoadDataAsync("f_get_all_personal_reservations", paramsName, paramsValue, _connectionStrings.Value.AppDbConnection).ConfigureAwait(false);
 
             return result;
         }
@@ -87,7 +87,7 @@ public class ReservationData : IReservationData
             string[] paramsName = ["client_reservation_id"];
             object[] paramsValue = [id];
 
-            var result = await _sql.LoadDataAsync("f_get_concurrent_reservations", paramsName, paramsValue, _connectionStrings.Value.AppDbConnection);
+            var result = await _sql.LoadDataAsync("f_get_concurrent_reservations", paramsName, paramsValue, _connectionStrings.Value.AppDbConnection).ConfigureAwait(false);
 
             return result;
         }
@@ -105,7 +105,7 @@ public class ReservationData : IReservationData
             string[] paramsName = ["client_reservation_id"];
             object[] paramsValue = [id];
 
-            var result = await _sql.LoadDataAsync("f_get_previous_reservations", paramsName, paramsValue, _connectionStrings.Value.AppDbConnection);
+            var result = await _sql.LoadDataAsync("f_get_previous_reservations", paramsName, paramsValue, _connectionStrings.Value.AppDbConnection).ConfigureAwait(false);
 
             return result;
         }
@@ -129,7 +129,7 @@ public class ReservationData : IReservationData
         }
         try
         {
-            await _sql.SaveDataAsync("sp_delete_specific_reservation", new { client_reservation_id = ClientReservationId }, _connectionStrings.Value.AppDbConnection);
+            await _sql.SaveDataAsync("sp_delete_specific_reservation", new { client_reservation_id = ClientReservationId }, _connectionStrings.Value.AppDbConnection).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -142,7 +142,7 @@ public class ReservationData : IReservationData
     {
         try
         {
-            await _sql.SaveDataAsync("sp_update_specific_reservation", model, _connectionStrings.Value.AppDbConnection);
+            await _sql.SaveDataAsync("sp_update_specific_reservation", model, _connectionStrings.Value.AppDbConnection).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -158,7 +158,7 @@ public class ReservationData : IReservationData
             string[] paramsName = ["doctor_availability_id"];
             object[] paramsValue = [DoctorAvailabilityId];
 
-            var result = await _sql.LoadDataAsync("f_get_all_reservation_for_the_day", paramsName, paramsValue, _connectionStrings.Value.AppDbConnection);
+            var result = await _sql.LoadDataAsync("f_get_all_reservation_for_the_day", paramsName, paramsValue, _connectionStrings.Value.AppDbConnection).ConfigureAwait(false);
 
             return result;
         }
@@ -173,13 +173,13 @@ public class ReservationData : IReservationData
     {
         try
         {
-            var ClientReservation = await _appDbContext.ClientReservations.FirstOrDefaultAsync(x => x.Id == ClientReservationId);
+            var ClientReservation = await _appDbContext.ClientReservations.FirstOrDefaultAsync(x => x.Id == ClientReservationId).ConfigureAwait(false);
             if (ClientReservation == null)
             {
                 throw new UserNotFoundException();
             }
             ClientReservation.IsDone = true;
-            await _appDbContext.SaveChangesAsync();
+            await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
         }
         catch (UserNotFoundException)
         {

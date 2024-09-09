@@ -31,7 +31,7 @@ public class DoctorAvailabilityController : Controller
         
         try
         {
-            var result = await _doctorAvailabilityData.GetAvailableDatesAsync(id);
+            var result = await _doctorAvailabilityData.GetAvailableDatesAsync(id).ConfigureAwait(false);
             return Ok(result);
         }
         catch (Exception ex)
@@ -51,7 +51,7 @@ public class DoctorAvailabilityController : Controller
         }
         try
         {
-            await _doctorAvailabilityData.OpenAvailableDateAsync(model);   
+            await _doctorAvailabilityData.OpenAvailableDateAsync(model).ConfigureAwait(false);   
             return Ok(new Response("تم انشاء تاريخ بنجاح"));
         }
         catch (Exception ex)
@@ -71,7 +71,7 @@ public class DoctorAvailabilityController : Controller
         }
         try
         {
-            await _doctorAvailabilityData.UpdateAvailableDateAsync(model);
+            await _doctorAvailabilityData.UpdateAvailableDateAsync(model).ConfigureAwait(false);
             return Ok(new Response ("لقد تم تحديث التاؤيخ بنجاح"));
         }
         catch (Exception ex)
@@ -89,7 +89,7 @@ public class DoctorAvailabilityController : Controller
 
         try
         {
-            await _doctorAvailabilityData.DeleteAvailableDateAsync(id);
+            await _doctorAvailabilityData.DeleteAvailableDateAsync(id).ConfigureAwait(false);
             return Ok(new Response("لقد تم حذف الموعد و اعادة ترتيب الحجوزات بنجاح"));
         }
         catch (Exception ex)
@@ -109,7 +109,7 @@ public class DoctorAvailabilityController : Controller
     {
         try
         {
-            var res = await _doctorAvailabilityData.GetAllDoctorAvailabilitiesAsync(doctorId);
+            var res = await _doctorAvailabilityData.GetAllDoctorAvailabilitiesAsync(doctorId).ConfigureAwait(false);
             return Ok(res);
         }
         catch (Exception ex)
@@ -125,7 +125,7 @@ public class DoctorAvailabilityController : Controller
     {
         try
         {
-            var res = await _doctorAvailabilityData.GetDoctorAvailabilitiesOfDayAsync(date);
+            var res = await _doctorAvailabilityData.GetDoctorAvailabilitiesOfDayAsync(date).ConfigureAwait(false);
             return Ok(res);
         }
         catch (Exception ex)
@@ -145,7 +145,7 @@ public class DoctorAvailabilityController : Controller
         }
         try
         {
-            await _doctorAvailabilityData.OpenRepeatedAvailableDateAsync(model);
+            await _doctorAvailabilityData.OpenRepeatedAvailableDateAsync(model).ConfigureAwait(false);
             return Ok(new Response("تم انشاء تاريخ بنجاح"));
         }
         catch (Exception ex)

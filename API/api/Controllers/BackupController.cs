@@ -36,7 +36,7 @@ namespace api.Controllers
         {
             try
             {
-                await _backupService.CreateRestoreAsync();
+                await _backupService.CreateRestoreAsync().ConfigureAwait(false);
                 return Ok(new Response("لقد تم استعادة المعلومات بنجاح"));
             }
             catch (Exception)

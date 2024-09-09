@@ -26,7 +26,7 @@ public class SecretaryController : Controller
     {
         try
         {
-            var secretarie = await _secretaryData.GetSecretariebyEmailAsync(email);
+            var secretarie = await _secretaryData.GetSecretariebyEmailAsync(email).ConfigureAwait(false);
             return Ok(secretarie);
         }
         catch (Exception ex)
