@@ -3,6 +3,7 @@ using api.Data;
 using api.Exceptions;
 using api.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace api.BusinessLogic.DataAccess
 {
@@ -10,18 +11,27 @@ namespace api.BusinessLogic.DataAccess
     {
         private readonly ILogger<CategoryData> _logger;
         private readonly ApplicationDbContext _appDbContext;
+        private readonly IMemoryCache _cache;
+        private readonly MemoryCacheEntryOptions _cacheOptions;
 
-        public CategoryData(ApplicationDbContext appDbContext)
+        public CategoryData(ApplicationDbContext appDbContext, IMemoryCache cache, MemoryCacheEntryOptions cacheOptions)
         {
             _appDbContext = appDbContext;
+            _cache = cache;
+            _cacheOptions = cacheOptions;
         }
 
         public async Task<IEnumerable<CategoryModel>> GetAllCategoriesAsync()
         {
+            const string cacheKey = "categories";
             try
             {
-                var result = await _appDbContext.Categories.ToListAsync().ConfigureAwait(false);
-                return result;
+                if (!_cache.TryGetValue(cacheKey, out IEnumerable<CategoryModel> categories))
+                {
+                    categories = await _appDbContext.Categories.ToListAsync().ConfigureAwait(false);
+                    _cache.Set(cacheKey, categories, _cacheOptions);
+                }
+                return categories;
             }
             catch (Exception ex)
             {

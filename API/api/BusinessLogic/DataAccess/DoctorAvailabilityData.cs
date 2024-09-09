@@ -8,7 +8,10 @@ using api.Models.Request;
 using api.Models.Responce;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using System.Text;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace api.BusinessLogic.DataAccess;
@@ -21,12 +24,16 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
     private readonly ApplicationDbContext _appDbContext;
     private readonly Dictionary<string, string> Days;
     private readonly ISqlDataAccess _sql;
+    private readonly IMemoryCache _cache;
+    private readonly MemoryCacheEntryOptions _cacheOptions;
 
     public DoctorAvailabilityData(UserManager<UserModel> userManager,
                               ApplicationDbContext appDbContext,
                               ISqlDataAccess sql,
                               IOptions<ConnectionStrings> connectionStrings,
-                              ILogger<DoctorAvailabilityData> logger)
+                              ILogger<DoctorAvailabilityData> logger,
+                              IMemoryCache cache,
+                              MemoryCacheEntryOptions cacheOptions)
     {
         _userManager = userManager;
         _appDbContext = appDbContext;
@@ -43,23 +50,27 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
         _sql = sql;
         _connectionStrings = connectionStrings;
         _logger = logger;
+        _cache = cache;
+        _cacheOptions = cacheOptions;
     }
 
     public async Task<IEnumerable<DoctorAvailabilityResponse>> GetAvailableDatesAsync(string id)
     {
         try
         {
+            
             var doctoravailabilities = await _appDbContext.DoctorAvailabilities
-                                   .Where(x => x.DoctorId == id)
-                                   .Select(x => new DoctorAvailabilityResponse
-                                   {
-                                       id = x.Id,
-                                       day = new DateOnly(x.AvailableDate.Year, x.AvailableDate.Month, x.AvailableDate.Day),
-                                       dayName = x.DayName,
-                                       startHour = x.StartHour,
-                                       endHour = x.EndHour,
-                                       maxClient = x.MaxClient
-                                   }).OrderBy(x => x.day).ToListAsync().ConfigureAwait(false);
+                                .Where(x => x.DoctorId == id)
+                                .Select(x => new DoctorAvailabilityResponse
+                                {
+                                    id = x.Id,
+                                    day = new DateOnly(x.AvailableDate.Year, x.AvailableDate.Month, x.AvailableDate.Day),
+                                    dayName = x.DayName,
+                                    startHour = x.StartHour,
+                                    endHour = x.EndHour,
+                                    maxClient = x.MaxClient
+                                }).OrderBy(x => x.day).ToListAsync().ConfigureAwait(false);
+            
             return doctoravailabilities;
         }
         catch (Exception ex)
@@ -204,15 +215,16 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
         }
     }
 
-    public async Task<IEnumerable<DoctorAvailabilityModel>> GetDoctorAvailabilitiesOfDayAsync(DateOnly date){
+    public async Task<IEnumerable<DoctorAvailabilityModel>> GetDoctorAvailabilitiesOfDayAsync(DateOnly date)
+    {
         try
         {
-             if(date == DateOnly.MinValue)
+            if(date == DateOnly.MinValue)
             {
                 var res = await _appDbContext.DoctorAvailabilities.Where(x => x.AvailableDate == DateOnly.FromDateTime(DateTime.Now)).ToListAsync().ConfigureAwait(false);
                 return res;
             }else{
-               var res = await _appDbContext.DoctorAvailabilities.Where(x => x.AvailableDate == date).ToListAsync().ConfigureAwait(false);
+                var res = await _appDbContext.DoctorAvailabilities.Where(x => x.AvailableDate == date).ToListAsync().ConfigureAwait(false);
                 return res;
             }
         }

@@ -10,9 +10,11 @@ using api.Models.Responce;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using System.Numerics;
 using static System.Net.Mime.MediaTypeNames;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace api.BusinessLogic.DataAccess;
 
@@ -24,8 +26,10 @@ public class DoctorManagementData : IDoctorManagementData
     private readonly ApplicationDbContext _appDbContext;
     private readonly UserManager<UserModel> _userManager;
     private readonly IdentityAppDbContext _identityContext;
+    private readonly IMemoryCache _cache;
+    private readonly MemoryCacheEntryOptions _cacheOptions;
 
-    public DoctorManagementData(IOptions<ConnectionStrings> connectionStrings, ISqlDataAccess sql, ApplicationDbContext appDbContext, UserManager<UserModel> userManager, IdentityAppDbContext identityContext, ILogger<DoctorManagementData> logger)
+    public DoctorManagementData(IOptions<ConnectionStrings> connectionStrings, ISqlDataAccess sql, ApplicationDbContext appDbContext, UserManager<UserModel> userManager, IdentityAppDbContext identityContext, ILogger<DoctorManagementData> logger, IMemoryCache cache, MemoryCacheEntryOptions cacheOptions)
     {
         _connectionStrings = connectionStrings;
         _sql = sql;
@@ -33,6 +37,8 @@ public class DoctorManagementData : IDoctorManagementData
         _userManager = userManager;
         _identityContext = identityContext;
         _logger = logger;
+        _cache = cache;
+        _cacheOptions = cacheOptions;
     }
 
 
@@ -58,7 +64,6 @@ public class DoctorManagementData : IDoctorManagementData
                 {
                     await AddDoctorServiceAsync(doctorService).ConfigureAwait(false);
                 }
-
             }
             catch (Exception ex)
             {
@@ -179,15 +184,16 @@ public class DoctorManagementData : IDoctorManagementData
     {
         try
         {
-            IQueryable<DoctorInfoResponse> doctor = from d in _appDbContext.Doctors
-                                                    where d.Email == email
-                                                    join c in _appDbContext.Categories on d.CategoryId equals c.Id
-                                                    select new DoctorInfoResponse { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
-            if (!doctor.Any())
+            var doctor = await (from d in _appDbContext.Doctors
+                    where d.Email == email
+                    join c in _appDbContext.Categories on d.CategoryId equals c.Id
+                    select new DoctorInfoResponse { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image }).FirstOrDefaultAsync().ConfigureAwait(false);
+            if (doctor == null)
             {
                 throw new UserNotFoundException();
             }
-            return await doctor.FirstAsync().ConfigureAwait(false);
+
+            return doctor;
         }
         catch (UserNotFoundException)
         {
@@ -204,34 +210,35 @@ public class DoctorManagementData : IDoctorManagementData
     {
         try
         {
-            var doctor = from d in _appDbContext.Doctors
-                         where d.Id == id
-                         join c in _appDbContext.Categories on d.CategoryId equals c.Id
-                         join ds in _appDbContext.DoctorServices on d.Id equals ds.DoctorId into servicesGroup
-                         select new DoctorInfoResponse 
-                         { 
-                            Id = d.Id, 
-                            FirstName = d.FirstName, 
-                            LastName = d.LastName, 
-                            Email = d.Email, 
-                            PhoneNumber = d.PhoneNumber, 
-                            Description = d.Description, 
-                            CategoryName = c.CategoryName, 
-                            Image = d.Image,
-                            Services = servicesGroup.Select(s => new DoctorServiceModel
+            var doctor = await( from d in _appDbContext.Doctors
+                            where d.Id == id
+                            join c in _appDbContext.Categories on d.CategoryId equals c.Id
+                            join ds in _appDbContext.DoctorServices on d.Id equals ds.DoctorId into servicesGroup
+                            select new DoctorInfoResponse
                             {
-                                Id = s.Id,
-                                ServiceName = s.ServiceName,
-                                Duration = s.Duration,
-                                DoctorId = s.DoctorId,
-                                ServiceId = s.ServiceId
-                            }).ToList()
-                        };
-            if (!doctor.Any())
+                                Id = d.Id,
+                                FirstName = d.FirstName,
+                                LastName = d.LastName,
+                                Email = d.Email,
+                                PhoneNumber = d.PhoneNumber,
+                                Description = d.Description,
+                                CategoryName = c.CategoryName,
+                                Image = d.Image,
+                                Services = servicesGroup.Select(s => new DoctorServiceModel
+                                {
+                                    Id = s.Id,
+                                    ServiceName = s.ServiceName,
+                                    Duration = s.Duration,
+                                    DoctorId = s.DoctorId,
+                                    ServiceId = s.ServiceId
+                                }).ToList()
+                            }).FirstOrDefaultAsync().ConfigureAwait(false);
+            if (doctor == null)
             {
                 throw new UserNotFoundException("هذا الطبيب غير موجود!");
             }
-            return await doctor.FirstAsync().ConfigureAwait(false);
+            
+            return doctor;
         }
         catch (UserNotFoundException)
         {
@@ -246,9 +253,12 @@ public class DoctorManagementData : IDoctorManagementData
 
     public async Task<IEnumerable<DoctorInfoResponse>> GetAllDoctorsAsync()
     {
+        string cacheKey = "doctors";
         try
         {
-            var doctors = await _appDbContext.Doctors.AsNoTracking()
+            if (!_cache.TryGetValue(cacheKey, out IEnumerable<DoctorInfoResponse>? doctors))
+            {
+                doctors = await _appDbContext.Doctors.AsNoTracking()
                             .Include(d => d.Category)
                             .Select(d => new DoctorInfoResponse
                             {
@@ -261,6 +271,8 @@ public class DoctorManagementData : IDoctorManagementData
                                 CategoryName = d.Category.CategoryName,
                                 Image = d.Image
                             }).ToListAsync().ConfigureAwait(false);
+                _cache.Set(cacheKey, doctors, _cacheOptions);
+            }
             return doctors;
         }
         catch (Exception ex)
@@ -272,13 +284,18 @@ public class DoctorManagementData : IDoctorManagementData
 
     public async Task<IEnumerable<DoctorInfoResponse>> GetDoctorsByCategoryAsync(int CategoryId)
     {
+        string cacheKey = "doctors_category_"+ CategoryId;
         try
         {
-            var doctors = from c in _appDbContext.Categories
-                          where c.Id == CategoryId
-                          join d in _appDbContext.Doctors on c.Id equals d.CategoryId
-                          select new DoctorInfoResponse { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image };
-            return await  doctors.ToListAsync().ConfigureAwait(false);
+            if (!_cache.TryGetValue(cacheKey, out IEnumerable<DoctorInfoResponse>? doctors))
+            {
+                doctors = await (from c in _appDbContext.Categories
+                              where c.Id == CategoryId
+                              join d in _appDbContext.Doctors on c.Id equals d.CategoryId
+                              select new DoctorInfoResponse { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image }).ToListAsync().ConfigureAwait(false);
+                _cache.Set(cacheKey, doctors, _cacheOptions);
+            }
+            return doctors;
         }
         catch (Exception ex)
         {

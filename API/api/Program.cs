@@ -15,6 +15,7 @@ using api.Middlewares;
 using Serilog;
 //using Microsoft.AspNetCore.Hosting;
 using Serilog.Events;
+using Microsoft.Extensions.Caching.Memory;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -96,6 +97,11 @@ builder.Services.AddScoped<IServiceData, ServiceData>();
 
 builder.Services.AddHostedService<DailyWorker>();
 
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton(new MemoryCacheEntryOptions
+{
+    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+});
 
 builder.Services.AddSwaggerGen(c =>
 {
