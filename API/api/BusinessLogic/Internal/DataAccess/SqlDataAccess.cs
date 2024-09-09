@@ -10,6 +10,13 @@ namespace api.Internal.DataAccess;
 
 public class SqlDataAccess :ISqlDataAccess,  IDisposable
 {
+    private readonly ILogger<AuthenticationData> _logger;
+
+    public SqlDataAccess(ILogger<AuthenticationData> logger)
+    {
+        _logger = logger;
+    }
+
     public async Task<List<Dictionary<string, object>>> LoadDataAsync(string functionName, string[] paramNames, object[] paramValues, string connectionString)
     {
         try
@@ -52,12 +59,14 @@ public class SqlDataAccess :ISqlDataAccess,  IDisposable
             {
                 throw new BusinessException(ex.InnerException.Message[8..]);
             }
+            _logger.LogError(ex.Message);
             throw new BusinessException();
         }
 
-        catch (Exception )
+        catch (Exception ex)
         {
-          throw new BusinessException();
+            _logger.LogError(ex.Message);
+            throw new BusinessException();
         }
     }
 
@@ -76,6 +85,7 @@ public class SqlDataAccess :ISqlDataAccess,  IDisposable
             {
                 throw new BusinessException(ex.Message[8..]);
             }
+            _logger.LogError(ex.Message);
             //throw new Exception(ex.Message[37..]);
             throw new BusinessException();
         }
