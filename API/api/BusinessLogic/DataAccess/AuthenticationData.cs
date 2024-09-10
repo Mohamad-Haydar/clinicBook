@@ -59,7 +59,7 @@ public class AuthenticationData : IAuthenticationData
                     PhoneNumber = model.PhoneNumber,
                 };
 
-                var accessToken = await _tokenService.GenerateAccessTokenAsync(model.Email);
+                var accessToken = await _tokenService.GenerateAccessTokenAsync(model.Email).ConfigureAwait(false);
                 var refreshToken = _tokenService.GenerateRefreshToken();
                 user.RefreshToken = refreshToken;
                 user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
@@ -77,8 +77,8 @@ public class AuthenticationData : IAuthenticationData
                     UserName = model.FirstName + " " + model.LastName,
                     Email = model.Email,
                     PhoneNumber = model.PhoneNumber,
-                    AccessToken = await _tokenService.GenerateAccessTokenAsync(model.Email).ConfigureAwait(false),
-                    RefreshToken = _tokenService.GenerateRefreshToken(),
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken,
                     Roles = [Roles.Client.ToString()]
                 };
             }
