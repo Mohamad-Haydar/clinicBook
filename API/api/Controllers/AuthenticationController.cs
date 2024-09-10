@@ -15,6 +15,8 @@ using System.Text.Json;
 using Serilog;
 using System.Text;
 using System.Security.Cryptography;
+using Web_API.Service;
+using System;
 
 namespace api.Controllers;
 
@@ -23,11 +25,15 @@ public class AuthenticationController : Controller
 {
     private readonly IAuthenticationData _authenticationData;
     private readonly UserManager<UserModel> _userManager;
+    private readonly IEmailService _emailService;
+    private readonly IConfiguration _configuration;
 
-    public AuthenticationController(IAuthenticationData authenticationData, UserManager<UserModel> userManager)
+    public AuthenticationController(IAuthenticationData authenticationData, UserManager<UserModel> userManager, IEmailService emailService, IConfiguration configuration)
     {
         _authenticationData = authenticationData;
         _userManager = userManager;
+        _emailService = emailService;
+        _configuration = configuration;
     }
 
     [Route("GenerateClients")]
@@ -343,4 +349,55 @@ public class AuthenticationController : Controller
         //}
     }
 
+    [Route("ForgotPassword")]
+    [HttpPost]
+    public async Task<IActionResult> ForgotPassword([Required] string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            return BadRequest(new BadRequestResponse("ال email غير موجود."));
+        }
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        if (!string.IsNullOrEmpty(token))
+        {
+            await SendForgotPasswordEmail(user, token);
+        }
+        return Ok(new Response("الان يمكنك انشاء رقم سري جديد."));
+    }
+
+    [HttpPost]
+    [Route("ResetPassword")]
+    public async Task<IActionResult> ResetPassword(string uid, string token, string newPassword)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new { status = "error", message = "Fill all the needed inputs" });
+        }
+
+        var user = await _userManager.FindByIdAsync(uid);
+        var resetPasswordResult = await _userManager.ResetPasswordAsync(user, token, newPassword);
+
+        return Ok();
+    }
+
+
+    private async Task SendForgotPasswordEmail(UserModel user, string token)
+    {
+        string appDomain = _configuration.GetSection("Application:AppDomain").Value;
+        string confirmationLink = _configuration.GetSection("Application:ForgotPassword").Value;
+
+        UserEmailOptions options = new UserEmailOptions
+        {
+            ToEmails = new List<string>() { user.Email },
+            PlaceHolders = new List<KeyValuePair<string, string>>()
+                {
+                    new KeyValuePair<string, string>("{{UserName}}", user.UserName),
+                    new KeyValuePair<string, string>("{{Link}}",
+                        string.Format(appDomain + confirmationLink, user.Id, token))
+                }
+        };
+
+        await _emailService.SendEmailForForgotPassword(options);
+    }
 }

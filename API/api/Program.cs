@@ -16,6 +16,7 @@ using Serilog;
 //using Microsoft.AspNetCore.Hosting;
 using Serilog.Events;
 using Microsoft.Extensions.Caching.Memory;
+using Web_API.Service;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,7 +38,9 @@ builder.Services.AddDbContext<IdentityAppDbContext>(options =>
 builder.Services.AddIdentity<UserModel, IdentityRole>(options => {
     options.SignIn.RequireConfirmedAccount = true;
     options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+/ ابتثجحخدذرزسشصضطظعغفقكلمنهويىأ";
-}).AddEntityFrameworkStores<IdentityAppDbContext>();
+})
+    .AddDefaultTokenProviders()
+    .AddEntityFrameworkStores<IdentityAppDbContext>();
 
 builder.Services.Configure<IdentityOptions>(options =>
     {
@@ -83,7 +86,6 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("ConnectionStrings"));
 builder.Services.AddScoped<ISqlDataAccess, SqlDataAccess>();
 builder.Services.AddScoped<SecretaryData>();
 builder.Services.AddScoped<ITokenData, TokenData>();
@@ -94,6 +96,11 @@ builder.Services.AddScoped<IAuthenticationData, AuthenticationData>();
 builder.Services.AddScoped<ICategoryData, CategoryData>();
 builder.Services.AddScoped<IBackupService, BackupService>();
 builder.Services.AddScoped<IServiceData, ServiceData>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("ConnectionStrings"));
+builder.Services.Configure<SMTPConfigModel>(builder.Configuration.GetSection("SMTPConfig"));
+
 
 builder.Services.AddHostedService<DailyWorker>();
 
