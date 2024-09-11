@@ -13,5 +13,6 @@ namespace api.BusinessLogic.DataAccess.IDataAccess
         Task LogoutAsync(string refreshToken, string accessToken);
         Task ResetPasswordAsync(string uid, string token, string newPassword);
         Task ForgotPasswordAsync(string email);
+        Task<AuthenticationResponse> UpdateUserAsync(UpdateUserRequest model);
     }
 }

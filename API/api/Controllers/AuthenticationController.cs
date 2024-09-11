@@ -158,6 +158,61 @@ public class AuthenticationController : Controller
 
     }
 
+    [Route("UpdateUserInfo")]
+    [HttpPost]
+    public async Task<IActionResult> UpdateUserInfo([FromBody] UpdateUserRequest model)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+            return BadRequest(new BadRequestResponse());
+        }
+        try
+        {
+            var result = await _authenticationData.UpdateUserAsync(model).ConfigureAwait(false);
+            var userDataJson = JsonSerializer.Serialize(new CookieUserModel
+            {
+                id = result.Id,
+                userName = result.UserName,
+                email = result.Email,
+                phoneNumber = result.PhoneNumber,
+                roles = result.Roles,
+            });
+
+            Response.Cookies.Append("userData", userDataJson, new CookieOptions
+            {
+                HttpOnly = false,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddYears(1)
+            });
+            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddYears(1)
+            });
+
+            Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddYears(1)
+            });
+
+
+            return Ok(new Response("لقد تم تحديث معلوماتك بنجاح"));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new Response(ex.Message));
+        }
+
+    }
+
+
     [Route("RegisterSecretary")]
     [HttpPost]
     [AuthorizeRoles(Roles.Admin, Roles.Secretary)]

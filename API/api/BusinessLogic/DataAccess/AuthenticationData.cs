@@ -102,6 +102,61 @@ public class AuthenticationData : IAuthenticationData
         }
     }
 
+    public async Task<AuthenticationResponse> UpdateUserAsync(UpdateUserRequest model)
+    {
+        var user = await _userManager.FindByEmailAsync(model.Email).ConfigureAwait(false) ?? throw new UserNotFoundException();
+        var userRoles = await _userManager.GetRolesAsync(user);
+        var client = await _appContext.Clients.FindAsync(user.Id) ?? throw new UserNotFoundException();
+
+        using (var identityTransaction = await _identityContext.Database.BeginTransactionAsync().ConfigureAwait(false))
+        using (var appTransaction = await _appContext.Database.BeginTransactionAsync().ConfigureAwait(false))
+        {
+            try
+            {
+                user.UserName = model.UserName;
+                user.PhoneNumber = model.PhoneNumber;
+                user.Email = model.Email;
+                await _userManager.UpdateAsync(user).ConfigureAwait(false);
+
+                client.FirstName = model.UserName.Split(" ")[0];
+                client.LastName = model.UserName.Split(" ")[1];
+                client.Email = model.Email;
+                client.PhoneNumber = model.PhoneNumber;
+
+                var accessToken = await _tokenService.GenerateAccessTokenAsync(model.Email).ConfigureAwait(false);
+                var refreshToken = _tokenService.GenerateRefreshToken();
+                user.RefreshToken = refreshToken;
+                user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+                user.OldRefreshToken = refreshToken;
+                user.OldRefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+
+                _appContext.Clients.Update(client);
+                await _appContext.SaveChangesAsync().ConfigureAwait(false);
+                await _identityContext.SaveChangesAsync().ConfigureAwait(false);
+                await identityTransaction.CommitAsync().ConfigureAwait(false);
+                await appTransaction.CommitAsync().ConfigureAwait(false);
+                return new AuthenticationResponse()
+                {
+                    Id = user.Id,
+                    UserName = model.UserName,
+                    Email = model.Email,
+                    PhoneNumber = model.PhoneNumber,
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken,
+                    Roles = [..userRoles]
+                };
+            }
+            catch (Exception ex)
+            {
+                identityTransaction.Rollback();
+                appTransaction.Rollback();
+                _logger.LogError(ex.Message);
+                throw new BusinessException();
+            }
+        }
+    }
+
+
     public async Task RegisterSecretaryAsync(CreateSecretaryRequest model)
     {
         var userExists = await _userManager.FindByEmailAsync(model.Email).ConfigureAwait(false);
