@@ -39,5 +39,44 @@ namespace api.BusinessLogic.DataAccess
                 throw new BusinessException();
             }
         }
+
+        public async Task UpdateCategoryAsync(CategoryModel model)
+        {
+            const string cacheKey = "categories";
+            try
+            {
+                _cache.Remove(cacheKey);
+                var category = await _appDbContext.Categories.FirstOrDefaultAsync(x => x.Id == model.Id).ConfigureAwait(false) ?? throw new BusinessException();
+                category.CategoryName = model.CategoryName;
+                await _appDbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw new BusinessException();
+            }
+        }
+
+        public async Task DeleteCategoryAsync(CategoryModel model)
+        {
+            const string cacheKey = "categories";
+            try
+            {
+                _cache.Remove(cacheKey);
+                var category = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.CategoryId == model.Id).ConfigureAwait(false);
+                if(category != null)
+                {
+                    throw new BusinessException("هناك اطباء مسجلين في هذا الختصاص, لا يجب ازالتهم جميعا.");
+                }
+                
+                _appDbContext.Remove(category);
+                await _appDbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw new BusinessException();
+            }
+        }
     }
 }
