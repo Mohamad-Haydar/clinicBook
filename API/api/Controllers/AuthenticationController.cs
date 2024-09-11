@@ -17,6 +17,7 @@ using System.Text;
 using System.Security.Cryptography;
 using Web_API.Service;
 using System;
+using System.Web;
 
 namespace api.Controllers;
 
@@ -353,17 +354,15 @@ public class AuthenticationController : Controller
     [HttpPost]
     public async Task<IActionResult> ForgotPassword([Required] string email)
     {
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user == null)
+        try
         {
-            return BadRequest(new BadRequestResponse("ال email غير موجود."));
+            await _authenticationData.ForgotPasswordAsync(email);
+            return Ok(new Response("لقد ارسلنا لك email ليمكنك من انشاء رقم سري جديد."));
         }
-        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-        if (!string.IsNullOrEmpty(token))
+        catch (Exception)
         {
-            await SendForgotPasswordEmail(user, token);
+            throw;
         }
-        return Ok(new Response("الان يمكنك انشاء رقم سري جديد."));
     }
 
     [HttpPost]
@@ -374,30 +373,14 @@ public class AuthenticationController : Controller
         {
             return BadRequest(new { status = "error", message = "Fill all the needed inputs" });
         }
-
-        var user = await _userManager.FindByIdAsync(uid);
-        var resetPasswordResult = await _userManager.ResetPasswordAsync(user, token, newPassword);
-
-        return Ok();
-    }
-
-
-    private async Task SendForgotPasswordEmail(UserModel user, string token)
-    {
-        string appDomain = _configuration.GetSection("Application:AppDomain").Value;
-        string confirmationLink = _configuration.GetSection("Application:ForgotPassword").Value;
-
-        UserEmailOptions options = new UserEmailOptions
+        try
         {
-            ToEmails = new List<string>() { user.Email },
-            PlaceHolders = new List<KeyValuePair<string, string>>()
-                {
-                    new KeyValuePair<string, string>("{{UserName}}", user.UserName),
-                    new KeyValuePair<string, string>("{{Link}}",
-                        string.Format(appDomain + confirmationLink, user.Id, token))
-                }
-        };
-
-        await _emailService.SendEmailForForgotPassword(options);
+            await _authenticationData.ResetPasswordAsync(uid, token, newPassword);
+            return Ok(new Response("لقد تم تحديث الرقم السري بنجاح."));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new BusinessException(ex.Message));
+        }
     }
 }

@@ -8,6 +8,10 @@ using api.BusinessLogic.DataAccess.IDataAccess;
 using System.Security.Claims;
 using System.Transactions;
 using api.Controllers;
+using System.Web;
+using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
+using Web_API.Service;
 
 namespace api.BusinessLogic.DataAccess;
 
@@ -18,14 +22,18 @@ public class AuthenticationData : IAuthenticationData
     private readonly UserManager<UserModel> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly ApplicationDbContext _appContext;
+    private readonly IConfiguration _configuration;
     private readonly ITokenService _tokenService;
+    private readonly IEmailService _emailService;
 
     public AuthenticationData(IdentityAppDbContext identityContext,
                               UserManager<UserModel> userManager,
                               RoleManager<IdentityRole> roleManager,
                               ApplicationDbContext appContext,
                               ITokenService tokenService,
-                              ILogger<AuthenticationData> logger)
+                              ILogger<AuthenticationData> logger,
+                              IConfiguration configuration,
+                              IEmailService emailService)
     {
         _identityContext = identityContext;
         _userManager = userManager;
@@ -33,6 +41,8 @@ public class AuthenticationData : IAuthenticationData
         _appContext = appContext;
         _tokenService = tokenService;
         _logger = logger;
+        _configuration = configuration;
+        _emailService = emailService;
     }
     public async Task<AuthenticationResponse> RegisterClientAsync(CreateUserRequest model)
     {
@@ -279,6 +289,65 @@ public class AuthenticationData : IAuthenticationData
             throw;
         }
 
+    }
+
+    public async Task ForgotPasswordAsync(string email)
+    {
+        try
+        {
+            var user = await _userManager.FindByEmailAsync(email) ?? throw new UserNotFoundException("ال email غير موجود.");
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            if (!string.IsNullOrEmpty(token))
+            {
+                await SendForgotPasswordEmail(user, token);
+            }
+        }
+        catch (UserNotFoundException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            throw new BusinessException();
+        }
+        
+    }
+
+    public async Task ResetPasswordAsync(string uid, string token, string newPassword)
+    {
+        try
+        {
+            var user = await _userManager.FindByIdAsync(uid);
+            var resetPasswordResult = await _userManager.ResetPasswordAsync(user, HttpUtility.UrlDecode(token), newPassword);
+            if (!resetPasswordResult.Succeeded)
+            {
+                throw new Exception("لقد حدث خطا اثناء تجديد الرقم السري, الرجاء المحاولة مرة اخرى.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            throw new BusinessException();
+        }
+    }
+
+    private async Task SendForgotPasswordEmail(UserModel user, string token)
+    {
+        string appDomain = _configuration.GetSection("Application:AppDomain").Value!;
+        string confirmationLink = _configuration.GetSection("Application:ForgotPassword").Value!;
+
+        UserEmailOptions options = new()
+        {
+            ToEmails = [user.Email!],
+            PlaceHolders =
+                [
+                    new KeyValuePair<string, string>("{{UserName}}", user.UserName!),
+                    new KeyValuePair<string, string>("{{Link}}",
+                        string.Format(appDomain + confirmationLink, HttpUtility.UrlEncode(user.Id), HttpUtility.UrlEncode(token)))
+                ]
+        };
+        await _emailService.SendEmailForForgotPassword(options);
     }
 
 }

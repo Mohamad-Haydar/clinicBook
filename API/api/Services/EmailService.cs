@@ -59,9 +59,9 @@ namespace Web_API.Service
                 mail.To.Add(toEmail);
             }
 
-            NetworkCredential networkCredential = new NetworkCredential(_smtpConfig.UserName, _smtpConfig.Password);
+            NetworkCredential networkCredential = new(_smtpConfig.UserName, _smtpConfig.Password);
 
-            SmtpClient smtpClient = new SmtpClient
+            SmtpClient smtpClient = new()
             {
                 Host = _smtpConfig.Host,
                 Port = _smtpConfig.Port,
