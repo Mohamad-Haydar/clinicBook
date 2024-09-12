@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using System.Numerics;
+using System.Runtime.ConstrainedExecution;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -210,29 +211,29 @@ public class DoctorManagementData : IDoctorManagementData
     {
         try
         {
-            var doctor = await( from d in _appDbContext.Doctors
-                            where d.Id == id
-                            join c in _appDbContext.Categories on d.CategoryId equals c.Id
-                            join ds in _appDbContext.DoctorServices on d.Id equals ds.DoctorId into servicesGroup
-                            select new DoctorInfoResponse
-                            {
-                                Id = d.Id,
-                                FirstName = d.FirstName,
-                                LastName = d.LastName,
-                                Email = d.Email,
-                                PhoneNumber = d.PhoneNumber,
-                                Description = d.Description,
-                                CategoryName = c.CategoryName,
-                                Image = d.Image,
-                                Services = servicesGroup.Select(s => new DoctorServiceModel
+            var doctor = await (from d in _appDbContext.Doctors where d.Id == id
+                                join c in _appDbContext.Categories on d.CategoryId equals c.Id
+                                select new DoctorInfoResponse
                                 {
-                                    Id = s.Id,
-                                    ServiceName = s.ServiceName,
-                                    Duration = s.Duration,
-                                    DoctorId = s.DoctorId,
-                                    ServiceId = s.ServiceId
-                                }).ToList()
-                            }).FirstOrDefaultAsync().ConfigureAwait(false);
+                                    Id = d.Id,
+                                    FirstName = d.FirstName,
+                                    LastName = d.LastName,
+                                    Email = d.Email,
+                                    PhoneNumber = d.PhoneNumber,
+                                    Description = d.Description,
+                                    CategoryName = c.CategoryName,
+                                    Image = d.Image,
+                                    Services = (from ds in _appDbContext.DoctorServices where ds.DoctorId == d.Id
+                                                join ser in _appDbContext.Services on ds.ServiceId equals ser.Id
+                                                select new DoctorServiceResponse
+                                                {
+                                                    Id = ds.Id,
+                                                    ServiceName = ser.ServiceName,
+                                                    Duration = ds.Duration,
+                                                    DoctorId = ds.DoctorId,
+                                                    ServiceId = ds.ServiceId
+                                                }).ToList()
+                                }).FirstOrDefaultAsync().ConfigureAwait(false);
             if (doctor == null)
             {
                 throw new UserNotFoundException("هذا الطبيب غير موجود!");
