@@ -2,6 +2,9 @@
 using api.Data;
 using api.Exceptions;
 using api.Models;
+using api.Models.Responce;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.BusinessLogic.DataAccess
@@ -23,6 +26,22 @@ namespace api.BusinessLogic.DataAccess
             {
                 var result = await _appDbContext.Services.ToListAsync().ConfigureAwait(false);
                 return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw new BusinessException();
+            }
+        }
+
+
+        public async Task CreateServiceAsync(string serviceName)
+        {
+            const string cacheKey = "services";
+            try
+            {
+                var res = await _appDbContext.Services.AddAsync(new ServiceModel() { ServiceName = serviceName }) ?? throw new BusinessException();
+                await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -60,6 +79,7 @@ namespace api.BusinessLogic.DataAccess
                 }
                 var service = await _appDbContext.Services.FindAsync(id);
                 _appDbContext.Services.Remove(service);
+                await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (BusinessException)
             {

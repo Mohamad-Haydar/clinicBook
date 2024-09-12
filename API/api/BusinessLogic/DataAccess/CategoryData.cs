@@ -40,6 +40,23 @@ namespace api.BusinessLogic.DataAccess
             }
         }
 
+        public async Task CreateCategoryAsync(string categoryName)
+        {
+            const string cacheKey = "categories";
+            try
+            {
+               var res = await _appDbContext.Categories.AddAsync(new CategoryModel() { CategoryName = categoryName}) ?? throw new BusinessException();
+               await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
+                await _appDbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw new BusinessException();
+            }
+        }
+
+
         public async Task UpdateCategoryAsync(CategoryModel model)
         {
             const string cacheKey = "categories";

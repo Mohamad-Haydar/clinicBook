@@ -7,5 +7,6 @@ namespace api.BusinessLogic.DataAccess.IDataAccess
         Task<IEnumerable<ServiceModel>> GetAllServicesAsync();
         Task UpdateServiceAsync(ServiceModel model);
         Task DeleteServiceAsync(int id);
+        Task CreateServiceAsync(string serviceName);
     }
 }

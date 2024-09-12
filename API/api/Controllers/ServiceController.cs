@@ -1,4 +1,4 @@
-using api.Attributes;
+﻿using api.Attributes;
 using api.BusinessLogic.DataAccess.IDataAccess;
 using api.Models;
 using api.Models.Responce;
@@ -27,6 +27,22 @@ namespace api.Controllers
             {
                 var services = await _serviceData.GetAllServicesAsync().ConfigureAwait(false);
                 return Ok(services);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(ex.Message));
+            }
+        }
+
+        [HttpPost]
+        [Route("CreateService")]
+        [AllowAnonymous]
+        public async Task<IActionResult> CreateService(string serviceName)
+        {
+            try
+            {
+                await _serviceData.CreateServiceAsync(serviceName).ConfigureAwait(false);
+                return Ok(new Response("تم انشاء الخدمة بنجاح."));
             }
             catch (Exception ex)
             {

@@ -32,6 +32,22 @@ namespace api.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("CreateCategory")]
+        [AllowAnonymous]
+        public async Task<IActionResult> CreateCategory(string categoryName)
+        {
+            try
+            {
+                await _categoryData.CreateCategoryAsync(categoryName).ConfigureAwait(false);
+                return Ok(new Response("تم انشاء الاختصاص بنجاح."));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(ex.Message));
+            }
+        }
+
         [HttpPatch]
         [Route("UpdateCategory")]
         [AllowAnonymous]
