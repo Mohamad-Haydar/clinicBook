@@ -6,6 +6,6 @@ namespace api.BusinessLogic.DataAccess.IDataAccess
     {
         Task<IEnumerable<CategoryModel>> GetAllCategoriesAsync();
         Task UpdateCategoryAsync(CategoryModel model);
-        Task DeleteCategoryAsync(CategoryModel model);
+        Task DeleteCategoryAsync(int model);
     }
 }

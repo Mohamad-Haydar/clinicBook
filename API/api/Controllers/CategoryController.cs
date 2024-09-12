@@ -51,11 +51,11 @@ namespace api.Controllers
         [HttpDelete]
         [Route("DeleteCategory")]
         [AllowAnonymous]
-        public async Task<IActionResult> DeleteCategory([FromBody] CategoryModel model)
+        public async Task<IActionResult> DeleteCategory(int id)
         {
             try
             {
-                await _categoryData.DeleteCategoryAsync(model).ConfigureAwait(false);
+                await _categoryData.DeleteCategoryAsync(id).ConfigureAwait(false);
                 return Ok(new Response("تم حذف الاختصاص بنجاح."));
             }
             catch (Exception ex)

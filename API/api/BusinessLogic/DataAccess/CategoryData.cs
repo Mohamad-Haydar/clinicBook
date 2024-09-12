@@ -57,20 +57,24 @@ namespace api.BusinessLogic.DataAccess
             }
         }
 
-        public async Task DeleteCategoryAsync(CategoryModel model)
+        public async Task DeleteCategoryAsync(int id)
         {
             const string cacheKey = "categories";
             try
             {
                 _cache.Remove(cacheKey);
-                var category = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.CategoryId == model.Id).ConfigureAwait(false);
-                if(category != null)
+                var categoryReserved = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.CategoryId == id).ConfigureAwait(false);
+                if(categoryReserved != null)
                 {
                     throw new BusinessException("هناك اطباء مسجلين في هذا الختصاص, لا يجب ازالتهم جميعا.");
                 }
-                
+                var category = await _appDbContext.Categories.FirstAsync(x => x.Id == id).ConfigureAwait(false);
                 _appDbContext.Remove(category);
                 await _appDbContext.SaveChangesAsync();
+            }
+            catch (BusinessException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
