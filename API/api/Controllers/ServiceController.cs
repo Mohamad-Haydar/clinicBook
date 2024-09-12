@@ -33,5 +33,37 @@ namespace api.Controllers
                 return BadRequest(new Response(ex.Message));
             }
         }
+
+        [HttpPatch]
+        [Route("UpdateService")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UpdateService([FromBody] ServiceModel model)
+        {
+            try
+            {
+                await _serviceData.UpdateServiceAsync(model).ConfigureAwait(false);
+                return Ok(new Response());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(ex.Message));
+            }
+        }
+
+        [HttpDelete]
+        [Route("DeleteService")]
+        [AllowAnonymous]
+        public async Task<IActionResult> DeleteService(int id)
+        {
+            try
+            {
+                await _serviceData.DeleteServiceAsync(id).ConfigureAwait(false);
+                return Ok(new Response());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(ex.Message));
+            }
+        }
     }
 }

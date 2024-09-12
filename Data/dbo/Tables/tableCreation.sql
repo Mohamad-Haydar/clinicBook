@@ -31,7 +31,6 @@ Create Table Doctor(
 
 Create Table DoctorService(
   Id int primary key GENERATED ALWAYS AS IDENTITY,
-  ServiceName varchar(50) NOT NULL,
   Duration int NOT NULL, -- Duration in minutes and represent the Duration of this service for the specified doctor
   DoctorId varchar(128) NOT NULL,
   ServiceId int NOT NULL,
