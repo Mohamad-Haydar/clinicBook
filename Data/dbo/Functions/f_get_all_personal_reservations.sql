@@ -13,12 +13,13 @@ BEGIN
         cr.endtime, 
         cr.doctoravailabilityid, 
         cr.isdone,
-        array_agg(ds.servicename) AS service_names,
+        array_agg(service.servicename) AS service_names,
         ds.doctorid
     FROM clientreservation AS cr
     JOIN reservationdetail rd ON cr.id = rd.clientreservationid
     JOIN doctorservice AS ds ON ds.id = rd.doctorserviceid
     JOIN doctoravailability AS da ON da.id = cr.doctoravailabilityid
+    JOIN service ON service.id = ds.serviceid
     WHERE cr.id IN (
         SELECT cr.id
         FROM clientreservation AS cr
