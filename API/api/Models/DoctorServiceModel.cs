@@ -13,5 +13,6 @@ public class DoctorServiceModel
     public string DoctorId { get; set; }
     [Column("serviceid")]
     public int ServiceId { get; set; }
+    [ForeignKey("Id")]
     public ServiceModel services { get; set; }
 }

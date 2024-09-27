@@ -26,15 +26,17 @@ public class AuthenticationController : Controller
 {
     private readonly IAuthenticationData _authenticationData;
     private readonly UserManager<UserModel> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IEmailService _emailService;
     private readonly IConfiguration _configuration;
 
-    public AuthenticationController(IAuthenticationData authenticationData, UserManager<UserModel> userManager, IEmailService emailService, IConfiguration configuration)
+    public AuthenticationController(IAuthenticationData authenticationData, UserManager<UserModel> userManager, IEmailService emailService, IConfiguration configuration, RoleManager<IdentityRole> roleManager)
     {
         _authenticationData = authenticationData;
         _userManager = userManager;
         _emailService = emailService;
         _configuration = configuration;
+        _roleManager = roleManager;
     }
 
     [Route("GenerateClients")]
@@ -54,20 +56,20 @@ public class AuthenticationController : Controller
         //     }
         // }
 
-        // string[] emails = ["zeinab@gmail.com", "mohamad@gmail.com"];
-        // foreach (var email in emails)
-        // {
-        //     var userExists = await _userManager.FindByEmailAsync(email);
-        //     if(userExists == null)
-        //     {
-        //         var user = new IdentityUser{UserName=email, Email=email};
-        //         var result = await _userManager.CreateAsync(user, "Pass1234!");
-        //         if(result.Succeeded)
-        //         {
-        //             await _userManager.AddToRoleAsync(user, "Secretary");
-        //         } 
-        //     }
-        // }
+        string[] emails = ["zeinabsalloum@gmail.com", "mohamad@gmail.com"];
+        foreach (var email in emails)
+        {
+            var userExists = await _userManager.FindByEmailAsync(email);
+            if(userExists == null)
+            {
+                var user = new UserModel{UserName=email, Email=email};
+                var result = await _userManager.CreateAsync(user, "Pass1234!");
+                if(result.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(user, "Secretary");
+                } 
+            }
+        }
 
         //StringBuilder name = new();
         //StringBuilder email = new();
@@ -215,7 +217,7 @@ public class AuthenticationController : Controller
 
     [Route("RegisterSecretary")]
     [HttpPost]
-    [AuthorizeRoles(Roles.Admin, Roles.Secretary)]
+    //[AuthorizeRoles(Roles.Admin, Roles.Secretary)]
     public async Task<IActionResult> RegisterSecretary([FromBody] CreateSecretaryRequest model)
     {
         if (!ModelState.IsValid) 
