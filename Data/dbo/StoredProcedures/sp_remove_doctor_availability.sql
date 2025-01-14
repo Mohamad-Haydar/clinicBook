@@ -15,7 +15,7 @@ DECLARE
     reservation_services INT[];
 BEGIN
     -- Start transaction with SERIALIZABLE isolation level
-    SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+    -- SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
     
     -- STEP 2: Get the doctor id and other details
     SELECT *
@@ -30,9 +30,16 @@ BEGIN
     AND doctorid = doctor_availability_row.doctorid 
     ORDER BY availabledate LIMIT 1;
 
-    IF NOT FOUND THEN
+    IF NOT FOUND AND doctor_availability_row.currentreservations > 0 THEN
         RAISE EXCEPTION 'لا يوجد مواعيد متاحة كافية, الرجاء اتاحة موعد جديد لنقل الحجوزات بنجاح' USING ERRCODE = 'M3GA0';
         ROLLBACK;
+        RETURN;
+    END IF;
+
+    -- if their is no reservation in this day, just drop it no need to do any other thing
+    IF doctor_availability_row.currentreservations = 0 THEN
+        DELETE FROM doctoravailability
+        WHERE doctoravailability.id = availability_id;
         RETURN;
     END IF;
 
@@ -94,7 +101,7 @@ BEGIN
             END IF;
 
             -- Assign the reservation to the found slot
-            CALL sp_create_queue_reservation(reservation_row.clientid, future_availability.id, reservation_services, true);
+            CALL sp_create_queue_reservation(reservation_row.clientid, future_availability.id, reservation_services, true, reservation_row.details);
             future_availability.currentreservations := future_availability.currentreservations + 1;
     END LOOP;
 END;

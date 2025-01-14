@@ -17,6 +17,7 @@ using Serilog;
 using Serilog.Events;
 using Microsoft.Extensions.Caching.Memory;
 using Web_API.Service;
+using api.Models.Responce;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -97,6 +98,9 @@ builder.Services.AddScoped<ICategoryData, CategoryData>();
 builder.Services.AddScoped<IBackupService, BackupService>();
 builder.Services.AddScoped<IServiceData, ServiceData>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+builder.Services.AddSingleton<BadRequestResponse,BadRequestResponse>();
+builder.Services.AddSingleton<Response,Response>();
 
 builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("ConnectionStrings"));
 builder.Services.Configure<SMTPConfigModel>(builder.Configuration.GetSection("SMTPConfig"));

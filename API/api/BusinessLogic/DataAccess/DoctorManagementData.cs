@@ -152,6 +152,14 @@ public class DoctorManagementData : IDoctorManagementData
         {
             try
             {
+                if(model.Image != null && doctor.Image != null && doctor.Image != model.Image)
+                {
+                    // remove old image
+                    string imageName = doctor.Image.Split("/").Last();
+                    string _storagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images");
+                    var filePath = Path.Combine(_storagePath, imageName);
+                    File.Delete(filePath);
+                }
                 string userName = model.FirstName ?? doctor.FirstName + model.LastName ?? doctor.LastName;
                 user.UserName = userName;
                 user.PhoneNumber = model.PhoneNumber ?? user.PhoneNumber;
@@ -161,7 +169,7 @@ public class DoctorManagementData : IDoctorManagementData
                 doctor.PhoneNumber = model.PhoneNumber ?? doctor.PhoneNumber;
                 doctor.Description = model.Description ?? doctor.Description;
                 doctor.CategoryId = model.CategoryId > 0 ? model.CategoryId : doctor.CategoryId;
-                doctor.Image = model.Image  ?? doctor.Image;
+                doctor.Image = model.Image ?? doctor.Image;
 
                 await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
                 await _identityContext.SaveChangesAsync().ConfigureAwait(false);

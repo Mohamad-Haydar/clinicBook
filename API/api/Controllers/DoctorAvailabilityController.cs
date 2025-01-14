@@ -7,6 +7,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using api.Attributes;
 using api.Models;
 using Microsoft.AspNetCore.Authorization;
+using api.Exceptions;
 
 namespace api.Controllers;
 
@@ -91,6 +92,10 @@ public class DoctorAvailabilityController : Controller
         {
             await _doctorAvailabilityData.DeleteAvailableDateAsync(id).ConfigureAwait(false);
             return Ok(new Response("لقد تم حذف الموعد و اعادة ترتيب الحجوزات بنجاح"));
+        }
+        catch (BusinessException ex)
+        {
+            return BadRequest(new BadRequestResponse(ex.Message));
         }
         catch (Exception ex)
         {

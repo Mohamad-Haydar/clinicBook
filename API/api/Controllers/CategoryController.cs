@@ -10,10 +10,12 @@ namespace api.Controllers
     public class CategoryController : Controller
     {
         private readonly ICategoryData _categoryData;
+        private readonly Response _response;
 
-        public CategoryController(ICategoryData categoryData)
+        public CategoryController(ICategoryData categoryData, Response response)
         {
             _categoryData = categoryData;
+            _response = response;
         }
 
         [HttpGet]
@@ -28,7 +30,9 @@ namespace api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new Response(ex.Message));
+                // return BadRequest(new Response(ex.Message));
+                _response.Message = ex.Message;
+                return BadRequest(_response);
             }
         }
 

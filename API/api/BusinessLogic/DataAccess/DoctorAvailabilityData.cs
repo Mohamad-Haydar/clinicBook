@@ -88,7 +88,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
             availables.Add(
                 new()
                 {
-                    AvailableDate = model.AvailableDate.AddDays(7*i) ,
+                    AvailableDate = model.AvailableDate.AddDays(7*i*(model.RepetitionDelay)) ,
                     DayName = Days[model.AvailableDate.DayOfWeek.ToString()],
                     StartHour = model.StartHour,
                     EndHour = model.EndHour,

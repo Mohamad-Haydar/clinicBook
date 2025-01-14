@@ -29,14 +29,18 @@ public class AuthenticationController : Controller
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IEmailService _emailService;
     private readonly IConfiguration _configuration;
+    private readonly BadRequestResponse _badrequest;
+    private readonly Response _response;
 
-    public AuthenticationController(IAuthenticationData authenticationData, UserManager<UserModel> userManager, IEmailService emailService, IConfiguration configuration, RoleManager<IdentityRole> roleManager)
+    public AuthenticationController(IAuthenticationData authenticationData, UserManager<UserModel> userManager, IEmailService emailService, IConfiguration configuration, RoleManager<IdentityRole> roleManager, BadRequestResponse badrequest, Response response)
     {
         _authenticationData = authenticationData;
         _userManager = userManager;
         _emailService = emailService;
         _configuration = configuration;
         _roleManager = roleManager;
+        _badrequest = badrequest;
+        _response = response;
     }
 
     [Route("GenerateClients")]
@@ -106,7 +110,7 @@ public class AuthenticationController : Controller
         if (!ModelState.IsValid) 
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new BadRequestResponse());
+            return BadRequest(_badrequest);
         }
         try
         {
@@ -167,7 +171,7 @@ public class AuthenticationController : Controller
         if (!ModelState.IsValid)
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new BadRequestResponse());
+            return BadRequest(_badrequest);
         }
         try
         {
@@ -223,7 +227,7 @@ public class AuthenticationController : Controller
         if (!ModelState.IsValid) 
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new BadRequestResponse());
+            return BadRequest(_badrequest);
         }
         try
         {
@@ -244,7 +248,7 @@ public class AuthenticationController : Controller
         if (!ModelState.IsValid) 
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new BadRequestResponse());
+            return BadRequest(_badrequest);
         }
         try
         {
@@ -295,7 +299,7 @@ public class AuthenticationController : Controller
         if (!ModelState.IsValid)
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new BadRequestResponse());
+            return BadRequest(_badrequest);
         }
         try
         {
@@ -428,7 +432,7 @@ public class AuthenticationController : Controller
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest(new { status = "error", message = "Fill all the needed inputs" });
+            return BadRequest(new BadRequestResponse("Fill all the needed inputs"));
         }
         try
         {
