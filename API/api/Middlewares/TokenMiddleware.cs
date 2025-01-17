@@ -29,16 +29,17 @@ namespace api.Middlewares
         }
 
         public async Task InvokeAsync(HttpContext context)
-        {           
+        {      
             if (!context.Request.Path.Value.EndsWith("logout"))
             {
-                var accessToken = context.Request.Cookies["accessToken"];
-                var refreshToken = context.Request.Cookies["refreshToken"];
-                var userData = context.Request.Cookies["userData"];
-                if (accessToken != null)
+                 using (var scope = _serviceScopeFactory.CreateScope())
                 {
-                    using (var scope = _serviceScopeFactory.CreateScope())
+                    var accessToken = context.Request.Cookies["accessToken"];
+                    var refreshToken = context.Request.Cookies["refreshToken"];
+                    var userData = context.Request.Cookies["userData"];
+                    if (accessToken != null)
                     {
+                    
                         var _tokenData = scope.ServiceProvider.GetRequiredService<ITokenData>();
                         var token = accessToken.ToString().Trim();
 
@@ -57,19 +58,12 @@ namespace api.Middlewares
                                         AccessToken = accessToken,
                                         RefreshToken = refreshToken,
                                     };
-                                    //await _semaphore.WaitAsync();
-                                    //if (_tokenCache.TryGetValue(cacheKey, out AuthenticationResponse cachedToken))
-                                    //{
                                     if (expirationDate > DateTime.UtcNow)
                                     {
-                                        // Use cached token if it exists and is valid
                                         context.Request.Headers.Authorization = $"bearer {result.AccessToken}";
                                     }
-                                    //}
                                     else
                                     { 
-                                        //if (!_tokenCache.TryGetValue(cacheKey, out cachedToken) || cachedToken == null || expirationDate < DateTime.UtcNow)
-                                        //{
                                         result = await _tokenData.RefreshAsync(new RefreshRequest { AccessToken = accessToken, RefreshToken = refreshToken });
                                         context.Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
                                         {
@@ -88,8 +82,7 @@ namespace api.Middlewares
                                         });
                                         context.Request.Headers.Authorization = $"bearer {result.AccessToken}";
                                     }
-                                //_tokenCache.Set(cacheKey, result.RefreshToken, TimeSpan.FromMinutes(30));
-                                //_semaphore.Release();
+                                
                                 }
                             }
                             catch (Exception)
@@ -114,9 +107,10 @@ namespace api.Middlewares
                             }
                         }
                     }
-                }
+                 }
             }
             await _next(context);
         }
+    
     }
 }

@@ -73,8 +73,6 @@ public class AuthenticationData : IAuthenticationData
                 var refreshToken = _tokenService.GenerateRefreshToken();
                 user.RefreshToken = refreshToken;
                 user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-                user.OldRefreshToken = refreshToken;
-                user.OldRefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
 
                 await _appContext.Clients.AddAsync(client).ConfigureAwait(false);
                 await _appContext.SaveChangesAsync().ConfigureAwait(false);
@@ -120,15 +118,13 @@ public class AuthenticationData : IAuthenticationData
 
                 client.FirstName = model.UserName.Split(" ")[0];
                 client.LastName = model.UserName.Split(" ")[1];
-                client.Email = model.Email;
+                // client.Email = model.Email;
                 client.PhoneNumber = model.PhoneNumber;
 
                 var accessToken = await _tokenService.GenerateAccessTokenAsync(model.Email).ConfigureAwait(false);
                 var refreshToken = _tokenService.GenerateRefreshToken();
                 user.RefreshToken = refreshToken;
                 user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-                user.OldRefreshToken = refreshToken;
-                user.OldRefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
 
                 _appContext.Clients.Update(client);
                 await _appContext.SaveChangesAsync().ConfigureAwait(false);
@@ -290,8 +286,6 @@ public class AuthenticationData : IAuthenticationData
                 var refreshToken = _tokenService.GenerateRefreshToken();
                 user.RefreshToken = refreshToken;
                 user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-                user.OldRefreshToken = refreshToken;
-                user.OldRefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
                 _identityContext.SaveChanges();
 
                 return new AuthenticationResponse
@@ -386,6 +380,26 @@ public class AuthenticationData : IAuthenticationData
             throw new BusinessException();
         }
     }
+
+    public async Task ChangePasswordAsync(string userId, string oldPassword, string newPassword)
+    {
+        try
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            // var resetPasswordResult = await _userManager.ResetPasswordAsync(user, HttpUtility.UrlDecode(token), newPassword);
+            var resetPasswordResult = await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
+            if (!resetPasswordResult.Succeeded)
+            {
+                throw new Exception("الرجاء ادخال رقم سري صحيح!!!");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            throw new BusinessException(ex.Message);
+        }
+    }
+
 
     private async Task SendForgotPasswordEmail(UserModel user, string token)
     {

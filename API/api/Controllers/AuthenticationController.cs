@@ -444,4 +444,32 @@ public class AuthenticationController : Controller
             return BadRequest(new BusinessException(ex.Message));
         }
     }
+
+    [HttpPost]
+    [Route("ChangePassword")]
+    public async Task<IActionResult> ChangePassword(string oldPassword, string newPassword)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new BadRequestResponse("الرجاء ملئ جميع المتطلبات"));
+        }
+        try
+        {
+            var userData = HttpContext.Request.Cookies["userData"];
+            var userDataJson = JsonSerializer.Deserialize<CookieUserModel>(userData);
+
+            var userId = userDataJson.id;
+            await _authenticationData.ChangePasswordAsync(userId, oldPassword, newPassword);
+            return Ok(new Response("لقد تم تحديث الرقم السري بنجاح."));
+        }
+        catch (BusinessException ex)
+        {
+            return BadRequest(new BusinessException(ex.Message));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new BusinessException(ex.Message));
+        }
+    }
+
 }
