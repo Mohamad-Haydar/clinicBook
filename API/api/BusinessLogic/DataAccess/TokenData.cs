@@ -43,6 +43,7 @@ public class TokenData : ITokenData
             var userId = principal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier)?.Value;
             var roles = principal.Claims.Where(claim => claim.Type == ClaimTypes.Role).Select(claim => claim.Value);
             var user = await _userManager.FindByIdAsync(userId).ConfigureAwait(false);
+            var userData = await _appContext.Clients.FirstOrDefaultAsync(x => x.Id == userId);
 
             if (user is null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
             {
@@ -54,7 +55,8 @@ public class TokenData : ITokenData
                     return new AuthenticationResponse
                     {
                         Id = user.Id,
-                        UserName = user.UserName,
+                        FirstName = userData.FirstName,
+                        LastName = userData.LastName,
                         Email = email,
                         PhoneNumber = user.PhoneNumber,
                         AccessToken = cachedAccessToken,
@@ -77,7 +79,8 @@ public class TokenData : ITokenData
             return new AuthenticationResponse
             {
                 Id = user.Id,
-                UserName = user.UserName,
+                FirstName = userData.FirstName,
+                LastName = userData.LastName,
                 Email = email,
                 PhoneNumber = user.PhoneNumber,
                 AccessToken = newAccessToken,

@@ -12,6 +12,7 @@ using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Web_API.Service;
+using Microsoft.EntityFrameworkCore;
 
 namespace api.BusinessLogic.DataAccess;
 
@@ -57,7 +58,7 @@ public class AuthenticationData : IAuthenticationData
         {
             try
             {
-                var user = new UserModel { UserName = model.FirstName + " " + model.LastName, Email = model.Email, PhoneNumber = model.PhoneNumber };
+                var user = new UserModel { UserName = model.FirstName + " " + DateTime.Now.Ticks + " " + model.LastName, Email = model.Email, PhoneNumber = model.PhoneNumber };
                 var result = await _userManager.CreateAsync(user, model.Password).ConfigureAwait(false);
                 await _userManager.AddToRoleAsync(user, Roles.Client.ToString()).ConfigureAwait(false);
                 ClientModel client = new()
@@ -82,7 +83,8 @@ public class AuthenticationData : IAuthenticationData
                 return new AuthenticationResponse()
                 {
                     Id = user.Id,
-                    UserName = model.FirstName + " " + model.LastName,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
                     Email = model.Email,
                     PhoneNumber = model.PhoneNumber,
                     AccessToken = accessToken,
@@ -111,13 +113,13 @@ public class AuthenticationData : IAuthenticationData
         {
             try
             {
-                user.UserName = model.UserName;
+                user.UserName = model.FirstName + " " + DateTime.Now.Ticks + " " + model.LastName;
                 user.PhoneNumber = model.PhoneNumber;
                 user.Email = model.Email;
                 await _userManager.UpdateAsync(user).ConfigureAwait(false);
 
-                client.FirstName = model.UserName.Split(" ")[0];
-                client.LastName = model.UserName.Split(" ")[1];
+                client.FirstName = model.FirstName;
+                client.LastName = model.LastName;
                 // client.Email = model.Email;
                 client.PhoneNumber = model.PhoneNumber;
 
@@ -134,7 +136,8 @@ public class AuthenticationData : IAuthenticationData
                 return new AuthenticationResponse()
                 {
                     Id = user.Id,
-                    UserName = model.UserName,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
                     Email = model.Email,
                     PhoneNumber = model.PhoneNumber,
                     AccessToken = accessToken,
@@ -166,7 +169,7 @@ public class AuthenticationData : IAuthenticationData
         {
             try
             {
-                var user = new UserModel { UserName = model.FirstName + " " + model.LastName, Email = model.Email, PhoneNumber = model.PhoneNumber };
+                var user = new UserModel { UserName = model.FirstName + " " + DateTime.UtcNow.Ticks +  " " + model.LastName, Email = model.Email, PhoneNumber = model.PhoneNumber };
                 var result = await _userManager.CreateAsync(user, model.Password).ConfigureAwait(false);
                 await _userManager.AddToRoleAsync(user, Roles.Secretary.ToString()).ConfigureAwait(false);
                 SecretaryModel secretary = new()
@@ -215,7 +218,7 @@ public class AuthenticationData : IAuthenticationData
         {
             try
             {
-                string userName = model.FirstName + " " + model.LastName;
+                string userName = model.FirstName + " " + DateTime.UtcNow.Ticks + " " + model.LastName;
                 var user = new UserModel
                 {
                     UserName = userName,
@@ -277,6 +280,7 @@ public class AuthenticationData : IAuthenticationData
     public async Task<AuthenticationResponse> LoginUserAsync(LoginRequest model)
     {
         var user = await _userManager.FindByEmailAsync(model.Email).ConfigureAwait(false) ?? throw new UserNotFoundException();
+        var userData = await _appContext.Clients.FirstOrDefaultAsync(x => x.Email == model.Email);
         try
         {
             if (await _userManager.CheckPasswordAsync(user, model.Password).ConfigureAwait(false))
@@ -291,7 +295,8 @@ public class AuthenticationData : IAuthenticationData
                 return new AuthenticationResponse
                 {
                     Id = user.Id,
-                    UserName = user.UserName,
+                    FirstName = userData.FirstName,
+                    LastName = userData.LastName,
                     Email = model.Email,
                     PhoneNumber = user.PhoneNumber,
                     AccessToken = accessToken,

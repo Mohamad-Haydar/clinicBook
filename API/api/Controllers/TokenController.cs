@@ -43,7 +43,8 @@ public class TokenController : Controller
             var userDataJson = JsonSerializer.Serialize(new
             {
                 id = result.Id,
-                userName = result.UserName,
+                firstName = result.FirstName,
+                lastName = result.LastName,
                 email = result.Email,
                 phoneNumber = result.PhoneNumber,
                 roles = result.Roles,
@@ -74,7 +75,8 @@ public class TokenController : Controller
             return Ok(new
             {
                 Id = result.Id,
-                UserName = result.UserName,
+                FirstName = result.FirstName,
+                LastName = result.LastName,
                 Email = result.Email,
                 PhoneNumber = result.PhoneNumber,
             });

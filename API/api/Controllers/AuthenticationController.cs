@@ -118,7 +118,8 @@ public class AuthenticationController : Controller
             var userDataJson = JsonSerializer.Serialize(new CookieUserModel
             {
                 id= result.Id,
-                userName= result.UserName,
+                firstName= model.FirstName,
+                lastName= model.LastName,
                 email= result.Email,
                 phoneNumber= result.PhoneNumber,
                 roles = result.Roles,
@@ -151,7 +152,8 @@ public class AuthenticationController : Controller
             return Ok(new
             {
                 Id = result.Id,
-                UserName = result.UserName,
+                FirstName = model.FirstName,
+                LasttName = model.LastName,
                 Email = result.Email,
                 PhoneNumber = result.PhoneNumber,
                 Roles = result.Roles,
@@ -179,7 +181,8 @@ public class AuthenticationController : Controller
             var userDataJson = JsonSerializer.Serialize(new CookieUserModel
             {
                 id = result.Id,
-                userName = result.UserName,
+                firstName = model.FirstName,
+                lastName = model.LastName,
                 email = result.Email,
                 phoneNumber = result.PhoneNumber,
                 roles = result.Roles,
@@ -308,7 +311,8 @@ public class AuthenticationController : Controller
             var userDataJson = JsonSerializer.Serialize(new CookieUserModel
             {
                 id = result.Id,
-                userName = result.UserName,
+                firstName = result.FirstName,
+                lastName = result.LastName,
                 email = result.Email,
                 phoneNumber = result.PhoneNumber,
                 roles = result.Roles,
@@ -340,7 +344,8 @@ public class AuthenticationController : Controller
 
             return Ok(new{
                 Id = result.Id,
-                UserName = result.UserName,
+                FirstName = result.FirstName,
+                LastName = result.LastName,
                 Email = result.Email,
                 PhoneNumber = result.PhoneNumber,
                 Roles = result.Roles,
