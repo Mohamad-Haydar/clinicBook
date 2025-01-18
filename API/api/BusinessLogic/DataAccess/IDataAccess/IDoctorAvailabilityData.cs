@@ -8,9 +8,9 @@ namespace api.BusinessLogic.DataAccess.IDataAccess
     {
         Task DeleteAvailableDateAsync(int id);
         Task<IEnumerable<DoctorAvailabilityResponse>> GetAvailableDatesAsync(string id);
-        Task OpenAvailableDateAsync(OpenAvailableDateRequest model);
-        Task OpenRepeatedAvailableDateAsync(IEnumerable<OpenAvailableDateRequest> model);
-        Task UpdateAvailableDateAsync(UpdateAvailableDateRequest model);
+        Task<Result> OpenAvailableDateAsync(OpenAvailableDateRequest model);
+        Task<Result> OpenRepeatedAvailableDateAsync(IEnumerable<OpenAvailableDateRequest> model);
+        Task<Result> UpdateAvailableDateAsync(UpdateAvailableDateRequest model);
         Task<IEnumerable<DoctorAvailabilityModel>> GetDoctorAvailabilitiesOfDayAsync(DateOnly date);
         Task<IEnumerable<DoctorAvailabilityModel>> GetAllDoctorAvailabilitiesAsync(string doctorId);
     }

@@ -15,22 +15,21 @@ public class SecretaryData
 
     private readonly ApplicationDbContext _appDbContext;
     private readonly ILogger<SecretaryData> _logger;
-    public SecretaryData(ApplicationDbContext applicationDbContext, ILogger<SecretaryData> logger)
+    private readonly IMessageProvider _messageProvider;
+    public SecretaryData(ApplicationDbContext applicationDbContext, ILogger<SecretaryData> logger, IMessageProvider messageProvider)
     {
         _appDbContext = applicationDbContext;
         _logger = logger;
+        _messageProvider = messageProvider;
     }
 
-    public async Task<SecretaryModel> GetSecretariebyEmailAsync(string email)
+    public async Task<Result<SecretaryModel>> GetSecretariebyEmailAsync(string email)
     {
         try
         {
-            var secretarie = await _appDbContext.Secretaries.FirstOrDefaultAsync(x => x.Email == email).ConfigureAwait(false) ?? throw new UserNotFoundException();
-            return secretarie;
-        }
-        catch (UserNotFoundException)
-        {
-            throw;
+            var secretarie = await _appDbContext.Secretaries.FirstOrDefaultAsync(x => x.Email == email).ConfigureAwait(false);
+            if(secretarie == null) return Result<SecretaryModel>.Failure(_messageProvider.GetMessage("userNotFound"));
+            return Result<SecretaryModel>.Success(secretarie);
         }
         catch (Exception ex)
         {

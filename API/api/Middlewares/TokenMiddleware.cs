@@ -64,8 +64,8 @@ namespace api.Middlewares
                                     }
                                     else
                                     { 
-                                        result = await _tokenData.RefreshAsync(new RefreshRequest { AccessToken = accessToken, RefreshToken = refreshToken });
-                                        context.Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
+                                        var res = await _tokenData.RefreshAsync(new RefreshRequest { AccessToken = accessToken, RefreshToken = refreshToken });
+                                        context.Response.Cookies.Append("accessToken", res.Data.AccessToken, new CookieOptions
                                         {
                                             HttpOnly = true,
                                             Secure = true,
@@ -73,14 +73,14 @@ namespace api.Middlewares
                                             Expires = DateTime.UtcNow.AddYears(1)
                                         });
 
-                                        context.Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+                                        context.Response.Cookies.Append("refreshToken", res.Data.RefreshToken, new CookieOptions
                                         {
                                             HttpOnly = true,
                                             Secure = true,
                                             SameSite = SameSiteMode.Lax,
                                             Expires = DateTime.UtcNow.AddYears(1)
                                         });
-                                        context.Request.Headers.Authorization = $"bearer {result.AccessToken}";
+                                        context.Request.Headers.Authorization = $"bearer {res.Data.AccessToken}";
                                     }
                                 
                                 }

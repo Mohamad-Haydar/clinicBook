@@ -23,12 +23,15 @@ public class ReservationData : IReservationData
     private readonly IOptions<ConnectionStrings> _connectionStrings;
     private readonly ApplicationDbContext _appDbContext;
     private readonly ISqlDataAccess _sql;
-    public ReservationData(ISqlDataAccess sql, IOptions<ConnectionStrings> connectionStrings, ApplicationDbContext appDbContext, ILogger<ReservationData> logger)
+    private readonly IMessageProvider _messageProvider;
+
+    public ReservationData(ISqlDataAccess sql, IOptions<ConnectionStrings> connectionStrings, ApplicationDbContext appDbContext, ILogger<ReservationData> logger, IMessageProvider messageProvider)
     {
         _sql = sql;
         _connectionStrings = connectionStrings;
         _appDbContext = appDbContext;
         _logger = logger;
+        _messageProvider = messageProvider;
     }
 
     public async Task CreateQueueReservationAsync(CreateQueueReservationRequest data)
@@ -40,7 +43,7 @@ public class ReservationData : IReservationData
         catch (Exception ex)
         {
             _logger.LogError(ex.Message);
-            throw;
+            throw new BusinessException();
         }
     }
 
@@ -58,7 +61,7 @@ public class ReservationData : IReservationData
         catch (Exception ex)
         {
             _logger.LogError(ex.Message);
-            throw;
+            throw new BusinessException();
         }
     }
 
@@ -76,7 +79,7 @@ public class ReservationData : IReservationData
         catch (Exception ex)
         {
             _logger.LogError(ex.Message);
-            throw;
+            throw new BusinessException();
         }
     }
 
@@ -116,20 +119,20 @@ public class ReservationData : IReservationData
         }
     }
 
-    public async Task DeleteSpecificReservationAsync(int ClientReservationId, string userData, string accessToken)
+    public async Task<Result> DeleteSpecificReservationAsync(int ClientReservationId, string userData, string accessToken)
     {
-        // new Claim(ClaimTypes.NameIdentifier, user.Id),
         var user = JsonSerializer.Deserialize<CookieUserModel>(userData);
         var handler = new JwtSecurityTokenHandler();
         var jwtToken = handler.ReadJwtToken(accessToken);
         var userId = jwtToken.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier)?.Value;
         if(userId != user.id)
         {
-            throw new BusinessException();
+            return Result.Failure(_messageProvider.GetMessage("error"));
         }
         try
         {
             await _sql.SaveDataAsync("sp_delete_specific_reservation", new { client_reservation_id = ClientReservationId }, _connectionStrings.Value.AppDbConnection).ConfigureAwait(false);
+            return Result.Success(_messageProvider.GetMessage("deleteSpecificReservationSuccess"));
         }
         catch (Exception ex)
         {
@@ -169,21 +172,18 @@ public class ReservationData : IReservationData
         }
     }
 
-    public async Task MarkCompleteReservationAsync(int ClientReservationId)
+    public async Task<Result> MarkCompleteReservationAsync(int ClientReservationId)
     {
         try
         {
             var ClientReservation = await _appDbContext.ClientReservations.FirstOrDefaultAsync(x => x.Id == ClientReservationId).ConfigureAwait(false);
             if (ClientReservation == null)
             {
-                throw new UserNotFoundException();
+                return Result.Failure(_messageProvider.GetMessage("userNotFound"));
             }
             ClientReservation.IsDone = true;
             await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
-        }
-        catch (UserNotFoundException)
-        {
-            throw;
+            return Result.Success(_messageProvider.GetMessage("markCompleteReservation"));
         }
         catch (Exception ex)
         {

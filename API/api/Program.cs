@@ -98,6 +98,12 @@ builder.Services.AddScoped<ICategoryData, CategoryData>();
 builder.Services.AddScoped<IBackupService, BackupService>();
 builder.Services.AddScoped<IServiceData, ServiceData>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddSingleton<IMessageProvider>(sp =>
+{
+     var basePath = Directory.GetCurrentDirectory(); // Gets the application's root directory
+    var filePath = Path.Combine(basePath, "messages.json");
+    return new JsonMessageProvider(filePath);
+});
 
 builder.Services.AddSingleton<BadRequestResponse,BadRequestResponse>();
 builder.Services.AddSingleton<Response,Response>();

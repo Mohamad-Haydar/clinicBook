@@ -1,6 +1,7 @@
 ﻿using api.BusinessLogic.DataAccess.IDataAccess;
 using api.Data;
 using api.Exceptions;
+using api.Helper;
 using api.Models;
 using api.Models.Responce;
 using Microsoft.AspNetCore.Authorization;
@@ -13,11 +14,13 @@ namespace api.BusinessLogic.DataAccess
     {
         private readonly ApplicationDbContext _appDbContext;
         private readonly ILogger<ServiceData> _logger;
+        private readonly IMessageProvider _messageProvider;
 
-        public ServiceData(ApplicationDbContext appDbContext, ILogger<ServiceData> logger)
+        public ServiceData(ApplicationDbContext appDbContext, ILogger<ServiceData> logger, IMessageProvider messageProvider)
         {
             _appDbContext = appDbContext;
             _logger = logger;
+            _messageProvider = messageProvider;
         }
 
         public async Task<IEnumerable<ServiceModel>> GetAllServicesAsync()
@@ -35,13 +38,16 @@ namespace api.BusinessLogic.DataAccess
         }
 
 
-        public async Task CreateServiceAsync(string serviceName)
+        public async Task<Result> CreateServiceAsync(string serviceName)
         {
             const string cacheKey = "services";
             try
             {
-                var res = await _appDbContext.Services.AddAsync(new ServiceModel() { ServiceName = serviceName }) ?? throw new BusinessException();
+                var res = await _appDbContext.Services.AddAsync(new ServiceModel() { ServiceName = serviceName });
+                if(res == null) return Result.Failure(_messageProvider.GetMessage("error"));
                 await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
+
+                return Result.Success(_messageProvider.GetMessage("createServiceAsync"));
             }
             catch (Exception ex)
             {
@@ -50,13 +56,16 @@ namespace api.BusinessLogic.DataAccess
             }
         }
 
-        public async Task UpdateServiceAsync(ServiceModel model)
+        public async Task<Result> UpdateServiceAsync(ServiceModel model)
         {
             try
             {
-                var service = await _appDbContext.Services.FindAsync(model.Id).ConfigureAwait(false) ?? throw new BusinessException();
+                var service = await _appDbContext.Services.FindAsync(model.Id).ConfigureAwait(false);
+                if(service == null) return Result.Failure(_messageProvider.GetMessage("error"));
+
                 service.ServiceName = model.ServiceName;
                 await _appDbContext.SaveChangesAsync();
+                return Result.Success(_messageProvider.GetMessage("updateServiceAsync"));
             }
             catch (Exception ex)
             {
@@ -65,7 +74,7 @@ namespace api.BusinessLogic.DataAccess
             }
         }
 
-        public async Task DeleteServiceAsync(int id)
+        public async Task<Result> DeleteServiceAsync(int id)
         {
             try
             {
@@ -75,11 +84,12 @@ namespace api.BusinessLogic.DataAccess
                                        select rd).AnyAsync();
                 if(resDetail)
                 {
-                    throw new BusinessException("عذرا, لا يمكن حذف هذه الخدمة حاليا, هناك من يستخدمها.");
+                    return Result.Failure(_messageProvider.GetMessage("cantRemoveServiceError"));
                 }
                 var service = await _appDbContext.Services.FindAsync(id);
                 _appDbContext.Services.Remove(service);
                 await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
+                return Result.Success(_messageProvider.GetMessage("deleteServiceAsync"));
             }
             catch (BusinessException)
             {

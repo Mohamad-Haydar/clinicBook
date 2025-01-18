@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using api.Exceptions;
 using api.Models.Responce;
+using api.Helper;
 
 namespace api.Controllers;
 
@@ -14,10 +15,12 @@ public class SecretaryController : Controller
 {
 
     private readonly ISecretaryData _secretaryData;
+    private readonly IMessageProvider _messageProvider;
 
-    public SecretaryController(ISecretaryData secretaryData)
+    public SecretaryController(ISecretaryData secretaryData, IMessageProvider messageProvider)
     {
         _secretaryData = secretaryData;
+        _messageProvider = messageProvider;
     }
 
     [Route("GetSecretaries")]
@@ -26,12 +29,12 @@ public class SecretaryController : Controller
     {
         try
         {
-            var secretarie = await _secretaryData.GetSecretariebyEmailAsync(email).ConfigureAwait(false);
-            return Ok(secretarie);
+            var res = await _secretaryData.GetSecretariebyEmailAsync(email).ConfigureAwait(false);
+            return Ok(res.Data);
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 }

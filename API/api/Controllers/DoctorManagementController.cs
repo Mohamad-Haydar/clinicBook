@@ -12,6 +12,7 @@ using api.Exceptions;
 using System.ComponentModel.DataAnnotations;
 using api.BusinessLogic.DataAccess.IDataAccess;
 using System.Diagnostics;
+using api.Helper;
 
 namespace api.Controllers;
 
@@ -21,30 +22,28 @@ public class DoctorManagementController : ControllerBase
 {
     private readonly IDoctorManagementData _doctorManagementData;
     private readonly ILogger<DoctorManagementController> _logger;
+    private readonly IMessageProvider _messageProvider;
 
-    public DoctorManagementController(IDoctorManagementData doctorManagementData, ILogger<DoctorManagementController> logger)
+    public DoctorManagementController(IDoctorManagementData doctorManagementData, ILogger<DoctorManagementController> logger, IMessageProvider messageProvider)
     {
         _doctorManagementData = doctorManagementData;
         _logger = logger;
+        _messageProvider = messageProvider;
     }
 
     [HttpPost]
     [Route("addDoctorService")]
     public async Task<IActionResult> AddDoctorService([FromBody] DoctorServiceRequest doctorService)
     {
-        if(!ModelState.IsValid)
-        {
-            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new BadRequestResponse());
-        }
+        if(!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
         try
         {
             await _doctorManagementData.AddDoctorServiceAsync(doctorService).ConfigureAwait(false);
-            return Ok(new Response("تم اضافة خدمة بنجاح"));
+            return Ok(Result.Success(_messageProvider.GetMessage("AddDoctorServiceSuccess")));
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -52,19 +51,16 @@ public class DoctorManagementController : ControllerBase
     [Route("addMultipleService")]
     public async Task<IActionResult> AddMultipleService([FromBody] List<DoctorServiceRequest> doctorServices)
     {
-         if(!ModelState.IsValid)
-        {
-            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new BadRequestResponse());
-        }
+        if(!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+        
         try
         {
             await _doctorManagementData.AddMultipleServiceAsync(doctorServices).ConfigureAwait(false);
-            return Ok(new Response("تم اضافة خدمات بنجاح"));
+            return Ok(Result.Success(_messageProvider.GetMessage("AddDoctorServiceSuccess")));
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
         
     }
@@ -73,18 +69,16 @@ public class DoctorManagementController : ControllerBase
     [Route("updateDoctorServiceDuration")]
     public async Task<IActionResult> UpdateDoctorServiceDuration([Required] int id, [Required] int duration)
     {
-        if(!ModelState.IsValid)
-        {
-            return BadRequest(new BadRequestResponse());
-        }
+        if(!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+        
         try
         {
-            await _doctorManagementData.UpdateDoctorServiceDurationAsync(id, duration).ConfigureAwait(false);
-            return Ok(new Response("تم تحديث التوقيت بنجاح"));
+            var res = await _doctorManagementData.UpdateDoctorServiceDurationAsync(id, duration).ConfigureAwait(false);
+            return res.IsSuccess ? Ok(res) : BadRequest(res);
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -92,18 +86,17 @@ public class DoctorManagementController : ControllerBase
     [Route("deleteDoctorService")]
     public async Task<IActionResult> DeleteDoctorService([Required] int id)
     {
-        if(!ModelState.IsValid)
-        {
-            return BadRequest(new BadRequestResponse());
-        }
+
+        if(!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+        
         try
         {
-            await _doctorManagementData.DeleteDoctorServiceAsync(id).ConfigureAwait(false);
-            return Ok(new Response("تم ازالة الخدمة بنجاح"));
+            var res = await _doctorManagementData.DeleteDoctorServiceAsync(id).ConfigureAwait(false);
+            return res.IsSuccess ? Ok(res) : BadRequest(res);
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -111,18 +104,16 @@ public class DoctorManagementController : ControllerBase
     [Route("removeDoctor")]
     public async Task<IActionResult> RemoveDoctor([Required] string id)
     {
-        if(!ModelState.IsValid)
-        {
-            return BadRequest(new BadRequestResponse());
-        }
+        if(!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+        
         try
         {
-            await _doctorManagementData.RemoveDoctorAsync(id).ConfigureAwait(false);
-            return Ok(new Response("تم ازالة الدكتور بنجاح"));
+            var res = await _doctorManagementData.RemoveDoctorAsync(id).ConfigureAwait(false);
+            return res.IsSuccess ? Ok(res) : BadRequest(res);
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -131,19 +122,16 @@ public class DoctorManagementController : ControllerBase
     [AuthorizeRoles(Roles.Doctor,Roles.Admin, Roles.Secretary)]
     public async Task<IActionResult> UpdateDoctorInfo([FromBody] UpdateDoctorRequest model)
     {
-        if(!ModelState.IsValid)
-        {
-            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new BadRequestResponse());
-        }
+        if(!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+        
         try
         {
-            await _doctorManagementData.UpdateDoctorInfoAsync(model).ConfigureAwait(false);
-            return Ok(new Response("تم تحديث معلومات الدكتور بنجاح" ));
+            var res = await _doctorManagementData.UpdateDoctorInfoAsync(model).ConfigureAwait(false);
+            return res.IsSuccess? Ok(res) : BadRequest(res);
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -152,18 +140,16 @@ public class DoctorManagementController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetDoctorByEmail([Required] string email)
     {
-        if(!ModelState.IsValid)
-        {
-            return BadRequest(new BadRequestResponse());
-        }
+        if(!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+        
         try
         {
-            var doctor = await _doctorManagementData.GetDoctorByEmailAsync(email).ConfigureAwait(false);
-            return Ok(doctor);
+            var res = await _doctorManagementData.GetDoctorByEmailAsync(email).ConfigureAwait(false);
+            return Ok(res.Data);
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -172,19 +158,16 @@ public class DoctorManagementController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetDoctorById([Required] string id)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new BadRequestResponse());
-        }
-
+        if(!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+        
         try
         {
-            var doctor = await _doctorManagementData.GetDoctorByIdAsync(id).ConfigureAwait(false);
-            return Ok(doctor);
+            var res = await _doctorManagementData.GetDoctorByIdAsync(id).ConfigureAwait(false);
+            return Ok(res.Data);
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -198,9 +181,9 @@ public class DoctorManagementController : ControllerBase
             var doctors = await _doctorManagementData.GetAllDoctorsAsync().ConfigureAwait(false);
             return doctors.Any() ? Ok(doctors) : NoContent();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -214,9 +197,9 @@ public class DoctorManagementController : ControllerBase
             var doctors = await _doctorManagementData.GetDoctorsByCategoryAsync(CategoryId).ConfigureAwait(false);
             return doctors.Any() ? Ok(doctors) : NoContent();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -229,9 +212,13 @@ public class DoctorManagementController : ControllerBase
             string path = await _doctorManagementData.UploadImageAsync(file).ConfigureAwait(false);
             return Ok(new Response(path));
         }
+        catch(BusinessException ex)
+        {
+            return BadRequest(Result.Failure(_messageProvider.GetMessage(ex.Message)));
+        }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 }

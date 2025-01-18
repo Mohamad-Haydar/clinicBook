@@ -1,12 +1,13 @@
 ﻿using api.Models;
+using api.Models.Responce;
 
 namespace api.BusinessLogic.DataAccess.IDataAccess
 {
     public interface ICategoryData
     {
         Task<IEnumerable<CategoryModel>> GetAllCategoriesAsync();
-        Task CreateCategoryAsync(string categoryName);
-        Task UpdateCategoryAsync(CategoryModel model);
-        Task DeleteCategoryAsync(int model);
+        Task<Result> CreateCategoryAsync(string categoryName);
+        Task<Result> UpdateCategoryAsync(CategoryModel model);
+        Task<Result> DeleteCategoryAsync(int model);
     }
 }

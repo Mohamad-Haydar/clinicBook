@@ -1,12 +1,13 @@
 using api.Models;
+using api.Models.Responce;
 
 namespace api.BusinessLogic.DataAccess.IDataAccess
 {
     public interface IServiceData
     {
         Task<IEnumerable<ServiceModel>> GetAllServicesAsync();
-        Task UpdateServiceAsync(ServiceModel model);
-        Task DeleteServiceAsync(int id);
-        Task CreateServiceAsync(string serviceName);
+        Task<Result> UpdateServiceAsync(ServiceModel model);
+        Task<Result> DeleteServiceAsync(int id);
+        Task<Result> CreateServiceAsync(string serviceName);
     }
 }

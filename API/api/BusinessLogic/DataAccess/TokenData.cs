@@ -2,6 +2,7 @@ using System.Security.Claims;
 using api.BusinessLogic.DataAccess.IDataAccess;
 using api.Data;
 using api.Exceptions;
+using api.Helper;
 using api.Models;
 using api.Models.Request;
 using api.Models.Responce;
@@ -20,8 +21,9 @@ public class TokenData : ITokenData
     private readonly ITokenService _tokenService;
     private readonly ApplicationDbContext _appContext;
     private readonly IMemoryCache _cache;
+    private readonly IMessageProvider _messageProvider;
 
-    public TokenData(UserManager<UserModel> userManager, IdentityAppDbContext identityContext, ITokenService tokenService, ApplicationDbContext appContext, ILogger<TokenData> logger, IMemoryCache cache)
+    public TokenData(UserManager<UserModel> userManager, IdentityAppDbContext identityContext, ITokenService tokenService, ApplicationDbContext appContext, ILogger<TokenData> logger, IMemoryCache cache, IMessageProvider messageProvider)
     {
         _userManager = userManager;
         _identityContext = identityContext;
@@ -29,8 +31,9 @@ public class TokenData : ITokenData
         _appContext = appContext;
         _logger = logger;
         _cache = cache;
+        _messageProvider = messageProvider;
     }
-    public async Task<AuthenticationResponse> RefreshAsync(RefreshRequest tokenApiModel)
+    public async Task<Result<AuthenticationResponse>> RefreshAsync(RefreshRequest tokenApiModel)
     {
         string? accessToken = tokenApiModel.AccessToken;
         string? refreshToken = tokenApiModel.RefreshToken;
@@ -52,7 +55,7 @@ public class TokenData : ITokenData
                     _cache.TryGetValue(cacheaccessToken, out string? cachedAccessToken)
                 )
                 {
-                    return new AuthenticationResponse
+                    return Result<AuthenticationResponse>.Success(new AuthenticationResponse
                     {
                         Id = user.Id,
                         FirstName = userData.FirstName,
@@ -62,9 +65,9 @@ public class TokenData : ITokenData
                         AccessToken = cachedAccessToken,
                         RefreshToken = cachedRefreshToken,
                         Roles = roles
-                    };
+                    });
                 }else{
-                throw new InvalidRequestException();
+                    return Result<AuthenticationResponse>.Failure(_messageProvider.GetMessage("wrongInput"));
                 }
             }
 
@@ -76,7 +79,7 @@ public class TokenData : ITokenData
             _cache.Set(cacheaccessToken, newAccessToken, TimeSpan.FromSeconds(10));
             await _identityContext.SaveChangesAsync().ConfigureAwait(false);
 
-            return new AuthenticationResponse
+            return Result<AuthenticationResponse>.Success(new AuthenticationResponse
             {
                 Id = user.Id,
                 FirstName = userData.FirstName,
@@ -86,11 +89,7 @@ public class TokenData : ITokenData
                 AccessToken = newAccessToken,
                 RefreshToken = newRefreshToken,
                 Roles = roles
-            };
-        }
-        catch (InvalidRequestException)
-        {
-            throw;
+            });
         }
         catch (Exception ex)
         {

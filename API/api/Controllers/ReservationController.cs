@@ -22,9 +22,12 @@ namespace api.Controllers;
 public class ReservationController : ControllerBase
 {
     private readonly IReservationData _reservationData;
-    public ReservationController(IReservationData reservationData)
+    private readonly IMessageProvider _messageProvider;
+
+    public ReservationController(IReservationData reservationData, IMessageProvider messageProvider)
     {
         _reservationData = reservationData;
+        _messageProvider = messageProvider;
     }
 
 
@@ -32,20 +35,16 @@ public class ReservationController : ControllerBase
     [Route("CreateQueueReservation")]
     public async Task<IActionResult> CreateQueueReservation([FromBody] CreateQueueReservationRequest model)
     {
-        if (!ModelState.IsValid)
-        {
-            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new BadRequestResponse());
-        }
+        if(!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
 
         try
         {
             await _reservationData.CreateQueueReservationAsync(model).ConfigureAwait(false);
-            return Ok(new Response("لقد تم حجز الموعد بنجاح"));
+            return Ok(Result.Success(_messageProvider.GetMessage("createQueueReservationSuccess")));
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -53,10 +52,8 @@ public class ReservationController : ControllerBase
     [Route("GetReservationDetail")]
     public async Task<IActionResult> GetReservationDetails([Required] int id)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new BadRequestResponse());
-        }
+        if(!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+        
         try
         {
             var res = await _reservationData.GetReservationDetailsAsync(id).ConfigureAwait(false);
@@ -64,7 +61,7 @@ public class ReservationController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -72,10 +69,8 @@ public class ReservationController : ControllerBase
     [Route("GetAllPersonalReservations")]
     public async Task<IActionResult> GetAllPersonalReservations([Required] string ClientId)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new BadRequestResponse());
-        }
+        if(!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+
         try
         {
             var res = await _reservationData.GetAllPersonalReservationsAsync(ClientId).ConfigureAwait(false);
@@ -83,7 +78,7 @@ public class ReservationController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -91,10 +86,8 @@ public class ReservationController : ControllerBase
     [Route("GetConcurrentBookings")]
     public async Task<IActionResult> GetConcurrentBookings([Required] int id)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new BadRequestResponse());
-        }
+        if(!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+
         try
         {
             var result = await _reservationData.GetConcurrentBookingsAsync(id).ConfigureAwait(false);
@@ -102,7 +95,7 @@ public class ReservationController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -110,10 +103,8 @@ public class ReservationController : ControllerBase
     [Route("GetPreviousBookings")]
     public async Task<IActionResult> GetPreviousBookings([Required] int id)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new BadRequestResponse());
-        }
+        if(!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+
         try
         {
             var result = await _reservationData.GetPreviousBookingsAsync(id).ConfigureAwait(false);
@@ -121,7 +112,7 @@ public class ReservationController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
 
     }
@@ -130,8 +121,7 @@ public class ReservationController : ControllerBase
     [Route("DeleteSpecificReservation")]
     public async Task<IActionResult> DeleteSpecificReservation([Required] int clientReservationId)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(new BadRequestResponse());
+        if(!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
 
         try
         {
@@ -139,14 +129,14 @@ public class ReservationController : ControllerBase
             var accessToken = Request.Cookies["accessToken"];
             if(userData == null || accessToken == null)
             {
-                return BadRequest(new Response("Please login"));
+                return BadRequest(Result.Failure(_messageProvider.GetMessage("pleaseLoginError")));
             }
-            await _reservationData.DeleteSpecificReservationAsync(clientReservationId, userData, accessToken).ConfigureAwait(false);
-            return Ok(new Response("لقد تم ازالة موعدك بنجاح"));
+            var res = await _reservationData.DeleteSpecificReservationAsync(clientReservationId, userData, accessToken).ConfigureAwait(false);
+            return Ok(res);
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
 
 
@@ -156,18 +146,16 @@ public class ReservationController : ControllerBase
     [Route("UpdateSpecificReservation")]
     public async Task<IActionResult> UpdateSpecificReservation([FromBody] UpdateReservationRequest model)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new BadRequestResponse());
-        }
+        if(!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+
         try
         {
             await _reservationData.UpdateSpecificReservationAsync(model).ConfigureAwait(false);
-            return Ok(new Response("لقد تم تحديث الحجز بنجاح"));
+            return Ok(Result.Success(_messageProvider.GetMessage("updateSpecificReservation")));
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -175,10 +163,8 @@ public class ReservationController : ControllerBase
     [Route("GetAllReservationForTheDay")]
     public async Task<IActionResult> GetAllReservationForTheDay([Required] int DoctorAvailabilityId)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new BadRequestResponse());
-        }
+        if(!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+
         try
         {
             var result = await _reservationData.GetAllReservationForTheDayAsync(DoctorAvailabilityId).ConfigureAwait(false);
@@ -186,7 +172,7 @@ public class ReservationController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -194,18 +180,16 @@ public class ReservationController : ControllerBase
     [Route("MarkCompleteReservation")]
     public async Task<IActionResult> MarkCompleteReservation([Required] int ClientReservationId)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new BadRequestResponse());
-        }
+        if(!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+
         try
         {
-            await _reservationData.MarkCompleteReservationAsync(ClientReservationId).ConfigureAwait(false);
-            return Ok(new Response("تم انهاء الزيارة"));
+            var res = await _reservationData.MarkCompleteReservationAsync(ClientReservationId).ConfigureAwait(false);
+            return Ok(res);
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -213,10 +197,8 @@ public class ReservationController : ControllerBase
     [Route("GetAllReservationOfAvailability")]
     public async Task<IActionResult> GetAllReservationOfAvailability([Required] int availabilityId)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new BadRequestResponse());
-        }
+        if(!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+
         try
         {
             var res = await _reservationData.GetAllReservationOfAvailabilityAsync(availabilityId).ConfigureAwait(false);
@@ -224,7 +206,7 @@ public class ReservationController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 

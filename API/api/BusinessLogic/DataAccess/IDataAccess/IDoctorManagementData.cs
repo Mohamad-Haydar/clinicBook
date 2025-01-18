@@ -9,14 +9,14 @@ namespace api.BusinessLogic.DataAccess.IDataAccess
     {
         Task AddDoctorServiceAsync(DoctorServiceRequest data);
         Task AddMultipleServiceAsync(List<DoctorServiceRequest> doctorServices);
-        Task DeleteDoctorServiceAsync(int id);
-        Task<DoctorInfoResponse> GetDoctorByEmailAsync(string email);
-        Task<DoctorInfoResponse> GetDoctorByIdAsync(string id);
+        Task<Result> DeleteDoctorServiceAsync(int id);
+        Task<Result<DoctorInfoResponse>> GetDoctorByEmailAsync(string email);
+        Task<Result<DoctorInfoResponse>> GetDoctorByIdAsync(string id);
         Task<IEnumerable<DoctorInfoResponse>> GetAllDoctorsAsync();
         Task<IEnumerable<DoctorInfoResponse>> GetDoctorsByCategoryAsync(int CategoryId);
-        Task RemoveDoctorAsync(string id);
-        Task UpdateDoctorInfoAsync(UpdateDoctorRequest model);
-        Task UpdateDoctorServiceDurationAsync(int id, int duration);
+        Task<Result> RemoveDoctorAsync(string id);
+        Task<Result> UpdateDoctorInfoAsync(UpdateDoctorRequest model);
+        Task<Result> UpdateDoctorServiceDurationAsync(int id, int duration);
         Task<string> UploadImageAsync(IFormFile file);
     }
 }

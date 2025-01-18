@@ -29,8 +29,9 @@ public class DoctorManagementData : IDoctorManagementData
     private readonly IdentityAppDbContext _identityContext;
     private readonly IMemoryCache _cache;
     private readonly MemoryCacheEntryOptions _cacheOptions;
+    private readonly IMessageProvider _messageProvider;
 
-    public DoctorManagementData(IOptions<ConnectionStrings> connectionStrings, ISqlDataAccess sql, ApplicationDbContext appDbContext, UserManager<UserModel> userManager, IdentityAppDbContext identityContext, ILogger<DoctorManagementData> logger, IMemoryCache cache, MemoryCacheEntryOptions cacheOptions)
+    public DoctorManagementData(IOptions<ConnectionStrings> connectionStrings, ISqlDataAccess sql, ApplicationDbContext appDbContext, UserManager<UserModel> userManager, IdentityAppDbContext identityContext, ILogger<DoctorManagementData> logger, IMemoryCache cache, MemoryCacheEntryOptions cacheOptions, IMessageProvider messageProvider)
     {
         _connectionStrings = connectionStrings;
         _sql = sql;
@@ -40,6 +41,7 @@ public class DoctorManagementData : IDoctorManagementData
         _logger = logger;
         _cache = cache;
         _cacheOptions = cacheOptions;
+        _messageProvider = messageProvider;
     }
 
 
@@ -75,17 +77,15 @@ public class DoctorManagementData : IDoctorManagementData
         }
     }
 
-    public async Task UpdateDoctorServiceDurationAsync(int id, int duration)
+    public async Task<Result> UpdateDoctorServiceDurationAsync(int id, int duration)
     {
         try
         {
-            var service = await _appDbContext.DoctorServices.FirstOrDefaultAsync(x => x.Id == id).ConfigureAwait(false) ?? throw new UserNotFoundException();
+            var service = await _appDbContext.DoctorServices.FirstOrDefaultAsync(x => x.Id == id).ConfigureAwait(false);
+            if(service == null) return Result.Failure(_messageProvider.GetMessage("userNotFound"));
             service.Duration = duration;
             await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
-        }
-        catch (UserNotFoundException)
-        {
-            throw;
+            return Result.Success(_messageProvider.GetMessage("updateDurationSuccess"));
         }
         catch (Exception ex)
         {
@@ -96,17 +96,16 @@ public class DoctorManagementData : IDoctorManagementData
 
     //TODO: when deleting i should delete the reservation detail 
     // and check if i want to delete the client reservation
-    public async Task DeleteDoctorServiceAsync(int id)
+    public async Task<Result> DeleteDoctorServiceAsync(int id)
     {
-        var service = await _appDbContext.DoctorServices.FirstOrDefaultAsync(x => x.Id == id).ConfigureAwait(false) ?? throw new UserNotFoundException();
+        var service = await _appDbContext.DoctorServices.FirstOrDefaultAsync(x => x.Id == id).ConfigureAwait(false);
+        if(service == null) return Result.Failure(_messageProvider.GetMessage("userNotFound"));
+
         try
         {
             var res = _appDbContext.DoctorServices.Remove(service);
             await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
-        }
-        catch (UserNotFoundException)
-        {
-            throw;
+            return Result.Success(_messageProvider.GetMessage("deleteDoctorServiceSuccess"));
         }
         catch (Exception ex)
         {
@@ -115,10 +114,13 @@ public class DoctorManagementData : IDoctorManagementData
         }
     }
 
-    public async Task RemoveDoctorAsync(string id)
+    public async Task<Result> RemoveDoctorAsync(string id)
     {
-        var doctor = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.Id == id).ConfigureAwait(false) ?? throw new UserNotFoundException();
-        var user = await _userManager.FindByIdAsync(id).ConfigureAwait(false) ?? throw new UserNotFoundException();
+        var doctor = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.Id == id).ConfigureAwait(false);
+        if(doctor == null) return Result.Failure(_messageProvider.GetMessage("userNotFound"));
+        var user = await _userManager.FindByIdAsync(id).ConfigureAwait(false);
+        if(user == null) return Result.Failure(_messageProvider.GetMessage("userNotFound"));
+
         using (var transaction = _identityContext.Database.BeginTransaction())
         {
             try
@@ -128,11 +130,7 @@ public class DoctorManagementData : IDoctorManagementData
                 await _identityContext.SaveChangesAsync().ConfigureAwait(false);
                 await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
                 transaction.Commit();
-            }
-            catch (UserNotFoundException)
-            {
-                transaction.Rollback();
-                throw;
+                return Result.Success(_messageProvider.GetMessage("removeDoctorSuccess"));
             }
             catch (Exception ex)
             {
@@ -143,10 +141,12 @@ public class DoctorManagementData : IDoctorManagementData
         }
     }
 
-    public async Task UpdateDoctorInfoAsync(UpdateDoctorRequest model)
+    public async Task<Result> UpdateDoctorInfoAsync(UpdateDoctorRequest model)
     {
-        var user = await _userManager.FindByEmailAsync(model.Email).ConfigureAwait(false) ?? throw new UserNotFoundException();
-        var doctor = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.Email == model.Email).ConfigureAwait(false) ?? throw new UserNotFoundException();
+        var user = await _userManager.FindByEmailAsync(model.Email).ConfigureAwait(false);
+        if(user == null) return Result.Failure(_messageProvider.GetMessage("userNotFound"));
+        var doctor = await _appDbContext.Doctors.FirstOrDefaultAsync(x => x.Email == model.Email).ConfigureAwait(false);
+        if(doctor == null) return Result.Failure(_messageProvider.GetMessage("userNotFound"));
 
         using (var transaction = _identityContext.Database.BeginTransaction())
         {
@@ -174,11 +174,7 @@ public class DoctorManagementData : IDoctorManagementData
                 await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
                 await _identityContext.SaveChangesAsync().ConfigureAwait(false);
                 transaction.Commit();
-            }
-            catch (UserNotFoundException)
-            {
-                transaction.Rollback();
-                throw;
+                return Result.Success(_messageProvider.GetMessage("updateDoctorSuccess"));
             }
             catch (Exception ex)
             {
@@ -189,7 +185,7 @@ public class DoctorManagementData : IDoctorManagementData
         }
     }
 
-    public async Task<DoctorInfoResponse> GetDoctorByEmailAsync(string email)
+    public async Task<Result<DoctorInfoResponse>> GetDoctorByEmailAsync(string email)
     {
         try
         {
@@ -199,14 +195,10 @@ public class DoctorManagementData : IDoctorManagementData
                     select new DoctorInfoResponse { Id = d.Id, FirstName = d.FirstName, LastName = d.LastName, Email = d.Email, PhoneNumber = d.PhoneNumber, Description = d.Description, CategoryName = c.CategoryName, Image = d.Image }).FirstOrDefaultAsync().ConfigureAwait(false);
             if (doctor == null)
             {
-                throw new UserNotFoundException();
+                return Result<DoctorInfoResponse>.Failure(_messageProvider.GetMessage("userNotFound"));
             }
 
-            return doctor;
-        }
-        catch (UserNotFoundException)
-        {
-            throw;
+            return Result<DoctorInfoResponse>.Success(doctor);
         }
         catch (Exception ex)
         {
@@ -215,7 +207,7 @@ public class DoctorManagementData : IDoctorManagementData
         }
     }
 
-    public async Task<DoctorInfoResponse> GetDoctorByIdAsync(string id)
+    public async Task<Result<DoctorInfoResponse>> GetDoctorByIdAsync(string id)
     {
         try
         {
@@ -244,14 +236,10 @@ public class DoctorManagementData : IDoctorManagementData
                                 }).FirstOrDefaultAsync().ConfigureAwait(false);
             if (doctor == null)
             {
-                throw new UserNotFoundException("هذا الطبيب غير موجود!");
+                return Result<DoctorInfoResponse>.Failure(_messageProvider.GetMessage("userNotFound"));
             }
             
-            return doctor;
-        }
-        catch (UserNotFoundException)
-        {
-            throw;
+            return Result<DoctorInfoResponse>.Success(doctor);
         }
         catch (Exception ex)
         {
@@ -287,7 +275,7 @@ public class DoctorManagementData : IDoctorManagementData
         catch (Exception ex)
         {
             _logger.LogError(ex.Message);
-            throw;
+            throw new BusinessException();
         }
     }
 

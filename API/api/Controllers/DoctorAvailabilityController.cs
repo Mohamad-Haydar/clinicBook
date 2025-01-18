@@ -8,6 +8,7 @@ using api.Attributes;
 using api.Models;
 using Microsoft.AspNetCore.Authorization;
 using api.Exceptions;
+using api.Helper;
 
 namespace api.Controllers;
 
@@ -16,10 +17,12 @@ namespace api.Controllers;
 public class DoctorAvailabilityController : Controller
 {
     private readonly IDoctorAvailabilityData _doctorAvailabilityData;
+    private readonly IMessageProvider _messageProvider;
 
-    public DoctorAvailabilityController(IDoctorAvailabilityData doctorAvailabilityData)
+    public DoctorAvailabilityController(IDoctorAvailabilityData doctorAvailabilityData, IMessageProvider messageProvider)
     {
         _doctorAvailabilityData = doctorAvailabilityData;
+        _messageProvider = messageProvider;
     }
 
     [HttpGet]
@@ -27,8 +30,7 @@ public class DoctorAvailabilityController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> GetAvailableDates([Required] string id)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(new BadRequestResponse());
+       if (!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
         
         try
         {
@@ -37,7 +39,7 @@ public class DoctorAvailabilityController : Controller
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -45,19 +47,16 @@ public class DoctorAvailabilityController : Controller
     [Route("openavailabledate")]
     public async Task<IActionResult> OpenAvailableDate([FromBody] OpenAvailableDateRequest model)
     {
-        if (!ModelState.IsValid)
-        {
-            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new BadRequestResponse());
-        }
+        if (!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+        
         try
         {
-            await _doctorAvailabilityData.OpenAvailableDateAsync(model).ConfigureAwait(false);   
-            return Ok(new Response("تم انشاء تاريخ بنجاح"));
+            var res = await _doctorAvailabilityData.OpenAvailableDateAsync(model).ConfigureAwait(false);   
+            return res.IsSuccess ? Ok(res) : BadRequest(res);
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -65,19 +64,16 @@ public class DoctorAvailabilityController : Controller
     [Route("updateAvailableDate")]
     public async Task<IActionResult> UpdateAvailableDate([FromBody] UpdateAvailableDateRequest model)
     {
-        if (!ModelState.IsValid)
-        {
-            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new BadRequestResponse());
-        }
+        if (!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+        
         try
         {
-            await _doctorAvailabilityData.UpdateAvailableDateAsync(model).ConfigureAwait(false);
-            return Ok(new Response ("لقد تم تحديث التاؤيخ بنجاح"));
+            var res = await _doctorAvailabilityData.UpdateAvailableDateAsync(model).ConfigureAwait(false);
+            return res.IsSuccess ? Ok(res) : BadRequest(res);
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response (ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -85,25 +81,24 @@ public class DoctorAvailabilityController : Controller
     [Route("deleteAvailableDate")]
     public async Task<IActionResult> DeleteAvailableDate([Required] int id)
     {
-        if(!ModelState.IsValid)
-            return BadRequest(new BadRequestResponse());
+        if (!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
 
         try
         {
             await _doctorAvailabilityData.DeleteAvailableDateAsync(id).ConfigureAwait(false);
-            return Ok(new Response("لقد تم حذف الموعد و اعادة ترتيب الحجوزات بنجاح"));
+            return Ok(Result.Success(_messageProvider.GetMessage("deleteAvailableDateSuccess")));
         }
         catch (BusinessException ex)
         {
-            return BadRequest(new BadRequestResponse(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
         catch (Exception ex)
         {
             if (ex.Message.StartsWith("MYERROR:"))
             {
-                return BadRequest(new Response(ex.Message[8..]));
+                return BadRequest(Result.Failure(_messageProvider.GetMessage(ex.Message[8..])));
             }
-            return BadRequest(new BadRequestResponse());
+             return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -119,7 +114,7 @@ public class DoctorAvailabilityController : Controller
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -135,7 +130,7 @@ public class DoctorAvailabilityController : Controller
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
@@ -143,19 +138,16 @@ public class DoctorAvailabilityController : Controller
     [Route("CreateRepeatedAvailability")]
     public async Task<IActionResult> CreateRepeatedAvailability([FromBody] IEnumerable<OpenAvailableDateRequest> model)
     {
-        if (!ModelState.IsValid)
-        {
-            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(new BadRequestResponse());
-        }
+        if (!ModelState.IsValid) return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+        
         try
         {
-            await _doctorAvailabilityData.OpenRepeatedAvailableDateAsync(model).ConfigureAwait(false);
-            return Ok(new Response("تم انشاء تاريخ بنجاح"));
+            var res = await _doctorAvailabilityData.OpenRepeatedAvailableDateAsync(model).ConfigureAwait(false);
+            return res.IsSuccess ? Ok(res) : BadRequest(res);
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 }

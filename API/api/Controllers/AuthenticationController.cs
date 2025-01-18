@@ -18,6 +18,7 @@ using System.Security.Cryptography;
 using Web_API.Service;
 using System;
 using System.Web;
+using api.Helper;
 
 namespace api.Controllers;
 
@@ -31,8 +32,9 @@ public class AuthenticationController : Controller
     private readonly IConfiguration _configuration;
     private readonly BadRequestResponse _badrequest;
     private readonly Response _response;
+    private readonly IMessageProvider _messageProvider;
 
-    public AuthenticationController(IAuthenticationData authenticationData, UserManager<UserModel> userManager, IEmailService emailService, IConfiguration configuration, RoleManager<IdentityRole> roleManager, BadRequestResponse badrequest, Response response)
+    public AuthenticationController(IAuthenticationData authenticationData, UserManager<UserModel> userManager, IEmailService emailService, IConfiguration configuration, RoleManager<IdentityRole> roleManager, BadRequestResponse badrequest, Response response, IMessageProvider messageProvider)
     {
         _authenticationData = authenticationData;
         _userManager = userManager;
@@ -41,6 +43,7 @@ public class AuthenticationController : Controller
         _roleManager = roleManager;
         _badrequest = badrequest;
         _response = response;
+        _messageProvider = messageProvider;
     }
 
     [Route("GenerateClients")]
@@ -110,19 +113,23 @@ public class AuthenticationController : Controller
         if (!ModelState.IsValid) 
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(_badrequest);
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
         }
         try
         {
             var result = await _authenticationData.RegisterClientAsync(model).ConfigureAwait(false);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
             var userDataJson = JsonSerializer.Serialize(new CookieUserModel
             {
-                id= result.Id,
+                id= result.Data.Id,
                 firstName= model.FirstName,
                 lastName= model.LastName,
-                email= result.Email,
-                phoneNumber= result.PhoneNumber,
-                roles = result.Roles,
+                email= result.Data.Email,
+                phoneNumber= result.Data.PhoneNumber,
+                roles = result.Data.Roles,
             });
 
             Response.Cookies.Append("userData", userDataJson, new CookieOptions
@@ -133,7 +140,7 @@ public class AuthenticationController : Controller
                 Expires = DateTime.UtcNow.AddYears(1)
             });
 
-            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
+            Response.Cookies.Append("accessToken", result.Data.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
@@ -141,7 +148,7 @@ public class AuthenticationController : Controller
                 Expires = DateTime.UtcNow.AddYears(1)
             });
 
-            Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+            Response.Cookies.Append("refreshToken", result.Data.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
@@ -151,12 +158,12 @@ public class AuthenticationController : Controller
 
             return Ok(new
             {
-                Id = result.Id,
+                Id = result.Data.Id,
                 FirstName = model.FirstName,
                 LasttName = model.LastName,
-                Email = result.Email,
-                PhoneNumber = result.PhoneNumber,
-                Roles = result.Roles,
+                Email = result.Data.Email,
+                PhoneNumber = result.Data.PhoneNumber,
+                Roles = result.Data.Roles,
             });
         }
         catch (Exception ex)
@@ -173,19 +180,19 @@ public class AuthenticationController : Controller
         if (!ModelState.IsValid)
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(_badrequest);
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
         }
         try
         {
             var result = await _authenticationData.UpdateUserAsync(model).ConfigureAwait(false);
             var userDataJson = JsonSerializer.Serialize(new CookieUserModel
             {
-                id = result.Id,
+                id = result.Data.Id,
                 firstName = model.FirstName,
                 lastName = model.LastName,
-                email = result.Email,
-                phoneNumber = result.PhoneNumber,
-                roles = result.Roles,
+                email = result.Data.Email,
+                phoneNumber = result.Data.PhoneNumber,
+                roles = result.Data.Roles,
             });
 
             Response.Cookies.Append("userData", userDataJson, new CookieOptions
@@ -195,7 +202,7 @@ public class AuthenticationController : Controller
                 SameSite = SameSiteMode.Lax,
                 Expires = DateTime.UtcNow.AddYears(1)
             });
-            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
+            Response.Cookies.Append("accessToken", result.Data.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
@@ -203,7 +210,7 @@ public class AuthenticationController : Controller
                 Expires = DateTime.UtcNow.AddYears(1)
             });
 
-            Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+            Response.Cookies.Append("refreshToken", result.Data.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
@@ -212,7 +219,7 @@ public class AuthenticationController : Controller
             });
 
 
-            return Ok(new Response("لقد تم تحديث معلوماتك بنجاح"));
+            return Ok(Result.Success(_messageProvider.GetMessage("userUpdateSuccess")));
         }
         catch (Exception ex)
         {
@@ -302,20 +309,24 @@ public class AuthenticationController : Controller
         if (!ModelState.IsValid)
         {
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-            return BadRequest(_badrequest);
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
         }
         try
         {
             var result = await _authenticationData.LoginUserAsync(model).ConfigureAwait(false);
+            if(!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
 
             var userDataJson = JsonSerializer.Serialize(new CookieUserModel
             {
-                id = result.Id,
-                firstName = result.FirstName,
-                lastName = result.LastName,
-                email = result.Email,
-                phoneNumber = result.PhoneNumber,
-                roles = result.Roles,
+                id = result.Data.Id,
+                firstName = result.Data.FirstName,
+                lastName = result.Data.LastName,
+                email = result.Data.Email,
+                phoneNumber = result.Data.PhoneNumber,
+                roles = result.Data.Roles,
             });
 
             Response.Cookies.Append("userData", userDataJson, new CookieOptions
@@ -326,7 +337,7 @@ public class AuthenticationController : Controller
                 Expires  = DateTime.UtcNow.AddYears(1)
             });
 
-            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
+            Response.Cookies.Append("accessToken", result.Data.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
@@ -334,7 +345,7 @@ public class AuthenticationController : Controller
                 Expires = DateTime.UtcNow.AddYears(1)
             });
 
-            Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+            Response.Cookies.Append("refreshToken", result.Data.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
@@ -343,12 +354,12 @@ public class AuthenticationController : Controller
             });
 
             return Ok(new{
-                Id = result.Id,
-                FirstName = result.FirstName,
-                LastName = result.LastName,
-                Email = result.Email,
-                PhoneNumber = result.PhoneNumber,
-                Roles = result.Roles,
+                Id = result.Data.Id,
+                FirstName = result.Data.FirstName,
+                LastName = result.Data.LastName,
+                Email = result.Data.Email,
+                PhoneNumber = result.Data.PhoneNumber,
+                Roles = result.Data.Roles,
             });
         }
         catch (Exception ex)
@@ -361,92 +372,62 @@ public class AuthenticationController : Controller
     [HttpPost]
     public async Task<IActionResult> Logout()
     {
-        //string? refreshToken = Request.Cookies["refreshToken"];
-        //string? accessToken = Request.Cookies["accessToken"] ;
-        //string? userData = Request.Cookies["userData"] ;
-
-        //try
-        //{
-        //if (refreshToken == null || accessToken == null || userData == null)
-        //{
-        //    throw new BusinessException();
-        //}
-        //await _authenticationData.LogoutAsync(refreshToken, accessToken).ConfigureAwait(false);
         Response.Cookies.Delete("userData", new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Lax
+        });
+        Response.Cookies.Delete("accessToken", new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.Lax
             });
-            Response.Cookies.Delete("accessToken", new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Lax
-                });
-            Response.Cookies.Delete("refreshToken", new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Lax
-                });
-            return Ok(new Response("لقد تم تسجيل خروجك بنجاح"));
-        //}
-        //catch (Exception ex)
-        //{
-        //    Response.Cookies.Delete("userData", new CookieOptions
-        //    {
-        //        HttpOnly = true,
-        //        Secure = true,
-        //        SameSite = SameSiteMode.Lax
-        //    });
-        //    Response.Cookies.Delete("accessToken", new CookieOptions
-        //    {
-        //        HttpOnly = true,
-        //        Secure = true,
-        //        SameSite = SameSiteMode.Lax
-        //    });
-        //    Response.Cookies.Delete("refreshToken", new CookieOptions
-        //    {
-        //        HttpOnly = true,
-        //        Secure = true,
-        //        SameSite = SameSiteMode.Lax
-        //    });
-        //    return BadRequest(new Response(ex.Message));
-        //}
+        Response.Cookies.Delete("refreshToken", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax
+            });
+            
+        return Ok(Result.Success(_messageProvider.GetMessage("logoutSuccess")));
     }
 
     [Route("ForgotPassword")]
     [HttpPost]
     public async Task<IActionResult> ForgotPassword([Required] string email)
     {
+         if (!ModelState.IsValid)
+        {
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+        }
         try
         {
-            await _authenticationData.ForgotPasswordAsync(email);
-            return Ok(new Response("لقد ارسلنا لك email ليمكنك من انشاء رقم سري جديد."));
+            var res = await _authenticationData.ForgotPasswordAsync(email);
+            return res.IsSuccess ? Ok(res) : BadRequest(res);
         }
         catch (Exception)
         {
-            throw;
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
     }
 
     [HttpPost]
     [Route("ResetPassword")]
-    public async Task<IActionResult> ResetPassword(string uid, string token, string newPassword)
+    public async Task<IActionResult> ResetPassword(string uid, string token, string password)
     {
         if (!ModelState.IsValid)
-        {
-            return BadRequest(new BadRequestResponse("Fill all the needed inputs"));
-        }
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+        
         try
         {
-            await _authenticationData.ResetPasswordAsync(uid, token, newPassword);
-            return Ok(new Response("لقد تم تحديث الرقم السري بنجاح."));
+            var res = await _authenticationData.ResetPasswordAsync(uid, token, password);
+            return res.IsSuccess ? Ok(res) : BadRequest(res);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return BadRequest(new BusinessException(ex.Message));
+            return BadRequest(new BusinessException());
         }
     }
 
@@ -455,25 +436,20 @@ public class AuthenticationController : Controller
     public async Task<IActionResult> ChangePassword(string oldPassword, string newPassword)
     {
         if (!ModelState.IsValid)
-        {
-            return BadRequest(new BadRequestResponse("الرجاء ملئ جميع المتطلبات"));
-        }
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("wrongInput")));
+
         try
         {
             var userData = HttpContext.Request.Cookies["userData"];
             var userDataJson = JsonSerializer.Deserialize<CookieUserModel>(userData);
 
             var userId = userDataJson.id;
-            await _authenticationData.ChangePasswordAsync(userId, oldPassword, newPassword);
-            return Ok(new Response("لقد تم تحديث الرقم السري بنجاح."));
-        }
-        catch (BusinessException ex)
-        {
-            return BadRequest(new BusinessException(ex.Message));
+            var res = await _authenticationData.ChangePasswordAsync(userId, oldPassword, newPassword);
+            return res.IsSuccess ? Ok(res) : BadRequest(res);
         }
         catch (Exception ex)
         {
-            return BadRequest(new BusinessException(ex.Message));
+            return BadRequest(Result.Failure(ex.Message));
         }
     }
 

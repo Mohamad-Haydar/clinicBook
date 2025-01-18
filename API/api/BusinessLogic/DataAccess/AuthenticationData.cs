@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Web_API.Service;
 using Microsoft.EntityFrameworkCore;
+using api.Helper;
 
 namespace api.BusinessLogic.DataAccess;
 
@@ -26,6 +27,7 @@ public class AuthenticationData : IAuthenticationData
     private readonly IConfiguration _configuration;
     private readonly ITokenService _tokenService;
     private readonly IEmailService _emailService;
+    private readonly IMessageProvider _messageProvider;
 
     public AuthenticationData(IdentityAppDbContext identityContext,
                               UserManager<UserModel> userManager,
@@ -34,7 +36,8 @@ public class AuthenticationData : IAuthenticationData
                               ITokenService tokenService,
                               ILogger<AuthenticationData> logger,
                               IConfiguration configuration,
-                              IEmailService emailService)
+                              IEmailService emailService,
+                              IMessageProvider messageProvider)
     {
         _identityContext = identityContext;
         _userManager = userManager;
@@ -44,13 +47,14 @@ public class AuthenticationData : IAuthenticationData
         _logger = logger;
         _configuration = configuration;
         _emailService = emailService;
+        _messageProvider = messageProvider;
     }
-    public async Task<AuthenticationResponse> RegisterClientAsync(CreateUserRequest model)
+    public async Task<Result<AuthenticationResponse>> RegisterClientAsync(CreateUserRequest model)
     {
         var userExists = await _userManager.FindByEmailAsync(model.Email).ConfigureAwait(false);
         if (userExists != null)
         {
-            throw new UserAlreadyExistsException();
+            return Result<AuthenticationResponse>.Failure(_messageProvider.GetMessage("userAlreadyExists"));
         }
 
         using (var identityTransaction = await _identityContext.Database.BeginTransactionAsync().ConfigureAwait(false))
@@ -58,7 +62,7 @@ public class AuthenticationData : IAuthenticationData
         {
             try
             {
-                var user = new UserModel { UserName = model.FirstName + " " + DateTime.Now.Ticks + " " + model.LastName, Email = model.Email, PhoneNumber = model.PhoneNumber };
+                var user = new UserModel { UserName = model.FirstName + " " + model.LastName + " " + DateTime.Now.Ticks, Email = model.Email, PhoneNumber = model.PhoneNumber };
                 var result = await _userManager.CreateAsync(user, model.Password).ConfigureAwait(false);
                 await _userManager.AddToRoleAsync(user, Roles.Client.ToString()).ConfigureAwait(false);
                 ClientModel client = new()
@@ -80,7 +84,7 @@ public class AuthenticationData : IAuthenticationData
                 await _identityContext.SaveChangesAsync().ConfigureAwait(false);
                 await identityTransaction.CommitAsync().ConfigureAwait(false);
                 await appTransaction.CommitAsync().ConfigureAwait(false);
-                return new AuthenticationResponse()
+                return Result<AuthenticationResponse>.Success(new AuthenticationResponse()
                 {
                     Id = user.Id,
                     FirstName = model.FirstName,
@@ -90,7 +94,7 @@ public class AuthenticationData : IAuthenticationData
                     AccessToken = accessToken,
                     RefreshToken = refreshToken,
                     Roles = [Roles.Client.ToString()]
-                };
+                });
             }
             catch (Exception ex)
             {
@@ -102,18 +106,20 @@ public class AuthenticationData : IAuthenticationData
         }
     }
 
-    public async Task<AuthenticationResponse> UpdateUserAsync(UpdateUserRequest model)
+    public async Task<Result<AuthenticationResponse>> UpdateUserAsync(UpdateUserRequest model)
     {
-        var user = await _userManager.FindByEmailAsync(model.Email).ConfigureAwait(false) ?? throw new UserNotFoundException();
+        var user = await _userManager.FindByEmailAsync(model.Email).ConfigureAwait(false);
+        if(user == null) return Result<AuthenticationResponse>.Failure(_messageProvider.GetMessage("userNotFound"));
         var userRoles = await _userManager.GetRolesAsync(user);
-        var client = await _appContext.Clients.FindAsync(user.Id) ?? throw new UserNotFoundException();
+        var client = await _appContext.Clients.FindAsync(user.Id);
+        if(client == null) return Result<AuthenticationResponse>.Failure(_messageProvider.GetMessage("userNotFound"));
 
         using (var identityTransaction = await _identityContext.Database.BeginTransactionAsync().ConfigureAwait(false))
         using (var appTransaction = await _appContext.Database.BeginTransactionAsync().ConfigureAwait(false))
         {
             try
             {
-                user.UserName = model.FirstName + " " + DateTime.Now.Ticks + " " + model.LastName;
+                user.UserName = model.FirstName + " " + model.LastName + " " + DateTime.Now.Ticks;
                 user.PhoneNumber = model.PhoneNumber;
                 user.Email = model.Email;
                 await _userManager.UpdateAsync(user).ConfigureAwait(false);
@@ -133,7 +139,7 @@ public class AuthenticationData : IAuthenticationData
                 await _identityContext.SaveChangesAsync().ConfigureAwait(false);
                 await identityTransaction.CommitAsync().ConfigureAwait(false);
                 await appTransaction.CommitAsync().ConfigureAwait(false);
-                return new AuthenticationResponse()
+                return Result<AuthenticationResponse>.Success(new AuthenticationResponse()
                 {
                     Id = user.Id,
                     FirstName = model.FirstName,
@@ -143,7 +149,7 @@ public class AuthenticationData : IAuthenticationData
                     AccessToken = accessToken,
                     RefreshToken = refreshToken,
                     Roles = [..userRoles]
-                };
+                });
             }
             catch (Exception ex)
             {
@@ -169,7 +175,7 @@ public class AuthenticationData : IAuthenticationData
         {
             try
             {
-                var user = new UserModel { UserName = model.FirstName + " " + DateTime.UtcNow.Ticks +  " " + model.LastName, Email = model.Email, PhoneNumber = model.PhoneNumber };
+                var user = new UserModel { UserName = model.FirstName +  " " + model.LastName + " " + DateTime.UtcNow.Ticks, Email = model.Email, PhoneNumber = model.PhoneNumber };
                 var result = await _userManager.CreateAsync(user, model.Password).ConfigureAwait(false);
                 await _userManager.AddToRoleAsync(user, Roles.Secretary.ToString()).ConfigureAwait(false);
                 SecretaryModel secretary = new()
@@ -218,7 +224,7 @@ public class AuthenticationData : IAuthenticationData
         {
             try
             {
-                string userName = model.FirstName + " " + DateTime.UtcNow.Ticks + " " + model.LastName;
+                string userName = model.FirstName + " " + model.LastName + " " + DateTime.UtcNow.Ticks;
                 var user = new UserModel
                 {
                     UserName = userName,
@@ -277,9 +283,13 @@ public class AuthenticationData : IAuthenticationData
         }
     }
 
-    public async Task<AuthenticationResponse> LoginUserAsync(LoginRequest model)
+    public async Task<Result<AuthenticationResponse>> LoginUserAsync(LoginRequest model)
     {
-        var user = await _userManager.FindByEmailAsync(model.Email).ConfigureAwait(false) ?? throw new UserNotFoundException();
+        var user = await _userManager.FindByEmailAsync(model.Email).ConfigureAwait(false);
+        if(user == null)
+        {
+             return Result<AuthenticationResponse>.Failure(_messageProvider.GetMessage("userNotFound"));
+        }
         var userData = await _appContext.Clients.FirstOrDefaultAsync(x => x.Email == model.Email);
         try
         {
@@ -292,7 +302,7 @@ public class AuthenticationData : IAuthenticationData
                 user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
                 _identityContext.SaveChanges();
 
-                return new AuthenticationResponse
+                return Result<AuthenticationResponse>.Success(new AuthenticationResponse
                 {
                     Id = user.Id,
                     FirstName = userData.FirstName,
@@ -302,16 +312,12 @@ public class AuthenticationData : IAuthenticationData
                     AccessToken = accessToken,
                     RefreshToken = refreshToken,
                     Roles = roles
-                };
+                });
             }
             else
             {
-                throw new WrongPasswordException();
+                return Result<AuthenticationResponse>.Failure(_messageProvider.GetMessage("wrongPassword"));
             }
-        }
-        catch (WrongPasswordException)
-        {
-            throw;
         }
         catch (Exception ex)
         {
@@ -345,20 +351,26 @@ public class AuthenticationData : IAuthenticationData
 
     }
 
-    public async Task ForgotPasswordAsync(string email)
+    public async Task<Result> ForgotPasswordAsync(string email)
     {
         try
         {
-            var user = await _userManager.FindByEmailAsync(email) ?? throw new UserNotFoundException("ال email غير موجود.");
+            var user = await _userManager.FindByEmailAsync(email);
+            if(user == null)
+            {
+                return Result.Failure(_messageProvider.GetMessage("userNotFound"));
+            }
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             if (!string.IsNullOrEmpty(token))
             {
-                await SendForgotPasswordEmail(user, token);
+                var res = await SendForgotPasswordEmail(user, token);
+                if(!res.IsSuccess)
+                {
+                    return Result.Failure(_messageProvider.GetMessage("failedToSendEmail"));
+                }
+                return Result.Success(_messageProvider.GetMessage("sendEmailForgotPassword"));
             }
-        }
-        catch (UserNotFoundException)
-        {
-            throw;
+            return Result.Failure(_messageProvider.GetMessage("error"));
         }
         catch (Exception ex)
         {
@@ -368,7 +380,7 @@ public class AuthenticationData : IAuthenticationData
         
     }
 
-    public async Task ResetPasswordAsync(string uid, string token, string newPassword)
+    public async Task<Result> ResetPasswordAsync(string uid, string token, string newPassword)
     {
         try
         {
@@ -376,8 +388,24 @@ public class AuthenticationData : IAuthenticationData
             var resetPasswordResult = await _userManager.ResetPasswordAsync(user, HttpUtility.UrlDecode(token), newPassword);
             if (!resetPasswordResult.Succeeded)
             {
-                throw new Exception("لقد حدث خطا اثناء تجديد الرقم السري, الرجاء المحاولة مرة اخرى.");
+                return Result.Failure(_messageProvider.GetMessage("failedToResetPassword"));
             }
+            return Result.Success(_messageProvider.GetMessage("updatePasswordSuccess"));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            throw;
+        }
+    }
+
+    public async Task<Result> ChangePasswordAsync(string userId, string oldPassword, string newPassword)
+    {
+        try
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            var resetPasswordResult = await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
+            return resetPasswordResult.Succeeded ? Result.Success(_messageProvider.GetMessage("updatePasswordSuccess")) : Result.Failure(_messageProvider.GetMessage("failedToResetPassword"));
         }
         catch (Exception ex)
         {
@@ -386,27 +414,7 @@ public class AuthenticationData : IAuthenticationData
         }
     }
 
-    public async Task ChangePasswordAsync(string userId, string oldPassword, string newPassword)
-    {
-        try
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            // var resetPasswordResult = await _userManager.ResetPasswordAsync(user, HttpUtility.UrlDecode(token), newPassword);
-            var resetPasswordResult = await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
-            if (!resetPasswordResult.Succeeded)
-            {
-                throw new Exception("الرجاء ادخال رقم سري صحيح!!!");
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex.Message);
-            throw new BusinessException(ex.Message);
-        }
-    }
-
-
-    private async Task SendForgotPasswordEmail(UserModel user, string token)
+    private async Task<Result> SendForgotPasswordEmail(UserModel user, string token)
     {
         string appDomain = _configuration.GetSection("Application:AppDomain").Value!;
         string confirmationLink = _configuration.GetSection("Application:ForgotPassword").Value!;
@@ -422,6 +430,7 @@ public class AuthenticationData : IAuthenticationData
                 ]
         };
         await _emailService.SendEmailForForgotPassword(options);
+        return Result.Success();
     }
 
 }

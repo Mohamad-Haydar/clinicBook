@@ -1,5 +1,6 @@
 ﻿using api.Attributes;
 using api.BusinessLogic.DataAccess.IDataAccess;
+using api.Helper;
 using api.Models;
 using api.Models.Responce;
 using Microsoft.AspNetCore.Authorization;
@@ -12,10 +13,12 @@ namespace api.Controllers
     public class ServiceController : Controller
     {
         private readonly IServiceData _serviceData;
+        private readonly IMessageProvider _messageProvider;
 
-        public ServiceController(IServiceData serviceData)
+        public ServiceController(IServiceData serviceData, IMessageProvider messageProvider)
         {
             _serviceData = serviceData;
+            _messageProvider = messageProvider;
         }
 
         [HttpGet]
@@ -30,7 +33,7 @@ namespace api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new Response(ex.Message));
+                return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
             }
         }
 
@@ -41,12 +44,12 @@ namespace api.Controllers
         {
             try
             {
-                await _serviceData.CreateServiceAsync(serviceName).ConfigureAwait(false);
-                return Ok(new Response("تم انشاء الخدمة بنجاح."));
+                var res = await _serviceData.CreateServiceAsync(serviceName).ConfigureAwait(false);
+                return res.IsSuccess ? Ok(res) : BadRequest(res);
             }
             catch (Exception ex)
             {
-                return BadRequest(new Response(ex.Message));
+                return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
             }
         }
 
@@ -57,12 +60,12 @@ namespace api.Controllers
         {
             try
             {
-                await _serviceData.UpdateServiceAsync(model).ConfigureAwait(false);
-                return Ok(new Response());
+                var res = await _serviceData.UpdateServiceAsync(model).ConfigureAwait(false);
+                return res.IsSuccess ? Ok(res) : BadRequest(res);
             }
             catch (Exception ex)
             {
-                return BadRequest(new Response(ex.Message));
+                return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
             }
         }
 
@@ -73,12 +76,12 @@ namespace api.Controllers
         {
             try
             {
-                await _serviceData.DeleteServiceAsync(id).ConfigureAwait(false);
-                return Ok(new Response());
+                var res = await _serviceData.DeleteServiceAsync(id).ConfigureAwait(false);
+                return res.IsSuccess ? Ok(res) : BadRequest(res);
             }
             catch (Exception ex)
             {
-                return BadRequest(new Response(ex.Message));
+                return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
             }
         }
     }

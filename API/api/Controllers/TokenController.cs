@@ -11,6 +11,7 @@ using api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using api.Helper;
 
 namespace api.Controllers;
 
@@ -18,9 +19,11 @@ namespace api.Controllers;
 public class TokenController : Controller
 {
     private readonly ITokenData _tokenData;
-    public TokenController(ITokenData tokenData)
+    private readonly IMessageProvider _messageProvider;
+    public TokenController(ITokenData tokenData, IMessageProvider messageProvider)
     {
         _tokenData = tokenData;
+        _messageProvider = messageProvider;
     }
 
     [HttpPost]
@@ -39,15 +42,15 @@ public class TokenController : Controller
         try
         {
             var result = await _tokenData.RefreshAsync(tokenApiModel).ConfigureAwait(false);
-            
+            if(!result.IsSuccess) return BadRequest(result);
             var userDataJson = JsonSerializer.Serialize(new
             {
-                id = result.Id,
-                firstName = result.FirstName,
-                lastName = result.LastName,
-                email = result.Email,
-                phoneNumber = result.PhoneNumber,
-                roles = result.Roles,
+                id = result.Data.Id,
+                firstName = result.Data.FirstName,
+                lastName = result.Data.LastName,
+                email = result.Data.Email,
+                phoneNumber = result.Data.PhoneNumber,
+                roles = result.Data.Roles,
             });
 
             Response.Cookies.Append("userData", userDataJson, new CookieOptions
@@ -57,7 +60,7 @@ public class TokenController : Controller
                 SameSite = SameSiteMode.Lax,
                 Expires = DateTime.UtcNow.AddYears(1)
             });
-            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
+            Response.Cookies.Append("accessToken", result.Data.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
@@ -65,7 +68,7 @@ public class TokenController : Controller
                 Expires = DateTime.UtcNow.AddYears(1)
             });
 
-            Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+            Response.Cookies.Append("refreshToken", result.Data.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
@@ -74,11 +77,11 @@ public class TokenController : Controller
             });
             return Ok(new
             {
-                Id = result.Id,
-                FirstName = result.FirstName,
-                LastName = result.LastName,
-                Email = result.Email,
-                PhoneNumber = result.PhoneNumber,
+                Id = result.Data.Id,
+                FirstName = result.Data.FirstName,
+                LastName = result.Data.LastName,
+                Email = result.Data.Email,
+                PhoneNumber = result.Data.PhoneNumber,
             });
         }
         catch (InvalidRequestException)
@@ -95,15 +98,11 @@ public class TokenController : Controller
                     Secure = true,
                     SameSite = SameSiteMode.Lax
                 });
-            return BadRequest(new {message = "please login in"});
-        }
-        catch (BusinessException ex)
-        {
-            return BadRequest(new Response(ex.Message));
+            return BadRequest(Result.Failure(_messageProvider.GetMessage("pleaseLoginError")));
         }
         catch (Exception ex)
         {
-            return BadRequest(new Response(ex.Message));
+           return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
         }
         
     }

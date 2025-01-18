@@ -26,6 +26,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
     private readonly ISqlDataAccess _sql;
     private readonly IMemoryCache _cache;
     private readonly MemoryCacheEntryOptions _cacheOptions;
+    private readonly IMessageProvider _messageProvider;
 
     public DoctorAvailabilityData(UserManager<UserModel> userManager,
                               ApplicationDbContext appDbContext,
@@ -33,7 +34,8 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
                               IOptions<ConnectionStrings> connectionStrings,
                               ILogger<DoctorAvailabilityData> logger,
                               IMemoryCache cache,
-                              MemoryCacheEntryOptions cacheOptions)
+                              MemoryCacheEntryOptions cacheOptions,
+                              IMessageProvider messageProvider)
     {
         _userManager = userManager;
         _appDbContext = appDbContext;
@@ -52,13 +54,13 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
         _logger = logger;
         _cache = cache;
         _cacheOptions = cacheOptions;
+        _messageProvider = messageProvider;
     }
 
     public async Task<IEnumerable<DoctorAvailabilityResponse>> GetAvailableDatesAsync(string id)
     {
         try
         {
-            
             var doctoravailabilities = await _appDbContext.DoctorAvailabilities
                                 .Where(x => x.DoctorId == id)
                                 .Select(x => new DoctorAvailabilityResponse
@@ -80,7 +82,7 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
         }
     }
 
-    public async Task OpenAvailableDateAsync(OpenAvailableDateRequest model)
+    public async Task<Result> OpenAvailableDateAsync(OpenAvailableDateRequest model)
     {
         List<DoctorAvailabilityModel> availables = [];
         for (int i = 0; i < model.NbOfOpenAvailability; i++)
@@ -101,23 +103,22 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
         }
         try
         {
-            var doc = await _userManager.FindByIdAsync(model.DoctorId).ConfigureAwait(false) ?? throw new UserNotFoundException();
-            if (availables == null)
-            {
-                throw new FailedToAddException();
-            }
+            var doc = await _userManager.FindByIdAsync(model.DoctorId).ConfigureAwait(false);
+            if(doc==null) return Result.Failure(_messageProvider.GetMessage("userNotFound"));
+            if(availables == null) return Result.Failure(_messageProvider.GetMessage("failedToAdd"));
             await _appDbContext.DoctorAvailabilities.AddRangeAsync(availables).ConfigureAwait(false);
             await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
+            return Result.Success(_messageProvider.GetMessage("OpenAvailableDatesuccess"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message);
-            throw;
+            throw new BusinessException();
         }
 
     }
 
-    public async Task OpenRepeatedAvailableDateAsync(IEnumerable<OpenAvailableDateRequest> model)
+    public async Task<Result> OpenRepeatedAvailableDateAsync(IEnumerable<OpenAvailableDateRequest> model)
     {
         string doctorId = "";
         List<DoctorAvailabilityModel> availables = [];
@@ -140,64 +141,59 @@ public class DoctorAvailabilityData : IDoctorAvailabilityData
         
         try
         {
-            var doc = await _userManager.FindByIdAsync(doctorId) ?? throw new UserNotFoundException();
-            if(availables == null)
-            {
-                throw new FailedToAddException();
-            }
+            var doc = await _userManager.FindByIdAsync(doctorId);
+            if(doc == null) return Result.Failure(_messageProvider.GetMessage("userNotFound"));
+            if(availables == null) return Result.Failure(_messageProvider.GetMessage("failedToAdd"));
             await _appDbContext.DoctorAvailabilities.AddRangeAsync(availables).ConfigureAwait(false);
             await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
+            return Result.Success(_messageProvider.GetMessage("OpenAvailableDatesuccess"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message);
-            throw;
+            throw new BusinessException();
         }
 
     }
 
-    public async Task UpdateAvailableDateAsync(UpdateAvailableDateRequest model)
+    public async Task<Result> UpdateAvailableDateAsync(UpdateAvailableDateRequest model)
     {
-        var existedAvailability = await _appDbContext.DoctorAvailabilities.FirstOrDefaultAsync(x => x.Id == model.Id).ConfigureAwait(false) ?? throw new UserNotFoundException();
-        if (model.StartHour > model.EndHour)
-        {
-            throw new InvalidDataException("انتبه, يجب ان تكون ساعة البدء قبل ساعة الانتهاء");
-        }
-        if (model.AvailableDate < DateOnly.FromDateTime(DateTime.Now))
-        {
-            throw new InvalidDataException("انتبه, يجب ان يكون التاريخ في المستقبل ");
-        }
-
-        existedAvailability.AvailableDate = model?.AvailableDate != null ? model.AvailableDate : existedAvailability.AvailableDate;
-        existedAvailability.DayName = model?.AvailableDate != null ? model.AvailableDate.DayOfWeek.ToString() : existedAvailability.AvailableDate.DayOfWeek.ToString();
-        existedAvailability.StartHour = model?.StartHour != null ? model.StartHour : existedAvailability.StartHour;
-        existedAvailability.EndHour = model?.EndHour != null ? model.EndHour : existedAvailability.EndHour;
-        existedAvailability.MaxClient = model.MaxClient != 0 ? model.MaxClient : existedAvailability.MaxClient;
-
         try
         {
+            var existedAvailability = await _appDbContext.DoctorAvailabilities.FirstOrDefaultAsync(x => x.Id == model.Id).ConfigureAwait(false);
+            if(existedAvailability == null) return Result.Failure(_messageProvider.GetMessage("userNotFound"));
+            if (model.StartHour > model.EndHour)
+                return Result.Failure(_messageProvider.GetMessage("switchedTimeError"));
+            
+            if (model.AvailableDate < DateOnly.FromDateTime(DateTime.Now))
+                return Result.Failure(_messageProvider.GetMessage("timeInThePastError"));
+
+            existedAvailability.AvailableDate = model?.AvailableDate != null ? model.AvailableDate : existedAvailability.AvailableDate;
+            existedAvailability.DayName = model?.AvailableDate != null ? model.AvailableDate.DayOfWeek.ToString() : existedAvailability.AvailableDate.DayOfWeek.ToString();
+            existedAvailability.StartHour = model?.StartHour != null ? model.StartHour : existedAvailability.StartHour;
+            existedAvailability.EndHour = model?.EndHour != null ? model.EndHour : existedAvailability.EndHour;
+            existedAvailability.MaxClient = model.MaxClient != 0 ? model.MaxClient : existedAvailability.MaxClient;
+
             await _appDbContext.SaveChangesAsync().ConfigureAwait(false);
+            return Result.Success(_messageProvider.GetMessage("UpdateAvailableDateSucess"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message);
-            throw;
+            throw new BusinessException();
         }
     }
 
     public async Task DeleteAvailableDateAsync(int id)
     {
-        // var availableDate = await _appDbContext.DoctorAvailabilities.FirstOrDefaultAsync(x => x.Id == id) ?? throw new UserNotFoundException();
         try
         {
-            //var available = _appDbContext.Remove(availableDate);
-            //await _appDbContext.SaveChangesAsync();
             await _sql.SaveDataAsync<dynamic>("sp_remove_doctor_availability", new { id }, _connectionStrings.Value.AppDbConnection).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex.Message);
-            throw;
+            throw new BusinessException();
         }
     }
 

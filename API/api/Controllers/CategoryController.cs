@@ -1,4 +1,6 @@
 ﻿using api.BusinessLogic.DataAccess.IDataAccess;
+using api.Exceptions;
+using api.Helper;
 using api.Models;
 using api.Models.Responce;
 using Microsoft.AspNetCore.Authorization;
@@ -10,12 +12,12 @@ namespace api.Controllers
     public class CategoryController : Controller
     {
         private readonly ICategoryData _categoryData;
-        private readonly Response _response;
+        private readonly IMessageProvider _messageProvider;
 
-        public CategoryController(ICategoryData categoryData, Response response)
+        public CategoryController(ICategoryData categoryData, IMessageProvider messageProvider)
         {
             _categoryData = categoryData;
-            _response = response;
+            _messageProvider = messageProvider;
         }
 
         [HttpGet]
@@ -30,9 +32,7 @@ namespace api.Controllers
             }
             catch (Exception ex)
             {
-                // return BadRequest(new Response(ex.Message));
-                _response.Message = ex.Message;
-                return BadRequest(_response);
+                return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
             }
         }
 
@@ -43,12 +43,12 @@ namespace api.Controllers
         {
             try
             {
-                await _categoryData.CreateCategoryAsync(categoryName).ConfigureAwait(false);
-                return Ok(new Response("تم انشاء الاختصاص بنجاح."));
+                var res = await _categoryData.CreateCategoryAsync(categoryName).ConfigureAwait(false);
+                return res.IsSuccess ? Ok(res) : BadRequest(res);
             }
             catch (Exception ex)
             {
-                return BadRequest(new Response(ex.Message));
+                return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
             }
         }
 
@@ -59,12 +59,12 @@ namespace api.Controllers
         {
             try
             {
-                await _categoryData.UpdateCategoryAsync(model).ConfigureAwait(false);
-                return Ok(new Response("تم تحديث الاختصاص بنجاح."));
+                var res = await _categoryData.UpdateCategoryAsync(model).ConfigureAwait(false);
+                return res.IsSuccess ? Ok(res) : BadRequest(res);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return BadRequest(new Response(ex.Message));
+                return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
             }
         }
 
@@ -75,12 +75,12 @@ namespace api.Controllers
         {
             try
             {
-                await _categoryData.DeleteCategoryAsync(id).ConfigureAwait(false);
-                return Ok(new Response("تم حذف الاختصاص بنجاح."));
+                var res = await _categoryData.DeleteCategoryAsync(id).ConfigureAwait(false);
+                return res.IsSuccess ? Ok(res) : BadRequest(res);
             }
             catch (Exception ex)
             {
-                return BadRequest(new Response(ex.Message));
+                return BadRequest(Result.Failure(_messageProvider.GetMessage("error")));
             }
         }
     }
